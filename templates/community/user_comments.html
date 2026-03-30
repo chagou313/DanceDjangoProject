@@ -1,0 +1,215 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}{{ page_title }} - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block content %}
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        text-align: center;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        margin-bottom: 2rem;
+    }
+
+    .page-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-count {
+        font-size: 1.2rem;
+        color: rgba(232, 213, 155, 0.7);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.8rem 2rem;
+        background: transparent;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        color: #E8D59B;
+        border-radius: 2rem;
+        text-decoration: none;
+        font-family: 'Noto Serif SC', serif;
+        transition: all 0.3s;
+    }
+
+    .back-link:hover {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: rgba(216, 191, 100, 0.6);
+        transform: translateX(-5px);
+    }
+
+    /* 评论列表 */
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .comment-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        transition: all 0.3s;
+    }
+
+    .comment-card:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+    }
+
+    .comment-post-link {
+        display: block;
+        color: #F5EDC8;
+        font-size: 1.3rem;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1rem;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .comment-post-link:hover {
+        color: #E8D59B;
+        text-shadow: 0 0 10px rgba(216, 191, 100, 0.3);
+    }
+
+    .comment-content {
+        color: rgba(232, 213, 155, 0.8);
+        line-height: 1.8;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-left: 3px solid rgba(216, 191, 100, 0.4);
+        border-radius: 0.5rem;
+    }
+
+    .comment-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reply-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        background: rgba(52, 152, 219, 0.2);
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        color: #3498DB;
+        margin-left: 0.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state p {
+        font-size: 1.2rem;
+        color: rgba(232, 213, 155, 0.6);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .comment-meta {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <span class="page-icon" style="color: {{ color }};">
+            <i class="{{ icon }}"></i>
+        </span>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-count">共 {{ total_count }} 条评论</p>
+        <a href="{% url 'profile' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> 返回个人主页
+        </a>
+    </div>
+
+    {% if comments %}
+    <div class="comments-list">
+        {% for comment in comments %}
+        <div class="comment-card">
+            <a href="{% url 'post_detail' comment.post.id %}#comment-{{ comment.id }}" class="comment-post-link">
+                <i class="fas fa-quote-left"></i> {{ comment.post.title }}
+            </a>
+            
+            <div class="comment-content">
+                {{ comment.content|linebreaksbr }}
+            </div>
+            
+            <div class="comment-meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    {{ comment.created_at|date:"Y-m-d H:i" }}
+                </span>
+                {% if comment.parent %}
+                <span class="meta-item">
+                    <i class="fas fa-reply"></i>
+                    回复 {{ comment.parent.user.username }}
+                    <span class="reply-badge">回复</span>
+                </span>
+                {% endif %}
+                <span class="meta-item">
+                    <i class="fas fa-heart"></i>
+                    {{ comment.likes }} 点赞
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="{{ icon }}"></i>
+        <p>暂无评论记录</p>
+        <a href="{% url 'community_posts' %}" style="display: inline-block; padding: 0.8rem 2rem; background: linear-gradient(135deg, #D8BF64, #E8D59B); color: #0F0F1A; border-radius: 2rem; text-decoration: none; font-weight: 600; font-family: 'Noto Serif SC', serif;">
+            <i class="fas fa-compass"></i> 去逛逛社区
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

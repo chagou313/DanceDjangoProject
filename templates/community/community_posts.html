@@ -1,0 +1,484 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}交流社区 - 非遗舞蹈话题分享{% endblock %}
+
+{% block content %}
+<script>
+// 页面加载时执行
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('交流社区页面加载完成');
+    
+    // 检测是否需要刷新（从详情页返回）
+    const shouldRefresh = sessionStorage.getItem('shouldRefreshCommunity');
+    console.log('检查刷新标记:', shouldRefresh);
+    
+    if (shouldRefresh === 'true') {
+        console.log('检测到从详情页返回，刷新页面以更新数据');
+        // 清除标记
+        sessionStorage.removeItem('shouldRefreshCommunity');
+        // 立即刷新页面
+        window.location.reload();
+        return; // 停止执行后续代码
+    }
+    
+    // 隐藏原有的 Django messages（因为 AJAX 操作已有自定义提示）
+    const pageMessages = document.getElementById('page-messages');
+    console.log('查找 messages 元素:', pageMessages);
+    if (pageMessages) {
+        console.log('隐藏 messages');
+        pageMessages.style.display = 'none';
+    }
+    
+    // 更新访问过的帖子浏览量
+    updateVisitedPosts();
+});
+
+// 更新访问过的帖子浏览量
+function updateVisitedPosts() {
+    // 从 Django 模板获取访问记录 - 使用 JSON 格式
+    const visitedPostsStr = '{{ visited_posts|escapejs }}';
+    
+    if (!visitedPostsStr || visitedPostsStr === '{}') {
+        return;
+    }
+    
+    try {
+        const visitedPosts = JSON.parse(visitedPostsStr.replace(/'/g, '"'));
+        console.log('更新访问过的帖子浏览量:', visitedPosts);
+        
+        // 遍历每个帖子卡片，更新浏览量
+        for (const [postId, views] of Object.entries(visitedPosts)) {
+            const postCard = document.querySelector(`.post-item[data-post-id="${postId}"]`);
+            if (postCard) {
+                const viewsEl = postCard.querySelector('.post-stats-inline .fa-eye');
+                if (viewsEl) {
+                    // 更新浏览量显示
+                    viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${views}`;
+                    
+                    // 添加高亮动画
+                    postCard.style.transition = 'all 0.5s';
+                    postCard.style.boxShadow = '0 0 20px rgba(216, 191, 100, 0.4)';
+                    postCard.style.borderColor = 'rgba(216, 191, 100, 0.8)';
+                    
+                    setTimeout(() => {
+                        postCard.style.boxShadow = '';
+                        postCard.style.borderColor = 'rgba(216, 191, 100, 0.3)';
+                    }, 2000);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('解析访问记录失败:', e);
+    }
+}
+</script>
+<style>
+    .community-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .community-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .community-title {
+        font-size: 3rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1rem;
+    }
+    
+    .community-subtitle {
+        color: rgba(232, 213, 155, 0.8);
+        font-size: 1.2rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    /* 话题筛选区 */
+    .topic-filter {
+        background: rgba(20, 22, 30, 0.8);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+    
+    .topic-tabs {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .topic-tab {
+        padding: 0.8rem 1.5rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        border-radius: 2rem;
+        color: #E8D59B;
+        text-decoration: none;
+        font-family: 'Noto Serif SC', serif;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .topic-tab:hover {
+        background: rgba(216, 191, 100, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .topic-tab.active {
+        background: linear-gradient(135deg, #D8BF64, #E8D59B);
+        color: #0F0F1A;
+        border-color: #D8BF64;
+    }
+    
+    .sort-options {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(216, 191, 100, 0.2);
+    }
+    
+    .sort-label {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.9rem;
+    }
+    
+    .sort-btn {
+        padding: 0.5rem 1.2rem;
+        background: transparent;
+        border: 1px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1.5rem;
+        color: rgba(232, 213, 155, 0.8);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+    
+    .sort-btn:hover {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: #D8BF64;
+    }
+    
+    .sort-btn.active {
+        background: rgba(216, 191, 100, 0.2);
+        border-color: #D8BF64;
+        color: #F5EDC8;
+    }
+    
+    /* 发帖按钮 */
+    .create-post-btn {
+        position: fixed;
+        bottom: 3rem;
+        right: 3rem;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #D8BF64, #E8D59B);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(216, 191, 100, 0.5);
+        transition: all 0.3s;
+        z-index: 100;
+    }
+    
+    .create-post-btn:hover {
+        transform: scale(1.1) rotate(10deg);
+        box-shadow: 0 12px 35px rgba(216, 191, 100, 0.7);
+    }
+    
+    .create-post-btn i {
+        font-size: 1.8rem;
+        color: #0F0F1A;
+    }
+    
+    /* 帖子列表 */
+    .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .post-item {
+        background: rgba(20, 22, 30, 0.9);
+        border-radius: 1rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        padding: 1.5rem 2rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    
+    .post-item:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        box-shadow: 0 5px 20px rgba(216, 191, 100, 0.2);
+        transform: translateX(5px);
+    }
+    
+    .post-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .post-title-link {
+        color: #F5EDC8;
+        font-size: 1.4rem;
+        font-family: 'Noto Serif SC', serif;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: block;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .post-title-link:hover {
+        color: #E8D59B;
+        text-shadow: 0 0 10px rgba(216, 191, 100, 0.5);
+    }
+    
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+    }
+    
+    .post-topic-tag {
+        font-size: 0.85rem;
+        color: #D8BF64;
+        background: rgba(216, 191, 100, 0.15);
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        white-space: nowrap;
+    }
+    
+    .post-stats-inline {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        white-space: nowrap;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.95rem;
+    }
+    
+    .stat-item i {
+        color: #D8BF64;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .post-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .post-stats-inline {
+            width: 100%;
+            justify-content: space-around;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(216, 191, 100, 0.2);
+        }
+        
+        .post-title-link {
+            font-size: 1.2rem;
+        }
+    }
+    
+    /* 空状态 */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        margin-top: 3rem;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        color: rgba(216, 191, 100, 0.5);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h2 {
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: rgba(232, 213, 155, 0.7);
+    }
+    
+    /* 分页 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+    
+    .page-link {
+        padding: 0.8rem 1.2rem;
+        background: rgba(20, 22, 30, 0.8);
+        border: 1px solid rgba(216, 191, 100, 0.3);
+        border-radius: 0.5rem;
+        color: rgba(232, 213, 155, 0.8);
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .page-link:hover {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: #D8BF64;
+    }
+    
+    .page-link.active {
+        background: linear-gradient(135deg, #D8BF64, #E8D59B);
+        color: #0F0F1A;
+        border-color: #D8BF64;
+    }
+</style>
+
+<div class="community-container">
+    <div class="community-header">
+        <h1 class="community-title">
+            <i class="fas fa-comments"></i> 交流社区
+        </h1>
+        <p class="community-subtitle">分享非遗舞蹈故事，传承传统文化精髓</p>
+    </div>
+    
+    <!-- 话题筛选 -->
+    <div class="topic-filter">
+        <div class="topic-tabs">
+            <a href="?order={{ order_by }}" class="topic-tab {% if not current_topic %}active{% endif %}">
+                <i class="fas fa-th-large"></i> 全部话题
+            </a>
+            {% for topic in topics %}
+            <a href="?topic={{ topic.id }}&order={{ order_by }}" 
+               class="topic-tab {% if current_topic == topic.id %}active{% endif %}"
+               style="border-color: {{ topic.color }}40;">
+                <i class="{{ topic.icon|default:'fas fa-tag' }}"></i> {{ topic.name }}
+            </a>
+            {% endfor %}
+        </div>
+        
+        <div class="sort-options">
+            <span class="sort-label">排序：</span>
+            <a href="?topic={{ current_topic|default:'' }}&order=latest" 
+               class="sort-btn {% if order_by == 'latest' or not order_by %}active{% endif %}">
+                <i class="fas fa-clock"></i> 最新
+            </a>
+            <a href="?topic={{ current_topic|default:'' }}&order=hot" 
+               class="sort-btn {% if order_by == 'hot' %}active{% endif %}">
+                <i class="fas fa-fire"></i> 热门
+            </a>
+            <a href="?topic={{ current_topic|default:'' }}&order=featured" 
+               class="sort-btn {% if order_by == 'featured' %}active{% endif %}">
+                <i class="fas fa-star"></i> 精华
+            </a>
+        </div>
+    </div>
+    
+    <!-- 帖子列表 -->
+    {% if posts %}
+        <div class="posts-list">
+            {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}" class="post-item" data-post-id="{{ post.id }}">
+                <div class="post-info">
+                    <h3 class="post-title-link">{{ post.title }}</h3>
+                    <div class="post-meta">
+                        {% if post.topic %}
+                        <span class="post-topic-tag" style="color: {{ post.topic.color }}; border-color: {{ post.topic.color }}40;">
+                            {{ post.topic.name }}
+                        </span>
+                        {% elif post.category %}
+                        <span class="post-topic-tag">{{ post.category }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="post-stats-inline">
+                    <div class="stat-item" title="浏览量">
+                        <i class="fas fa-eye"></i>
+                        <span>{{ post.views }}</span>
+                    </div>
+                    <div class="stat-item" title="点赞数">
+                        <i class="fas fa-heart"></i>
+                        <span>{{ post.likes }}</span>
+                    </div>
+                    <div class="stat-item" title="评论数">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ post.comments_count }}</span>
+                    </div>
+                    <div class="stat-item" title="收藏数">
+                        <i class="fas fa-star"></i>
+                        <span>{{ post.collections }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- 分页 -->
+        {% if posts.has_other_pages %}
+        <div class="pagination">
+            {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}&topic={{ current_topic|default:'' }}&order={{ order_by }}" class="page-link">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% else %}
+            <span class="page-link" style="opacity: 0.5;"><i class="fas fa-chevron-left"></i></span>
+            {% endif %}
+            
+            {% for num in posts.paginator.page_range %}
+                {% if posts.number == num %}
+                <span class="page-link active">{{ num }}</span>
+                {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                <a href="?page={{ num }}&topic={{ current_topic|default:'' }}&order={{ order_by }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}&topic={{ current_topic|default:'' }}&order={{ order_by }}" class="page-link">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="page-link" style="opacity: 0.5;"><i class="fas fa-chevron-right"></i></span>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h2>暂无帖子</h2>
+            <p>快来发布第一个帖子，开启非遗舞蹈讨论吧！</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 发帖按钮 -->
+{% if user.is_authenticated %}
+<a href="{% url 'create_post' %}" class="create-post-btn" title="发布帖子">
+    <i class="fas fa-plus"></i>
+</a>
+{% endif %}
+{% endblock %}

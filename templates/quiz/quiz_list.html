@@ -1,0 +1,71 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}答题闯关 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        margin-bottom: 3rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 3px;
+    }
+
+    .coming-soon {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .coming-soon i {
+        font-size: 5rem;
+        color: #D8BF64;
+        margin-bottom: 2rem;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .coming-soon h2 {
+        font-size: 2rem;
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+    }
+
+    .coming-soon p {
+        font-size: 1.1rem;
+        color: rgba(232, 213, 155, 0.7);
+        line-height: 1.8;
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="fas fa-trophy"></i> 答题闯关</h1>
+        <p>挑战自我 · 检验学习成果</p>
+    </div>
+
+    <div class="coming-soon">
+        <i class="fas fa-medal"></i>
+        <h2>功能即将上线</h2>
+        <p>准备迎接挑战！我们将推出有趣的答题闯关系统，让您在互动中巩固所学知识。</p>
+        <p style="margin-top: 2rem; font-size: 0.95rem;">敬请期待...</p>
+    </div>
+</div>
+{% endblock %}

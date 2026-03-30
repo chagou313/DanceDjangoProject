@@ -1,0 +1,181 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}新闻资讯 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        margin-bottom: 3rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 3px;
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        color: #E8D59B;
+    }
+
+    .category-filter {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .category-btn {
+        padding: 0.7rem 1.5rem;
+        background: transparent;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        color: #E8D59B;
+        border-radius: 2rem;
+        cursor: pointer;
+        font-family: 'Noto Serif SC', serif;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
+        color: #0F0F1A;
+        border-color: rgba(216, 191, 100, 0.8);
+    }
+
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .news-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        overflow: hidden;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: block;
+    }
+
+    .news-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(216, 191, 100, 0.7);
+        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.2);
+    }
+
+    .news-cover {
+        width: 100%;
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .news-content {
+        padding: 1.5rem;
+    }
+
+    .news-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .news-category {
+        color: #D8BF64;
+        background: rgba(216, 191, 100, 0.15);
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+    }
+
+    .news-date {
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    .news-title {
+        font-size: 1.2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .news-excerpt {
+        font-size: 0.95rem;
+        color: rgba(232, 213, 155, 0.7);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .news-stats {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    @media (max-width: 768px) {
+        .news-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="fas fa-newspaper"></i> 新闻资讯</h1>
+        <p>了解非遗舞蹈最新动态 · 关注传承发展</p>
+    </div>
+
+    <div class="category-filter">
+        <a href="?category=" class="category-btn {% if not current_category %}active{% endif %}">全部</a>
+        <a href="?category=news" class="category-btn {% if current_category == 'news' %}active{% endif %}">新闻动态</a>
+        <a href="?category=activity" class="category-btn {% if current_category == 'activity' %}active{% endif %}">活动资讯</a>
+        <a href="?category=policy" class="category-btn {% if current_category == 'policy' %}active{% endif %}">政策法规</a>
+        <a href="?category=research" class="category-btn {% if current_category == 'research' %}active{% endif %}">学术研究</a>
+        <a href="?category=exhibition" class="category-btn {% if current_category == 'exhibition' %}active{% endif %}">展览演出</a>
+    </div>
+
+    <div class="news-grid">
+        {% for news_item in news_list %}
+        <a href="#" class="news-card">
+            {% if news_item.cover_image %}
+            <div class="news-cover" style="background-image: url('{{ news_item.cover_image.url }}');"></div>
+            {% else %}
+            <div class="news-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(232, 213, 155, 0.1) 100%);"></div>
+            {% endif %}
+            <div class="news-content">
+                <div class="news-meta">
+                    <span class="news-category">{{ news_item.get_category_display }}</span>
+                    <span class="news-date">{{ news_item.created_at|date:"Y-m-d" }}</span>
+                </div>
+                <h3 class="news-title">{{ news_item.title }}</h3>
+                <p class="news-excerpt">{{ news_item.content|truncatechars:120 }}</p>
+                <div class="news-stats">
+                    <span><i class="fas fa-eye"></i> {{ news_item.views }}</span>
+                    <span><i class="fas fa-heart"></i> {{ news_item.likes }}</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p style="text-align: center; color: #E8D59B; font-size: 1.2rem;">暂无资讯数据</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

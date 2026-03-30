@@ -1,0 +1,817 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}舞蹈起源 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block extra_head %}
+<!-- 高德地图 API -->
+<script type="text/javascript">
+window._AMapSecurityConfig = {
+    securityJsCode: '04ff9906b4dae058d7a85461aac205b7'
+}
+</script>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=5eebb35e0461699a3d5def798f12ba8d"></script>
+<style>
+    /* 地图容器 */
+    .map-section {
+        margin-bottom: 3rem;
+    }
+
+    .map-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .map-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .map-title {
+        font-size: 1.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .map-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .map-stat-item {
+        text-align: center;
+    }
+
+    .map-stat-number {
+        display: block;
+        font-size: 1.8rem;
+        color: #D8BF64;
+        font-weight: 700;
+    }
+
+    .map-stat-label {
+        font-size: 0.85rem;
+        color: rgba(232, 213, 155, 0.7);
+    }
+
+    #dance-map {
+        width: 100%;
+        height: 700px;
+        border-radius: 1rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .map-legend {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .legend-title {
+        font-size: 0.95rem;
+        color: #D8BF64;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+    }
+
+    .legend-items {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: rgba(232, 213, 155, 0.8);
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #D8BF64;
+        box-shadow: 0 0 10px rgba(216, 191, 100, 0.6);
+    }
+
+    /* 自定义弹出框样式 */
+    .leaflet-popup-content-wrapper {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.98) 0%, rgba(28, 30, 38, 0.98) 100%);
+        border: 2px solid rgba(216, 191, 100, 0.6);
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .leaflet-popup-content {
+        margin: 1rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .popup-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .popup-info {
+        font-size: 0.9rem;
+        color: rgba(232, 213, 155, 0.8);
+        line-height: 1.6;
+    }
+
+    .popup-count {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.3rem 0.8rem;
+        background: rgba(216, 191, 100, 0.2);
+        border-radius: 1rem;
+        color: #D8BF64;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        #dance-map {
+            height: 400px;
+        }
+
+        .map-stats {
+            gap: 1rem;
+        }
+
+        .map-stat-number {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* 筛选栏 */
+    .search-section {
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-filters {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+        position: relative;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.9rem;
+        color: #E8D59B;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        background: rgba(10, 10, 15, 0.6);
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: rgba(216, 191, 100, 0.8);
+        box-shadow: 0 0 15px rgba(216, 191, 100, 0.2);
+    }
+
+    .filter-select option {
+        background: rgba(20, 22, 30, 0.98);
+        color: #F5EDC8;
+    }
+
+    .search-input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .search-keyword {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        background: rgba(10, 10, 15, 0.6);
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    .search-keyword:focus {
+        border-color: rgba(216, 191, 100, 0.8);
+        box-shadow: 0 0 15px rgba(216, 191, 100, 0.2);
+    }
+
+    .search-keyword::placeholder {
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .search-btn {
+        padding: 0.9rem 2.5rem;
+        background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+        border: none;
+        border-radius: 1rem;
+        color: #fff;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+        letter-spacing: 1px;
+    }
+
+    .search-btn:hover {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(218, 165, 32, 0.6);
+    }
+
+    .search-results-info {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(216, 191, 100, 0.1);
+        border-left: 4px solid rgba(216, 191, 100, 0.6);
+        border-radius: 0 1rem 1rem 0;
+    }
+
+    .results-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 1px;
+    }
+
+    .results-count {
+        color: #D8BF64;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 1200px) {
+        .search-filters {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-filters {
+            grid-template-columns: 1fr;
+        }
+
+        .search-input-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+
+        .map-container {
+            height: 500px;
+        }
+    }
+
+    /* 舞蹈列表区域 */
+    .dance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dance-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        overflow: hidden;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: block;
+    }
+
+    .dance-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(216, 191, 100, 0.7);
+        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.2);
+    }
+
+    .dance-image {
+        width: 100%;
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .dance-info {
+        padding: 1.5rem;
+    }
+
+    .dance-name {
+        font-size: 1.3rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .dance-meta {
+        font-size: 0.9rem;
+        color: #E8D59B;
+        margin-bottom: 0.8rem;
+    }
+</style>
+
+<div class="page-container">
+    <!-- 地图展示区域 -->
+    <div class="map-section">
+        <div class="map-container">
+            <div class="map-header">
+                <h2 class="map-title"><i class="fas fa-map-marked-alt"></i> 舞蹈分布地图</h2>
+                <div class="map-stats">
+                    <div class="map-stat-item">
+                        <span class="map-stat-number" id="total-regions">0</span>
+                        <span class="map-stat-label">覆盖地区</span>
+                    </div>
+                    <div class="map-stat-item">
+                        <span class="map-stat-number" id="total-projects">{{ total_results|default:0 }}</span>
+                        <span class="map-stat-label">舞蹈项目</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="dance-map"></div>
+            
+            <div class="map-legend">
+                <div class="legend-title">图例说明</div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <i class="fas fa-map" style="color: #D8BF64; margin-right: 0.3rem;"></i>
+                        <span>中国地图可视化</span>
+                    </div>
+                    <div class="legend-item">
+                        <i class="fas fa-hand-pointer" style="color: #D8BF64; margin-right: 0.3rem;"></i>
+                        <span>点击圆圈查看详情</span>
+                    </div>
+                    <div class="legend-item">
+                        <i class="fas fa-search-plus" style="color: #D8BF64; margin-right: 0.3rem;"></i>
+                        <span>滚动缩放地图</span>
+                    </div>
+                    <div class="legend-item">
+                        <i class="fas fa-hand-paper" style="color: #D8BF64; margin-right: 0.3rem;"></i>
+                        <span>拖拽移动地图</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速入口：浏览全部项目 -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="{% url 'dance_project_list' %}" class="search-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-th-large"></i>
+            <span>浏览全部舞蹈项目</span>
+        </a>
+    </div>
+</div>
+
+<script>
+// 页面初始化
+console.log('舞蹈起源页面已加载');
+console.log('总项目数:', {{ total_results|default:0 }});
+
+// 初始化地图
+let map;
+let markers = [];
+
+// 从后端获取地区数据
+const regionsData = {{ regions_data|safe }};
+console.log('原始地区数据:', regionsData);
+
+// 获取所有地区的完整项目数据
+const allRegionData = {{ region_data|safe }};
+window.allRegionData = allRegionData;
+console.log('所有地区完整数据:', allRegionData);
+console.log('地区键名:', Object.keys(allRegionData));
+
+// 调试：打印每个地区的数据
+for (const [key, value] of Object.entries(allRegionData)) {
+    console.log(`地区：${key}, 项目数：${value.count}`);
+}
+
+// 中国主要地区的坐标（近似中心点）
+const regionCoordinates = {
+    '北京市': [116.405285, 39.904989],
+    '天津市': [117.200983, 39.084158],
+    '上海市': [121.473701, 31.230416],
+    '重庆市': [106.551556, 29.563009],
+    '河北省': [114.514867, 38.042307],
+    '山西省': [112.562939, 37.870553],
+    '辽宁省': [123.431474, 41.805698],
+    '吉林省': [125.3245, 43.886841],
+    '黑龙江省': [126.534967, 45.803775],
+    '江苏省': [118.796877, 32.060255],
+    '浙江省': [120.15507, 30.274084],
+    '安徽省': [117.227239, 31.820586],
+    '福建省': [119.296529, 26.074508],
+    '江西省': [115.857967, 28.682892],
+    '山东省': [117.000923, 36.675807],
+    '河南省': [113.614034, 33.881839],
+    '湖北省': [114.341481, 30.544332],
+    '湖南省': [112.938814, 28.228209],
+    '广东省': [113.266525, 23.132191],
+    '海南省': [110.33119, 19.195949],
+    '四川省': [104.066541, 30.572269],
+    '贵州省': [106.874825, 26.815424],
+    '云南省': [102.712251, 25.040609],
+    '陕西省': [108.93977, 34.341574],
+    '甘肃省': [103.8343, 36.061089],
+    '青海省': [101.778237, 36.617144],
+    '内蒙古自治区': [111.75196, 40.841407],
+    '广西壮族自治区': [108.36654, 22.817002],
+    '西藏自治区': [91.140856, 29.645554],
+    '宁夏回族自治区': [106.230909, 38.487193],
+    '新疆维吾尔自治区': [87.6168, 43.825592],
+};
+
+// 初始化地图函数
+function initMap() {
+    // 创建地图实例
+    map = new AMap.Map('dance-map', {
+        zoom: 4,
+        center: [104.195398, 35.86166], // 中国中心点
+        viewMode: '2D',
+        mapStyle: 'amap://styles/darkblue' // 暗色主题
+    });
+
+    // 添加热力图
+    if (regionsData && regionsData.length > 0) {
+        addHeatmap(regionsData);
+        updateStats(regionsData.length);
+    }
+}
+
+// 添加热力图（使用圆形标记模拟）
+function addHeatmap(regionsData) {
+    console.log('开始添加热力图，数据量:', regionsData.length);
+    let maxCount = 0;
+    
+    // 先找出最大值
+    regionsData.forEach(region => {
+        if (region.count > maxCount) {
+            maxCount = region.count;
+        }
+    });
+    
+    console.log('最大值:', maxCount);
+    
+    // 为每个地区添加圆形标记
+    regionsData.forEach(region => {
+        const coords = regionCoordinates[region.name];
+        if (coords) {
+            // 计算颜色（根据数量）
+            const ratio = region.count / maxCount;
+            let color;
+            if (ratio > 0.8) color = 'rgba(255, 215, 0, 0.8)';
+            else if (ratio > 0.6) color = 'rgba(218, 165, 32, 0.7)';
+            else if (ratio > 0.4) color = 'rgba(184, 134, 11, 0.6)';
+            else if (ratio > 0.2) color = 'rgba(26, 26, 46, 0.5)';
+            else color = 'rgba(13, 27, 42, 0.3)';
+            
+            // 创建圆形标记
+            const circle = new AMap.Circle({
+                center: new AMap.LngLat(coords[0], coords[1]),
+                radius: 40000 + (region.count / maxCount) * 60000,
+                fillColor: color,
+                strokeColor: 'rgba(218, 165, 32, 0.6)',
+                fillOpacity: 0.6,
+                strokeWeight: 2,
+                strokeOpacity: 0.8,
+                cursor: 'pointer',
+                extData: {
+                    name: region.name,
+                    count: region.count,
+                    maxCount: maxCount
+                }
+            });
+            
+            circle.setMap(map);
+            markers.push(circle);
+            
+            // 鼠标悬停事件 - 高亮圆圈
+            circle.on('mouseover', function(e) {
+                circle.setOptions({ 
+                    fillColor: 'rgba(255, 215, 0, 0.9)',
+                    fillOpacity: 0.8
+                });
+            });
+            
+            circle.on('mouseout', function(e) {
+                circle.setOptions({ 
+                    fillColor: color,
+                    fillOpacity: 0.6
+                });
+            });
+            
+            // 点击事件 - 显示指标卡
+            circle.on('click', function(e) {
+                showIndicatorCard(region.name, region.count, maxCount, e.lnglat);
+            });
+        }
+    });
+    
+    console.log('热力图圆形标记添加完成');
+}
+
+// 跳转函数（全局）
+window.jumpToRegion = function(regionName) {
+    // 解码地区名称（因为可能被 encodeURIComponent 编码）
+    const decodedRegionName = decodeURIComponent(regionName);
+    console.log('跳转函数接收到的地区:', regionName);
+    console.log('解码后的地区:', decodedRegionName);
+    // 在地图下方显示项目列表
+    showProjectsBelowMap(decodedRegionName);
+}
+
+// 显示指标卡
+let currentCard = null;
+function showIndicatorCard(name, count, maxCount, position) {
+    // 计算强度等级（1-5 星）
+    const ratio = count / maxCount;
+    let stars = '★'.repeat(Math.ceil(ratio * 5)) + '☆'.repeat(5 - Math.ceil(ratio * 5));
+    
+    const content = `
+        <div style="
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(20, 22, 30, 0.98), rgba(28, 30, 38, 0.98));
+            border: 2px solid rgba(216, 191, 100, 0.8);
+            border-radius: 12px;
+            min-width: 220px;
+            box-shadow: 0 8px 30px rgba(218, 165, 32, 0.3);
+            position: relative;
+        ">
+            <button onclick="closeIndicatorCard()" style="
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: transparent;
+                border: none;
+                color: rgba(232, 213, 155, 0.6);
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                line-height: 1;
+            " onmouseover="this.style.color='#FFD700'" onmouseout="this.style.color='rgba(232, 213, 155, 0.6)'">
+                ×
+            </button>
+            
+            <h4 style="
+                color: #F5EDC8;
+                margin: 0 0 10px 0;
+                font-size: 16px;
+                font-weight: bold;
+                font-family: 'Noto Serif SC', serif;
+            ">${name}</h4>
+            
+            <div style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+            ">
+                <span style="color: rgba(232, 213, 155, 0.8); font-size: 13px;">舞蹈项目</span>
+                <span style="color: #FFD700; font-size: 20px; font-weight: bold;">${count}个</span>
+            </div>
+            
+            <div style="
+                color: #DAA520;
+                font-size: 14px;
+                margin-bottom: 15px;
+                letter-spacing: 2px;
+            ">${stars}</div>
+            
+            <button onclick="jumpToRegion('${encodeURIComponent(name)}')" style="
+                width: 100%;
+                padding: 8px 0;
+                background: linear-gradient(135deg, #DAA520, #B8860B);
+                border: none;
+                border-radius: 6px;
+                color: #FFD700;
+                font-weight: bold;
+                font-size: 14px;
+                font-family: 'Noto Serif SC', serif;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);
+                transition: all 0.3s;
+            " onmouseover="this.style.boxShadow='0 6px 20px rgba(218, 165, 32, 0.6)'; this.style.transform='translateY(-2px)';" 
+               onmouseout="this.style.boxShadow='0 4px 15px rgba(218, 165, 32, 0.4)'; this.style.transform='translateY(0)';">
+                查看详情
+            </button>
+        </div>
+    `;
+    
+    currentCard = new AMap.InfoWindow({
+        content: content,
+        offset: new AMap.Pixel(0, -20),
+        closeWhenClickMap: true,
+        autoMove: true,
+        isCustom: true  // 使用自定义样式，移除默认白色边框
+    });
+    
+    currentCard.open(map, position);
+}
+
+// 隐藏指标卡
+function hideIndicatorCard() {
+    if (currentCard) {
+        currentCard.close();
+        currentCard = null;
+    }
+}
+
+// 关闭指标卡（全局函数）
+window.closeIndicatorCard = function() {
+    hideIndicatorCard();
+}
+
+// 在地图下方显示指定地区的项目列表
+function showProjectsBelowMap(regionName) {
+    console.log('在地图下方显示地区项目:', regionName);
+    
+    // 关闭指标卡
+    hideIndicatorCard();
+    
+    // 获取该地区的完整项目数据
+    const regionFullData = window.allRegionData[regionName];
+    
+    console.log('regionFullData:', regionFullData);
+    
+    // 获取或创建显示容器
+    let container = document.getElementById('region-projects-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'region-projects-container';
+        container.style.cssText = `
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(20, 22, 30, 0.95) 0%, rgba(28, 30, 38, 0.98) 100%);
+            border-radius: 2rem;
+            border: 2px solid rgba(216, 191, 100, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        `;
+        
+        // 插入到地图容器后面
+        const mapContainer = document.querySelector('.map-section');
+        mapContainer.parentNode.insertBefore(container, mapContainer.nextSibling);
+    }
+    
+    if (!regionFullData) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+                <div style="font-size: 1.2rem; color: #E8D59B; margin-bottom: 0.5rem;">暂无项目</div>
+                <div style="font-size: 0.9rem; color: rgba(232, 213, 155, 0.5);">该地区还没有舞蹈项目</div>
+            </div>
+        `;
+        return;
+    }
+    
+    const count = regionFullData.count || 0;
+    const dances = regionFullData.dances || [];
+    
+    console.log('项目数量:', count, '项目列表:', dances.length);
+    
+    let content = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(216, 191, 100, 0.3);">
+            <h3 style="color: #F5EDC8; font-size: 1.5rem; font-family: 'Noto Serif SC', serif; margin: 0;">
+                <i class="fas fa-map-marker-alt"></i> ${regionName}
+            </h3>
+            <button onclick="closeRegionProjects()" style="
+                background: transparent;
+                border: 2px solid rgba(216, 191, 100, 0.4);
+                border-radius: 1rem;
+                color: rgba(232, 213, 155, 0.6);
+                padding: 0.5rem 1.5rem;
+                cursor: pointer;
+                font-family: 'Noto Serif SC', serif;
+                transition: all 0.3s;
+            " onmouseover="this.style.borderColor='#D8BF64'; this.style.color='#F5EDC8'" 
+               onmouseout="this.style.borderColor='rgba(216, 191, 100, 0.4)'; this.style.color='rgba(232, 213, 155, 0.6)'">
+                <i class="fas fa-times"></i> 关闭
+            </button>
+        </div>
+        <div style="color: #D8BF64; font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: bold;">
+            共 ${count} 个项目
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+    `;
+    
+    if (count === 0 || dances.length === 0) {
+        content = `
+            <div style="text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+                <div style="font-size: 1.2rem; color: #E8D59B; margin-bottom: 0.5rem;">暂无项目</div>
+                <div style="font-size: 0.9rem; color: rgba(232, 213, 155, 0.5);">该地区还没有舞蹈项目</div>
+            </div>
+        `;
+    } else {
+        dances.forEach(project => {
+            content += `
+                <a href="/origin/${project.project_code}/" style="
+                    display: block;
+                    padding: 1.5rem;
+                    background: rgba(10, 10, 15, 0.6);
+                    border: 2px solid rgba(216, 191, 100, 0.3);
+                    border-radius: 1.5rem;
+                    color: #F5EDC8;
+                    text-decoration: none;
+                    transition: all 0.3s;
+                " onmouseover="this.style.background='rgba(184, 134, 11, 0.2)'; this.style.borderColor='rgba(216, 191, 100, 0.6)'; this.style.transform='translateY(-5px)'" 
+                   onmouseout="this.style.background='rgba(10, 10, 15, 0.6)'; this.style.borderColor='rgba(216, 191, 100, 0.3)'; this.style.transform='translateY(0)'">
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #FFD700; margin-bottom: 0.8rem;">${project.name}</div>
+                    <div style="font-size: 0.9rem; color: rgba(232, 213, 155, 0.7); margin-bottom: 0.5rem;">
+                        <span style="color: #D8BF64;">${project.dance_type || ''}</span>
+                        ${project.category ? `<span style="margin-left: 0.5rem; color: rgba(232, 213, 155, 0.6);">· ${project.category}</span>` : ''}
+                    </div>
+                    ${project.level ? `<div style="font-size: 0.8rem; color: rgba(232, 213, 155, 0.5);">${project.level}</div>` : ''}
+                </a>
+            `;
+        });
+        content += '</div>';
+    }
+    
+    container.innerHTML = content;
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 关闭地区项目显示
+window.closeRegionProjects = function() {
+    const container = document.getElementById('region-projects-container');
+    if (container) {
+        container.remove();
+    }
+}
+
+// 更新统计
+function updateStats(regionCount) {
+    document.getElementById('total-regions').textContent = regionCount;
+}
+
+// 页面加载完成后初始化地图
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查高德地图是否已加载
+    if (typeof AMap !== 'undefined') {
+        initMap();
+    } else {
+        console.error('高德地图 API 未加载成功，请检查 Key 配置');
+    }
+});
+</script>
+{% endblock %}

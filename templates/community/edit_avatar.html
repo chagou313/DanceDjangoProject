@@ -1,0 +1,265 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}修改头像 - 个人主页{% endblock %}
+
+{% block content %}
+<style>
+    .avatar-edit-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .edit-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        text-align: center;
+    }
+
+    .current-avatar {
+        margin-bottom: 2rem;
+    }
+
+    .avatar-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 4rem;
+        color: #0F0F1A;
+        border: 4px solid rgba(216, 191, 100, 0.6);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.3);
+        overflow: hidden;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        color: rgba(232, 213, 155, 0.6);
+        margin-bottom: 2rem;
+    }
+
+    .upload-form {
+        margin-top: 2rem;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+    }
+
+    .file-input-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem 2rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 2px dashed rgba(216, 191, 100, 0.4);
+        border-radius: 2rem;
+        color: #E8D59B;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .file-input-label:hover {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: rgba(216, 191, 100, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .btn-submit {
+        display: inline-block;
+        padding: 1rem 3rem;
+        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
+        color: #0F0F1A;
+        border: none;
+        border-radius: 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        font-family: 'Noto Serif SC', serif;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(216, 191, 100, 0.4);
+    }
+
+    .btn-cancel {
+        display: inline-block;
+        margin-left: 1rem;
+        padding: 1rem 2rem;
+        background: transparent;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        color: #E8D59B;
+        border-radius: 2rem;
+        font-size: 1rem;
+        font-family: 'Noto Serif SC', serif;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.6);
+    }
+
+    .tips {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        text-align: left;
+    }
+
+    .tips-title {
+        font-size: 0.95rem;
+        color: #D8BF64;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+    }
+
+    .tips ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tips li {
+        font-size: 0.85rem;
+        color: rgba(232, 213, 155, 0.7);
+        margin-bottom: 0.5rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .tips li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #D8BF64;
+    }
+
+    @media (max-width: 768px) {
+        .edit-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            font-size: 3rem;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            display: block;
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+    }
+</style>
+
+<div class="avatar-edit-container">
+    <div class="edit-card">
+        <div class="current-avatar">
+            <div class="avatar-preview">
+                {% if user_profile.avatar %}
+                    <img src="{{ user_profile.avatar.url }}" alt="当前头像">
+                {% else %}
+                    <i class="fas fa-user"></i>
+                {% endif %}
+            </div>
+        </div>
+
+        <h1 class="page-title">修改头像</h1>
+        <p class="page-subtitle">上传一张清晰的照片作为您的个人头像</p>
+
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            
+            <div class="file-input-wrapper">
+                <label for="avatar" class="file-input-label">
+                    <i class="fas fa-upload"></i>
+                    <span>选择图片</span>
+                </label>
+                <input type="file" id="avatar" name="avatar" accept="image/*" required onchange="previewImage(this)">
+            </div>
+
+            <div id="image-preview" style="margin: 1rem 0; display: none;">
+                <img id="preview-img" src="" alt="预览" style="max-width: 200px; max-height: 200px; border-radius: 1rem; border: 2px solid rgba(216, 191, 100, 0.4);">
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> 保存头像
+            </button>
+            
+            <a href="{% url 'profile' %}" class="btn-cancel">
+                <i class="fas fa-times"></i> 取消
+            </a>
+        </form>
+
+        <div class="tips">
+            <div class="tips-title">💡 头像建议：</div>
+            <ul>
+                <li>建议使用正面照片，尺寸不小于 200x200 像素</li>
+                <li>支持 JPG、PNG、GIF 格式，文件大小不超过 5MB</li>
+                <li>头像会自动裁剪为圆形，请确保主体在中心位置</li>
+                <li>请勿上传涉及隐私或不当内容的图片</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

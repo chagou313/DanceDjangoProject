@@ -1,0 +1,359 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}舞蹈项目列表 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* 页面容器 */
+    .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* 返回链接 */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(135deg, rgba(218, 165, 32, 0.2), rgba(184, 134, 11, 0.2));
+        border: 2px solid rgba(218, 165, 32, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        text-decoration: none;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+    }
+
+    .back-link:hover {
+        background: linear-gradient(135deg, rgba(218, 165, 32, 0.3), rgba(184, 134, 11, 0.3));
+        border-color: rgba(218, 165, 32, 0.6);
+        transform: translateX(-5px);
+    }
+
+    /* 页面标题 */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        color: rgba(232, 213, 155, 0.7);
+    }
+
+    /* 筛选栏 */
+    .search-section {
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-container {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-filters {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+        position: relative;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.9rem;
+        color: #E8D59B;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        background: rgba(10, 10, 15, 0.6);
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: rgba(216, 191, 100, 0.8);
+        box-shadow: 0 0 15px rgba(216, 191, 100, 0.2);
+    }
+
+    .filter-select option {
+        background: rgba(20, 22, 30, 0.98);
+        color: #F5EDC8;
+    }
+
+    .search-input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .search-keyword {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        background: rgba(10, 10, 15, 0.6);
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    .search-keyword:focus {
+        border-color: rgba(216, 191, 100, 0.8);
+        box-shadow: 0 0 15px rgba(216, 191, 100, 0.2);
+    }
+
+    .search-keyword::placeholder {
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .search-btn {
+        padding: 0.9rem 2.5rem;
+        background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+        border: none;
+        border-radius: 1rem;
+        color: #fff;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+        letter-spacing: 1px;
+    }
+
+    .search-btn:hover {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(218, 165, 32, 0.6);
+    }
+
+    .search-results-info {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(216, 191, 100, 0.1);
+        border-left: 4px solid rgba(216, 191, 100, 0.6);
+        border-radius: 0 1rem 1rem 0;
+    }
+
+    .results-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 1px;
+    }
+
+    .results-count {
+        color: #D8BF64;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 1200px) {
+        .search-filters {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-filters {
+            grid-template-columns: 1fr;
+        }
+
+        .search-input-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+    }
+
+    /* 舞蹈列表区域 */
+    .dance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .dance-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        overflow: hidden;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: block;
+    }
+
+    .dance-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(216, 191, 100, 0.7);
+        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.2);
+    }
+
+    .dance-image {
+        width: 100%;
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .dance-info {
+        padding: 1.5rem;
+    }
+
+    .dance-name {
+        font-size: 1.3rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .dance-meta {
+        font-size: 0.9rem;
+        color: #E8D59B;
+        margin-bottom: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- 返回链接 -->
+    <a href="{% url 'dance_origin_list' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        <span>返回舞蹈起源地图</span>
+    </a>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-list"></i> 舞蹈项目列表</h1>
+        <p class="page-subtitle">浏览和搜索所有非遗舞蹈项目</p>
+    </div>
+
+    <!-- 搜索筛选栏 -->
+    <div class="search-section">
+        <div class="search-container">
+            <form method="get" action="" id="filterForm">
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-map-marker-alt"></i> 所属地区</label>
+                        <select name="region" class="filter-select" id="regionSelect">
+                            <option value="">全部地区</option>
+                            {% for region in regions %}
+                            <option value="{{ region.id }}" {% if current_region == region.id|stringformat:"s" %}selected{% endif %}>{{ region.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-calendar"></i> 公布时间</label>
+                        <select name="announce_time" class="filter-select">
+                            <option value="">全部时间</option>
+                            {% for stat in batch_stats %}
+                            <option value="{{ stat.announce_time }}" {% if current_announce_time == stat.announce_time %}selected{% endif %}>{{ stat.announce_time }} ({{ stat.count }}个)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-tag"></i> 类别</label>
+                        <select name="category" class="filter-select">
+                            <option value="">全部类别</option>
+                            {% for stat in category_stats %}
+                            <option value="{{ stat.category }}" {% if current_category == stat.category %}selected{% endif %}>{{ stat.category }} ({{ stat.count }}个)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-list"></i> 类型</label>
+                        <select name="dance_type" class="filter-select">
+                            <option value="">全部类型</option>
+                            {% for stat in type_stats %}
+                            <option value="{{ stat.dance_type }}" {% if current_type == stat.dance_type %}selected{% endif %}>{{ stat.get_dance_type_display }} ({{ stat.count }}个)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-search"></i> 关键词</label>
+                        <input type="text" name="keyword" class="search-keyword" placeholder="输入项目名称/编号..." value="{{ current_keyword }}">
+                    </div>
+                </div>
+                <div class="search-input-group">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </div>
+            </form>
+            <div class="search-results-info">
+                <p class="results-title">
+                    🔍 搜索结果：共搜索到 <span class="results-count">{{ total_results|default:0 }}</span> 个项目
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 舞蹈列表 -->
+    <div class="dance-grid">
+        {% for dance in dances %}
+        <a href="{% url 'project_detail' dance.project_code %}" class="dance-card">
+            {% if dance.images %}
+            <div class="dance-image" style="background-image: url('{{ dance.images.url }}');"></div>
+            {% else %}
+            <div class="dance-image" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(232, 213, 155, 0.1) 100%);"></div>
+            {% endif %}
+            <div class="dance-info">
+                <h3 class="dance-name">{{ dance.name }}</h3>
+                <p class="dance-meta">{{ dance.get_dance_type_display }} · {{ dance.region.name|default:"未知" }}</p>
+                {% if dance.project_code %}
+                <p style="font-size: 0.8rem; color: #D8BF64; margin-top: 0.3rem;">
+                    <i class="fas fa-bookmark"></i> 编号：{{ dance.project_code }}
+                </p>
+                {% endif %}
+                {% if dance.introduction %}
+                <p style="font-size: 0.85rem; color: rgba(232, 213, 155, 0.6);">{{ dance.introduction|truncatechars:60 }}</p>
+                {% elif dance.history %}
+                <p style="font-size: 0.85rem; color: rgba(232, 213, 155, 0.6);">{{ dance.history|truncatechars:60 }}</p>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <p style="text-align: center; color: #E8D59B; font-size: 1.2rem; grid-column: 1/-1;">暂无舞蹈数据</p>
+        {% endfor %}
+    </div>
+
+    <!-- 分页（如果有需要可以添加） -->
+</div>
+{% endblock %}
