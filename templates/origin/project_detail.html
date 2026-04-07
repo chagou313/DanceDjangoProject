@@ -1,4 +1,5 @@
 {% extends 'dance/base.html' %}
+{% load static %}
 
 {% block title %}{{ project.name }} - 非遗传统舞蹈学习交流平台{% endblock %}
 
@@ -6,8 +7,10 @@
 <script>
 // 智能返回功能 - 根据来源页面设置返回按钮
 window.addEventListener('DOMContentLoaded', function() {
-    const backBtn = document.getElementById('back-btn');
-    const backText = document.getElementById('back-text');
+    const backBtnTop = document.getElementById('back-btn-top');
+    const backTextTop = document.getElementById('back-text-top');
+    const backBtnBottom = document.getElementById('back-btn-bottom');
+    const backTextBottom = document.getElementById('back-text-bottom');
     
     // 获取来源页面
     const referrer = document.referrer;
@@ -15,20 +18,26 @@ window.addEventListener('DOMContentLoaded', function() {
     // 检查是否有历史记录
     if (window.history.length > 1) {
         // 有历史记录，使用浏览器返回
-        backBtn.href = 'javascript:history.back()';
+        backBtnTop.href = 'javascript:history.back()';
+        backBtnBottom.href = 'javascript:history.back()';
         
         // 根据来源设置提示文字
         if (referrer.includes('/origin/')) {
-            backText.textContent = '返回列表';
+            backTextTop.textContent = '返回列表';
+            backTextBottom.textContent = '返回列表';
         } else if (referrer.includes('/') && !referrer.includes('/origin/')) {
-            backText.textContent = '返回首页';
+            backTextTop.textContent = '返回首页';
+            backTextBottom.textContent = '返回首页';
         } else {
-            backText.textContent = '返回';
+            backTextTop.textContent = '返回';
+            backTextBottom.textContent = '返回';
         }
     } else {
         // 没有历史记录（如直接访问或新标签页），默认返回舞蹈起源列表
-        backBtn.href = '{% url "dance_origin_list" %}';
-        backText.textContent = '返回列表';
+        backBtnTop.href = '{% url "dance_origin_list" %}';
+        backBtnBottom.href = '{% url "dance_origin_list" %}';
+        backTextTop.textContent = '返回列表';
+        backTextBottom.textContent = '返回列表';
     }
 });
 </script>
@@ -221,11 +230,38 @@ window.addEventListener('DOMContentLoaded', function() {
         background: rgba(216, 191, 100, 0.15);
         border-color: rgba(216, 191, 100, 0.6);
     }
+
+    /* 项目简介区域 - 文字和图片并排 */
+    .introduction-section {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    .introduction-text {
+        flex: 1;
+        line-height: 1.8;
+        color: rgba(232, 213, 155, 0.8);
+        white-space: pre-line;
+    }
+
+    .introduction-image {
+        flex: 0 0 400px;
+        max-width: 400px;
+    }
+
+    .introduction-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
 </style>
 
 <div class="project-detail">
-    <a href="javascript:history.back()" class="back-btn" id="back-btn">
-        <i class="fas fa-arrow-left"></i> <span id="back-text">返回</span>
+    <!-- 顶部返回按钮 -->
+    <a href="javascript:history.back()" class="back-btn" id="back-btn-top">
+        <i class="fas fa-arrow-left"></i> <span id="back-text-top">返回</span>
     </a>
 
     <div class="project-header">
@@ -260,12 +296,26 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 
-    {% if project.introduction %}
+    {% if project.introduction or project.images %}
     <div class="section">
         <h2 class="section-title">
             <i class="fas fa-info-circle"></i> 项目简介
         </h2>
-        <div class="content-text">{{ project.introduction }}</div>
+        <div class="introduction-section">
+            {% if project.introduction %}
+            <div class="introduction-text">{{ project.introduction }}</div>
+            {% endif %}
+            
+            {% if project.images %}
+            <div class="introduction-image">
+                <img src="{{ project.images.url }}" alt="{{ project.name }}" loading="lazy">
+            </div>
+            {% elif project.full_name %}
+            <div class="introduction-image">
+                <img src="{% static 'images/home.jpg' %}" alt="{{ project.name }}" loading="lazy">
+            </div>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
 
@@ -360,5 +410,10 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
     {% endif %}
+
+    <!-- 底部返回按钮 -->
+    <a href="javascript:history.back()" class="back-btn" id="back-btn-bottom" style="margin-top: 2rem; display: block; text-align: center;">
+        <i class="fas fa-arrow-left"></i> <span id="back-text-bottom">返回</span>
+    </a>
 </div>
 {% endblock %}

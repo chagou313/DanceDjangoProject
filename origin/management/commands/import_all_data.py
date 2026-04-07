@@ -168,18 +168,31 @@ def import_inheritors(df):
             project_code = str(row.get('项目编号', '')).strip()
             project_name = str(row.get('项目名称', '')).strip()
             
-            try:
-                project = DanceProject.objects.get(project_code=project_code)
-            except DanceProject.DoesNotExist:
-                # 尝试按名称查找
-                try:
+            # 优先使用项目名称匹配（更精确），其次使用项目编号
+            project = None
+            if project_name and project_name != 'nan':
+                # 尝试按项目名称精确匹配
+                project = DanceProject.objects.filter(name=project_name).first()
+                
+                # 如果没有找到，尝试模糊匹配
+                if not project:
                     project = DanceProject.objects.filter(name__contains=project_name).first()
-                except:
+            
+            # 如果项目名称匹配失败，且项目编号有效，则按编号匹配
+            if not project and project_code and project_code != 'nan':
+                try:
+                    # 注意：项目编号可能对应多个记录，这里只取第一个
+                    project = DanceProject.objects.filter(project_code=project_code).first()
+                except Exception:
                     project = None
             
             # 性别转换
             gender_raw = str(row.get('性别', '')).strip()
             gender = 'male' if gender_raw == '男' else 'female'
+            
+            # 生成传承人编号（如果为空则使用名称 + 项目名作为唯一标识）
+            if not inheritor_code or inheritor_code == 'nan':
+                inheritor_code = f"{name}_{project_name}" if project_name else name
             
             # 创建传承人
             inheritor, created = Inheritor.objects.update_or_create(

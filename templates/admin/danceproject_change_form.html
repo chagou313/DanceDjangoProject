@@ -1,0 +1,184 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取图片上传字段
+    const imageField = document.querySelector('input[name="images"]');
+    
+    if (imageField) {
+        // 创建提示区域
+        const pasteHint = document.createElement('div');
+        pasteHint.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, rgba(218, 165, 32, 0.1), rgba(184, 134, 11, 0.1));
+                border: 2px dashed rgba(218, 165, 32, 0.4);
+                border-radius: 12px;
+                padding: 20px;
+                margin: 15px 0;
+                text-align: center;
+                color: #D8BF64;
+                font-size: 14px;
+                transition: all 0.3s;
+            " id="pasteArea">
+                <i class="fas fa-paste" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                <strong>💡 快捷操作提示</strong><br>
+                <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">
+                    你可以直接按 <kbd style="background: rgba(216, 191, 100, 0.2); padding: 2px 6px; border-radius: 4px;">Ctrl+V</kbd> 粘贴图片<br>
+                    或者将图片拖放到这里<br>
+                    也可以使用传统的"选择文件"按钮上传
+                </span>
+            </div>
+        `;
+        
+        // 插入到图片字段后面
+        imageField.closest('.form-row').insertAdjacentElement('afterend', pasteHint);
+        
+        const pasteArea = document.getElementById('pasteArea');
+        
+        // 处理粘贴事件
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            
+            for (let i = 0; i < items.length; i++) {
+                // 如果是图片
+                if (items[i].type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    
+                    // 视觉反馈
+                    pasteArea.style.borderColor = '#D8BF64';
+                    pasteArea.style.background = 'linear-gradient(135deg, rgba(218, 165, 32, 0.2), rgba(184, 134, 11, 0.2))';
+                    pasteArea.innerHTML = `
+                        <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 8px; display: block; color: #2ECC71;"></i>
+                        <strong style="color: #2ECC71;">✅ 图片已粘贴成功！</strong><br>
+                        <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">正在处理图片...</span>
+                    `;
+                    
+                    // 获取图片 blob
+                    const blob = items[i].getAsFile();
+                    
+                    // 创建 File 对象
+                    const file = new File([blob], 'pasted-image.png', { type: blob.type });
+                    
+                    // 创建 DataTransfer 对象来设置文件
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    
+                    // 设置文件到 input
+                    imageField.files = dataTransfer.files;
+                    
+                    // 触发 change 事件
+                    const event = new Event('change', { bubbles: true });
+                    imageField.dispatchEvent(event);
+                    
+                    // 显示成功提示
+                    setTimeout(() => {
+                        pasteArea.innerHTML = `
+                            <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 8px; display: block; color: #2ECC71;"></i>
+                            <strong style="color: #2ECC71;">✅ 图片已准备好上传</strong><br>
+                            <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">点击页面底部的"保存"按钮完成上传</span>
+                        `;
+                        
+                        // 2秒后恢复提示
+                        setTimeout(() => {
+                            pasteArea.style.borderColor = 'rgba(218, 165, 32, 0.4)';
+                            pasteArea.style.background = 'linear-gradient(135deg, rgba(218, 165, 32, 0.1), rgba(184, 134, 11, 0.1))';
+                            pasteArea.innerHTML = `
+                                <i class="fas fa-paste" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                                <strong>💡 快捷操作提示</strong><br>
+                                <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">
+                                    你可以直接按 <kbd style="background: rgba(216, 191, 100, 0.2); padding: 2px 6px; border-radius: 4px;">Ctrl+V</kbd> 粘贴图片<br>
+                                    或者将图片拖放到这里<br>
+                                    也可以使用传统的"选择文件"按钮上传
+                                </span>
+                            `;
+                        }, 2000);
+                    }, 500);
+                    
+                    break;
+                }
+            }
+        });
+        
+        // 拖放功能
+        pasteArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#D8BF64';
+            this.style.background = 'linear-gradient(135deg, rgba(218, 165, 32, 0.3), rgba(184, 134, 11, 0.3))';
+        });
+        
+        pasteArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(218, 165, 32, 0.4)';
+            this.style.background = 'linear-gradient(135deg, rgba(218, 165, 32, 0.1), rgba(184, 134, 11, 0.1))';
+        });
+        
+        pasteArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(218, 165, 32, 0.4)';
+            this.style.background = 'linear-gradient(135deg, rgba(218, 165, 32, 0.1), rgba(184, 134, 11, 0.1))';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.indexOf('image') !== -1) {
+                // 视觉反馈
+                this.style.borderColor = '#D8BF64';
+                this.innerHTML = `
+                    <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 8px; display: block; color: #2ECC71;"></i>
+                    <strong style="color: #2ECC71;">✅ 图片已拖放成功！</strong><br>
+                    <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">点击页面底部的"保存"按钮完成上传</span>
+                `;
+                
+                // 设置文件
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                imageField.files = dataTransfer.files;
+                
+                // 触发 change 事件
+                const event = new Event('change', { bubbles: true });
+                imageField.dispatchEvent(event);
+                
+                // 2秒后恢复提示
+                setTimeout(() => {
+                    this.style.borderColor = 'rgba(218, 165, 32, 0.4)';
+                    this.innerHTML = `
+                        <i class="fas fa-paste" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                        <strong>💡 快捷操作提示</strong><br>
+                        <span style="color: rgba(232, 213, 155, 0.7); font-size: 12px;">
+                            你可以直接按 <kbd style="background: rgba(216, 191, 100, 0.2); padding: 2px 6px; border-radius: 4px;">Ctrl+V</kbd> 粘贴图片<br>
+                            或者将图片拖放到这里<br>
+                            也可以使用传统的"选择文件"按钮上传
+                        </span>
+                    `;
+                }, 2000);
+            }
+        });
+    }
+});
+</script>
+
+<style>
+/* 美化图片上传字段 */
+input[type="file"][name="images"] {
+    padding: 10px;
+    border: 2px dashed rgba(218, 165, 32, 0.4);
+    border-radius: 8px;
+    background: rgba(218, 165, 32, 0.05);
+    transition: all 0.3s;
+}
+
+input[type="file"][name="images"]:hover {
+    border-color: rgba(218, 165, 32, 0.7);
+    background: rgba(218, 165, 32, 0.1);
+}
+
+/* kbd 样式 */
+kbd {
+    font-family: monospace;
+    font-size: 0.9em;
+}
+</style>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from origin.models import DanceProject
 
 class News(models.Model):
     """新闻资讯表"""
@@ -18,9 +19,10 @@ class News(models.Model):
     ]
     
     title = models.CharField(max_length=200, verbose_name="标题")
+    summary = models.TextField(blank=True, verbose_name="摘要/简介", help_text="简短介绍，用于列表页展示（选填）")
     content = models.TextField(verbose_name="内容")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name="资讯类型")
-    dance_type = models.CharField(max_length=20, choices=DANCE_TYPE_CHOICES, blank=True, verbose_name="舞蹈类型")
+    dance_project = models.ForeignKey(DanceProject, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="舞蹈项目")
     cover_image = models.ImageField(upload_to='news/%Y%m%d/', blank=True, null=True, verbose_name="封面图")
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="作者")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="发布时间")
@@ -74,3 +76,18 @@ class UserInteraction(models.Model):
     
     def __str__(self):
         return f'{self.user.username} {self.get_interaction_type_display()} {self.news.title}'
+
+class NewsImage(models.Model):
+    """新闻多图表"""
+    news = models.ForeignKey(News, on_delete=models.CASCADE, related_name='images', verbose_name="关联新闻")
+    image = models.ImageField(upload_to='news/images/%Y%m%d/', verbose_name="图片")
+    caption = models.CharField(max_length=200, blank=True, verbose_name="图片说明")
+    sort_order = models.IntegerField(default=0, verbose_name="排序")
+    
+    class Meta:
+        verbose_name = "新闻图片"
+        verbose_name_plural = "新闻图片"
+        ordering = ['sort_order', 'id']
+    
+    def __str__(self):
+        return f'{self.news.title} - 图片 {self.id}'

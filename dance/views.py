@@ -146,6 +146,9 @@ def home(request):
 def login_view(request):
     """用户登录"""
     if request.user.is_authenticated:
+        # 如果已登录，检查是否是超级管理员
+        if request.user.is_staff:
+            return redirect('admin:index')
         return redirect('home')
 
     if request.method == 'POST':
@@ -156,7 +159,10 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                # 登录成功后，重定向到首页，让首页重新生成 CSRF token
+                # 判断用户权限，超级管理员跳转到 admin 后台
+                if user.is_staff:
+                    return redirect('admin:index')
+                # 普通用户跳转到首页
                 return redirect('home')
             else:
                 messages.error(request, '用户名或密码错误')
@@ -200,18 +206,33 @@ def logout_view(request):
 def news_list(request):
     """新闻资讯列表页"""
     from news.models import News
+    from django.db.models import Q
     
-    # 获取分类筛选
+    # 获取筛选参数
     category = request.GET.get('category', '')
+    keyword = request.GET.get('keyword', '').strip()
     
+    # 构建查询 - 移除 is_hot 限制，显示所有新闻
+    news_query = News.objects.all()
+    
+    # 分类筛选
     if category:
-        news_list = News.objects.filter(category=category, is_hot=True).order_by('-created_at')[:12]
-    else:
-        news_list = News.objects.filter(is_hot=True).order_by('-created_at')[:12]
+        news_query = news_query.filter(category=category)
+    
+    # 关键字搜索（仅搜索标题和摘要）
+    if keyword:
+        news_query = news_query.filter(
+            Q(title__icontains=keyword) |
+            Q(summary__icontains=keyword)
+        ).distinct()
+    
+    # 按时间排序
+    news_query = news_query.order_by('-created_at')
     
     context = {
-        'news_list': news_list,
+        'news_list': news_query,
         'current_category': category,
+        'current_keyword': keyword,
     }
     return render(request, 'news/news_list.html', context)
 
@@ -238,6 +259,7 @@ def dance_origin_list(request):
                 }
             region_data[region_name]['count'] += 1
             region_data[region_name]['dances'].append({
+                'id': dance.id,
                 'name': dance.name,
                 'project_code': dance.project_code,
                 'dance_type': dance.get_dance_type_display(),
@@ -331,19 +353,20 @@ def dance_project_list(request):
     }
     return render(request, 'origin/dance_list.html', context)
 
-def project_detail(request, project_code):
+def project_detail(request, project_id):
     """非遗舞蹈项目详情页"""
     from origin.models import DanceProject, Inheritor, RelatedProject, News
     
-    # 获取项目（使用 filter 防止重复记录）
-    project = DanceProject.objects.select_related('region').filter(project_code=project_code).first()
-    
-    if not project:
+    # 使用项目ID精确查找，避免编号重复导致的问题
+    try:
+        project = DanceProject.objects.select_related('region').get(id=project_id)
+    except DanceProject.DoesNotExist:
         from django.http import Http404
         raise Http404("项目不存在")
     
-    # 获取传承人
-    inheritors = Inheritor.objects.filter(project=project)
+    # 获取传承人：使用项目名称匹配（而不是项目编号）
+    # 因为同一编号可能对应多个项目，但项目名称是唯一的
+    inheritors = Inheritor.objects.filter(project_name=project.name)
     
     # 获取相关项目
     related_projects = RelatedProject.objects.filter(main_project=project)
@@ -383,6 +406,7 @@ def profile(request):
     """个人主页 - 显示用户的统计数据概览"""
     from dance.models import UserProfile
     from community.models import Post, PostLike, PostCollection, Comment
+    from news.models import UserInteraction
     
     if not request.user.is_authenticated:
         return redirect('login')
@@ -392,11 +416,15 @@ def profile(request):
     except UserProfile.DoesNotExist:
         user_profile = None
     
-    # 只统计数据，不获取详细列表
+    # 帖子互动统计
     total_likes = PostLike.objects.filter(user=request.user).count()
     total_collections = PostCollection.objects.filter(user=request.user).count()
     total_comments = Comment.objects.filter(user=request.user, is_deleted=False).count()
     total_posts = Post.objects.filter(author=request.user).count()
+    
+    # 资讯互动统计
+    news_liked_count = UserInteraction.objects.filter(user=request.user, interaction_type='like').count()
+    news_collected_count = UserInteraction.objects.filter(user=request.user, interaction_type='collect').count()
     
     # 获取最近的动态（各取 5 条用于展示）
     recent_posts = Post.objects.filter(author=request.user).select_related('topic').order_by('-created_at')[:5]
@@ -408,6 +436,8 @@ def profile(request):
         'total_collections': total_collections,
         'total_comments': total_comments,
         'total_posts': total_posts,
+        'news_liked_count': news_liked_count,
+        'news_collected_count': news_collected_count,
         'recent_posts': recent_posts,
         'recent_comments': recent_comments,
     }
@@ -495,6 +525,48 @@ def user_posts(request):
         'color': '#2ECC71',
     }
     return render(request, 'community/user_interactions.html', context)
+
+@login_required
+def user_liked_news(request):
+    """用户点赞的资讯列表"""
+    from news.models import News, UserInteraction
+    
+    news_list = News.objects.filter(
+        userinteraction__user=request.user,
+        userinteraction__interaction_type='like'
+    ).select_related('author', 'dance_project').order_by('-userinteraction__created_at').distinct()
+    
+    total_count = news_list.count()
+    
+    context = {
+        'page_title': '我点赞的资讯',
+        'news_list': news_list,
+        'total_count': total_count,
+        'icon': 'fa-heart',
+        'color': '#E74C3C',
+    }
+    return render(request, 'news/user_news_interactions.html', context)
+
+@login_required
+def user_collected_news(request):
+    """用户收藏的资讯列表"""
+    from news.models import News, UserInteraction
+    
+    news_list = News.objects.filter(
+        userinteraction__user=request.user,
+        userinteraction__interaction_type='collect'
+    ).select_related('author', 'dance_project').order_by('-userinteraction__created_at').distinct()
+    
+    total_count = news_list.count()
+    
+    context = {
+        'page_title': '我收藏的资讯',
+        'news_list': news_list,
+        'total_count': total_count,
+        'icon': 'fa-star',
+        'color': '#F39C12',
+    }
+    return render(request, 'news/user_news_interactions.html', context)
 
 @login_required
 def edit_avatar(request):

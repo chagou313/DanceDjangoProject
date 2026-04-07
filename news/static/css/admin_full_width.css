@@ -1,0 +1,111 @@
+/* Django Admin 全宽布局样式 */
+
+/* 主内容区域全宽 */
+#content {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* 表单容器全宽 */
+.module, .aligned, .form-row {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* 字段标签和输入框布局 */
+.aligned label {
+    width: 150px !important;
+    min-width: 150px !important;
+}
+
+.aligned label + p,
+.aligned label + input,
+.aligned label + textarea,
+.aligned label + select {
+    max-width: calc(100% - 170px) !important;
+    width: calc(100% - 170px) !important;
+}
+
+/* 文本框全宽 */
+textarea,
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+select {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 内容字段特别处理 */
+#id_content,
+#id_summary {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 400px !important;
+}
+
+/* 折叠区域全宽 */
+fieldset.collapse {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 内联表单全宽 */
+.inline-group {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 表格全宽 */
+.inline-group table {
+    width: 100% !important;
+}
+
+/* 按钮区域居中 */
+.submit-row {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 767px) {
+    .aligned label {
+        width: 100% !important;
+        display: block !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .aligned label + p,
+    .aligned label + input,
+    .aligned label + textarea,
+    .aligned label + select {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}
+
+/* 改善可读性 - 增加内边距 */
+.module h2, .module caption, .inline-group h2 {
+    padding: 1rem !important;
+}
+
+/* 字段集样式优化 */
+fieldset {
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* 字段行间距 */
+.form-row {
+    padding: 1rem 0 !important;
+    border-bottom: 1px solid rgba(216, 191, 100, 0.1) !important;
+}
+
+/* 帮助文本样式 */
+.help, .helptext {
+    margin-top: 0.5rem !important;
+    margin-left: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}

@@ -1297,7 +1297,7 @@
                     <div class="dance-carousel-track">
                         {% for dance in local_dances %}
                         <div class="dance-carousel-item">
-                            <a href="{% url 'project_detail' dance.project_code %}" class="dance-card">
+                            <a href="{% url 'project_detail' dance.id %}" class="dance-card">
                                 <div style="position: relative;">
                                     {% if dance.images %}
                                     <div class="dance-image" style="background-image: url('{{ dance.images.url }}');"></div>
@@ -1369,7 +1369,7 @@
                     <div class="popular-carousel-track">
                         {% for dance in popular_dances %}
                         <div class="popular-carousel-item">
-                            <a href="{% url 'project_detail' dance.project_code %}" class="popular-content">
+                            <a href="{% url 'project_detail' dance.id %}" class="popular-content">
                                 {% if dance.images %}
                                 <div class="popular-image" style="background-image: url('{{ dance.images.url }}');"></div>
                                 {% else %}
@@ -1462,7 +1462,7 @@
 
             <div class="news-grid">
                 {% for news_item in hot_news %}
-                <article class="news-card">
+                <a href="{% url 'news_detail' news_item.id %}" class="news-card" style="text-decoration: none; display: block;">
                     {% if news_item.cover_image %}
                     <div class="news-cover" style="background-image: url('{{ news_item.cover_image.url }}');"></div>
                     {% else %}
@@ -1482,7 +1482,7 @@
                             <span><i class="fas fa-heart"></i> {{ news_item.likes }}</span>
                         </div>
                     </div>
-                </article>
+                </a>
                 {% endfor %}
             </div>
         </section>

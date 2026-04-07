@@ -34,6 +34,88 @@
         flex-wrap: wrap;
     }
 
+    .search-section {
+        margin-bottom: 2rem;
+    }
+
+    .search-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .search-input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .search-keyword {
+        padding: 0.7rem 1.5rem;
+        background: rgba(10, 10, 15, 0.6);
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        outline: none;
+        width: 300px;
+    }
+
+    .search-keyword:focus {
+        border-color: rgba(216, 191, 100, 0.8);
+        box-shadow: 0 0 15px rgba(216, 191, 100, 0.2);
+    }
+
+    .search-keyword::placeholder {
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .search-btn {
+        padding: 0.7rem 2rem;
+        background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+        border: none;
+        border-radius: 1rem;
+        color: #fff;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+        letter-spacing: 1px;
+    }
+
+    .search-btn:hover {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(218, 165, 32, 0.6);
+    }
+
+    .search-results-info {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(216, 191, 100, 0.1);
+        border-left: 4px solid rgba(216, 191, 100, 0.6);
+        border-radius: 0 1rem 1rem 0;
+    }
+
+    .results-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 1px;
+    }
+
+    .results-count {
+        color: #D8BF64;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
     .category-btn {
         padding: 0.7rem 1.5rem;
         background: transparent;
@@ -55,39 +137,45 @@
     }
 
     .news-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 2rem;
-        max-width: 1400px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 1200px;
         margin: 0 auto;
     }
 
     .news-card {
         background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
+        border-radius: 1.5rem;
         overflow: hidden;
         border: 2px solid rgba(216, 191, 100, 0.4);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
-        display: block;
+        display: flex;
+        min-height: 200px;
     }
 
     .news-card:hover {
-        transform: translateY(-8px);
+        transform: translateX(8px);
         border-color: rgba(216, 191, 100, 0.7);
-        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.2);
+        box-shadow: 0 15px 40px rgba(216, 191, 100, 0.2);
     }
 
     .news-cover {
-        width: 100%;
-        height: 200px;
+        width: 300px;
+        min-height: 200px;
         background-size: cover;
         background-position: center;
+        flex-shrink: 0;
     }
 
     .news-content {
-        padding: 1.5rem;
+        padding: 1.5rem 2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .news-meta {
@@ -131,8 +219,13 @@
     }
 
     @media (max-width: 768px) {
-        .news-grid {
-            grid-template-columns: 1fr;
+        .news-card {
+            flex-direction: column;
+        }
+        
+        .news-cover {
+            width: 100%;
+            height: 200px;
         }
     }
 </style>
@@ -143,38 +236,73 @@
         <p>了解非遗舞蹈最新动态 · 关注传承发展</p>
     </div>
 
+    <!-- 搜索框 -->
+    <div class="search-section">
+        <div class="search-container">
+            <form method="get" action="" class="search-input-group">
+                <!-- 保留当前分类筛选 -->
+                {% if current_category %}
+                <input type="hidden" name="category" value="{{ current_category }}">
+                {% endif %}
+                <input type="text" name="keyword" class="search-keyword" 
+                       placeholder="搜索新闻标题、内容、舞蹈项目..." 
+                       value="{{ current_keyword }}">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </form>
+        </div>
+        {% if current_keyword %}
+        <div class="search-results-info">
+            <span class="results-title">
+                搜索关键字 "<span class="results-count">{{ current_keyword }}</span>" 的结果：
+                共找到 <span class="results-count">{{ news_list.count }}</span> 条资讯
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
     <div class="category-filter">
-        <a href="?category=" class="category-btn {% if not current_category %}active{% endif %}">全部</a>
-        <a href="?category=news" class="category-btn {% if current_category == 'news' %}active{% endif %}">新闻动态</a>
-        <a href="?category=activity" class="category-btn {% if current_category == 'activity' %}active{% endif %}">活动资讯</a>
-        <a href="?category=policy" class="category-btn {% if current_category == 'policy' %}active{% endif %}">政策法规</a>
-        <a href="?category=research" class="category-btn {% if current_category == 'research' %}active{% endif %}">学术研究</a>
-        <a href="?category=exhibition" class="category-btn {% if current_category == 'exhibition' %}active{% endif %}">展览演出</a>
+        <a href="?category=&keyword={{ current_keyword }}" class="category-btn {% if not current_category %}active{% endif %}">全部</a>
+        <a href="?category=science&keyword={{ current_keyword }}" class="category-btn {% if current_category == 'science' %}active{% endif %}">科普类</a>
+        <a href="?category=activity&keyword={{ current_keyword }}" class="category-btn {% if current_category == 'activity' %}active{% endif %}">活动类</a>
+        <a href="?category=policy&keyword={{ current_keyword }}" class="category-btn {% if current_category == 'policy' %}active{% endif %}">政策类</a>
+        <a href="?category=inheritor&keyword={{ current_keyword }}" class="category-btn {% if current_category == 'inheritor' %}active{% endif %}">传承人类资讯</a>
     </div>
 
     <div class="news-grid">
         {% for news_item in news_list %}
-        <a href="#" class="news-card">
+        <a href="{% url 'news_detail' news_item.id %}" class="news-card">
             {% if news_item.cover_image %}
             <div class="news-cover" style="background-image: url('{{ news_item.cover_image.url }}');"></div>
             {% else %}
-            <div class="news-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(232, 213, 155, 0.1) 100%);"></div>
+            <div class="news-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(232, 213, 155, 0.1) 100%); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-newspaper" style="font-size: 4rem; color: rgba(216, 191, 100, 0.3);"></i>
+            </div>
             {% endif %}
             <div class="news-content">
-                <div class="news-meta">
-                    <span class="news-category">{{ news_item.get_category_display }}</span>
-                    <span class="news-date">{{ news_item.created_at|date:"Y-m-d" }}</span>
+                <div>
+                    <div class="news-meta">
+                        <span class="news-category">{{ news_item.get_category_display }}</span>
+                        {% if news_item.dance_project %}
+                        <span style="color: #D8BF64; background: rgba(216, 191, 100, 0.15); padding: 0.3rem 0.8rem; border-radius: 1rem; font-size: 0.85rem;">
+                            <i class="fas fa-tag"></i> {{ news_item.dance_project.name }}
+                        </span>
+                        {% endif %}
+                        <span class="news-date"><i class="fas fa-calendar"></i> {{ news_item.created_at|date:"Y-m-d" }}</span>
+                    </div>
+                    <h3 class="news-title">{{ news_item.title }}</h3>
+                    <p class="news-excerpt">{{ news_item.content|striptags|truncatechars:150 }}</p>
                 </div>
-                <h3 class="news-title">{{ news_item.title }}</h3>
-                <p class="news-excerpt">{{ news_item.content|truncatechars:120 }}</p>
                 <div class="news-stats">
-                    <span><i class="fas fa-eye"></i> {{ news_item.views }}</span>
-                    <span><i class="fas fa-heart"></i> {{ news_item.likes }}</span>
+                    <span><i class="fas fa-eye"></i> {{ news_item.views }} 浏览</span>
+                    <span><i class="fas fa-heart"></i> {{ news_item.likes }} 点赞</span>
+                    <span><i class="fas fa-comments"></i> {{ news_item.comments.count }} 评论</span>
                 </div>
             </div>
         </a>
         {% empty %}
-        <p style="text-align: center; color: #E8D59B; font-size: 1.2rem;">暂无资讯数据</p>
+        <p style="text-align: center; color: #E8D59B; font-size: 1.2rem; padding: 3rem;">暂无资讯数据</p>
         {% endfor %}
     </div>
 </div>

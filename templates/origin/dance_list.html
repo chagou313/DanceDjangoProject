@@ -328,7 +328,7 @@
     <!-- 舞蹈列表 -->
     <div class="dance-grid">
         {% for dance in dances %}
-        <a href="{% url 'project_detail' dance.project_code %}" class="dance-card">
+        <a href="{% url 'project_detail' dance.id %}" class="dance-card">
             {% if dance.images %}
             <div class="dance-image" style="background-image: url('{{ dance.images.url }}');"></div>
             {% else %}

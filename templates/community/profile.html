@@ -51,7 +51,7 @@
     /* 统计数据卡片 */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1.5rem;
         margin-top: 2rem;
     }
@@ -217,7 +217,7 @@
                     <i class="fas fa-heart"></i>
                 </span>
                 <span class="stat-number">{{ total_likes }}</span>
-                <span class="stat-label">点赞记录</span>
+                <span class="stat-label">帖子点赞</span>
             </a>
             
             <a href="{% url 'user_collected_posts' %}" class="stat-card" title="查看我的收藏">
@@ -225,7 +225,23 @@
                     <i class="fas fa-star"></i>
                 </span>
                 <span class="stat-number">{{ total_collections }}</span>
-                <span class="stat-label">收藏记录</span>
+                <span class="stat-label">帖子收藏</span>
+            </a>
+            
+            <a href="{% url 'user_liked_news' %}" class="stat-card" title="查看我点赞的资讯">
+                <span class="stat-icon" style="color: #FF6B81;">
+                    <i class="fas fa-thumbs-up"></i>
+                </span>
+                <span class="stat-number">{{ news_liked_count }}</span>
+                <span class="stat-label">资讯点赞</span>
+            </a>
+            
+            <a href="{% url 'user_collected_news' %}" class="stat-card" title="查看我收藏的资讯">
+                <span class="stat-icon" style="color: #FFA502;">
+                    <i class="fas fa-bookmark"></i>
+                </span>
+                <span class="stat-number">{{ news_collected_count }}</span>
+                <span class="stat-label">资讯收藏</span>
             </a>
             
             <a href="{% url 'user_comments' %}" class="stat-card" title="查看我的评论">
