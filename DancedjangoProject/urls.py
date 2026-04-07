@@ -24,7 +24,7 @@ urlpatterns = [
     path("", include("dance.urls")),
     path("news/", include("news.urls")),
     path("community/", include("community.urls")),
-    path("knowledge/", include("knowledge.urls")),
+    path("knowledge/", include("knowledge.urls", namespace="knowledge")),
     path("quiz/", include("quiz.urls")),
 ]
 

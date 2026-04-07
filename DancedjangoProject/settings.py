@@ -143,3 +143,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ==================== 通义千问 API 配置 ====================
+# 在阿里云百炼平台申请：https://bailian.console.aliyun.com/
+# 创建应用 -> 获取 API Key
+QWEN_API_KEY = 'sk-4bfe9c5f1a7944ada8a85e5d9d886e1a'  # 已配置

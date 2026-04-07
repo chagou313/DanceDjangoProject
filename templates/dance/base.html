@@ -367,7 +367,7 @@
                 <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fas fa-home"></i> 首页</a></li>
                 <li><a href="{% url 'news_list' %}" class="{% if request.resolver_match.url_name == 'news_list' %}active{% endif %}"><i class="fas fa-newspaper"></i> 新闻资讯</a></li>
                 <li><a href="{% url 'dance_origin_list' %}" class="{% if request.resolver_match.url_name == 'dance_origin_list' %}active{% endif %}"><i class="fas fa-map-marked-alt"></i> 舞蹈起源</a></li>
-                <li><a href="{% url 'knowledge_map' %}" class="{% if request.resolver_match.url_name == 'knowledge_map' %}active{% endif %}"><i class="fas fa-brain"></i> 知识图谱</a></li>
+                <li><a href="{% url 'knowledge:knowledge_map' %}" class="{% if request.resolver_match.namespace == 'knowledge' and request.resolver_match.url_name == 'knowledge_map' %}active{% endif %}"><i class="fas fa-brain"></i> 知识图谱</a></li>
                 <li><a href="{% url 'quiz_list' %}" class="{% if request.resolver_match.url_name == 'quiz_list' %}active{% endif %}"><i class="fas fa-trophy"></i> 答题闯关</a></li>
                 <li><a href="{% url 'community_posts' %}" class="{% if request.resolver_match.url_name == 'community_posts' %}active{% endif %}"><i class="fas fa-comments"></i> 交流社区</a></li>
                 {% if user.is_authenticated %}
@@ -414,7 +414,7 @@
                         <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> 首页</a></li>
                         <li><a href="{% url 'news_list' %}"><i class="fas fa-newspaper"></i> 新闻资讯</a></li>
                         <li><a href="{% url 'dance_origin_list' %}"><i class="fas fa-map-marked-alt"></i> 舞蹈起源</a></li>
-                        <li><a href="{% url 'knowledge_map' %}"><i class="fas fa-brain"></i> 知识图谱</a></li>
+                        <li><a href="{% url 'knowledge:knowledge_map' %}"><i class="fas fa-brain"></i> 知识图谱</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">

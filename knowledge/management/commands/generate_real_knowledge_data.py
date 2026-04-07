@@ -1,0 +1,1148 @@
+"""
+为3个典型舞蹈项目生成真实的知识图谱数据
+使用方法: python manage.py generate_real_data
+"""
+from django.core.management.base import BaseCommand
+from knowledge.models import DanceProject, ActionModule, SpecificMove, MoveAttribute, LearningResource, KnowledgePoint
+
+
+class Command(BaseCommand):
+    help = '生成真实的知识图谱数据示例'
+
+    def handle(self, *args, **options):
+        self.stdout.write(self.style.SUCCESS('=' * 60))
+        self.stdout.write(self.style.SUCCESS('开始生成真实非遗舞蹈知识图谱数据'))
+        self.stdout.write(self.style.SUCCESS('=' * 60))
+        
+        # 使用真实的非遗舞蹈项目
+        generate_jingxi_taipinggu_data(self)  # 京西太平鼓
+        generate_yongxin_dunpaiwu_data(self)  # 永新盾牌舞
+        generate_ansai_yaogu_data(self)  # 安塞腰鼓（如果存在）
+        generate_yicheng_huagu_data(self)  # 翼城花鼓
+        generate_zuoquan_xiaohuaxi_data(self)  # 左权小花戏
+        generate_sama_wu_data(self)  # 萨玛舞
+        generate_ba_dang_wu_data(self)  # 巴当舞
+        generate_tiao_hua_peng_data(self)  # 跳花棚
+        generate_zong_shan_wu_data(self)  # 棕扇舞
+        generate_ershi_zhongzi_data(self)  # 协荣仲孜
+        
+        self.stdout.write(self.style.SUCCESS('\n所有非遗舞蹈数据生成完成！'))
+
+
+def generate_taipinggu_data(cmd):
+    """生成京西太平鼓的完整数据"""
+    
+    # 先删除旧数据
+    old_project = DanceProject.objects.filter(name='京西太平鼓').first()
+    if old_project:
+        cmd.stdout.write(cmd.style.WARNING(f'删除旧项目: {old_project.name}'))
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='京西太平鼓',
+        category='民间舞蹈',
+        description='京西太平鼓是流传于北京市门头沟区、石景山区等地的传统民间舞蹈，起源于明代，已有600多年历史。表演者左手持鼓，右手握槌，边击边舞，动作刚劲有力，节奏明快，具有浓郁的北方民间艺术特色。',
+        difficulty_level=3,
+    )
+    
+    # 模块1：基本步伐模块
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='基本步伐模块',
+        description='太平鼓的基础步法训练，包括站立姿势、移动步法、转身技巧等，是学习太平鼓的基础。通过系统练习，掌握正确的重心转移和脚步协调。',
+        order_index=1
+    )
+    
+    moves_module1 = [
+        {
+            'name': '马步站桩',
+            'description': '双脚分开与肩同宽，屈膝下蹲成马步，双手持鼓置于胸前。要求膝盖不超过脚尖，背部挺直，重心稳定。这是太平鼓最基础的站立姿势，为后续动作打下坚实基础。',
+            'difficulty': 2,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '大腿肌肉发力，核心收紧，双脚均匀受力',
+                'common_mistakes': '膝盖内扣、弯腰驼背、重心偏向一侧、呼吸急促',
+                'key_points': '两脚平行开立，屈膝90度，含胸拔背，气沉丹田，目视前方',
+                'precautions': '初学者时间不宜过长，每次3-5分钟，注意膝盖保暖，避免受凉'
+            },
+            'resources': [
+                {'type': 'video', 'title': '马步站桩标准示范', 'duration': 180},
+                {'type': 'demo', 'title': '传承人讲解站桩要点', 'duration': 300},
+                {'type': 'article', 'title': '马步训练的科学方法', 'duration': None},
+            ],
+            'knowledge_points': [
+                {'name': '重心控制', 'description': '掌握身体重心的分布和转移，保持平衡稳定', 'category': '技法要点', 'importance_level': 5},
+                {'name': '呼吸调节', 'description': '配合动作进行深呼吸，增强耐力和稳定性', 'category': '训练方法', 'importance_level': 4},
+                {'name': '腿部力量', 'description': '通过站桩锻炼大腿和小腿肌肉力量', 'category': '训练方法', 'importance_level': 4},
+                {'name': '传统文化', 'description': '马步是中国武术和传统舞蹈的基础功', 'category': '文化内涵', 'importance_level': 3},
+            ]
+        },
+        {
+            'name': '弓步击鼓',
+            'description': '前腿弓、后腿绷，形成弓箭步，同时右手挥槌击鼓。要求前后腿比例约为7:3，上身微向前倾，击鼓有力。此动作体现太平鼓的阳刚之气。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '前腿大腿发力支撑，后腿蹬地，腰部扭转带动手臂击鼓',
+                'common_mistakes': '前后脚距离过小、后腿弯曲、击鼓无力、身体晃动',
+                'key_points': '前腿屈膝90度，后腿伸直，髋部正对前方，击鼓时腰臂合一',
+                'precautions': '注意膝盖方向与脚尖一致，避免扭伤，击鼓力度适中'
+            },
+            'resources': [
+                {'type': 'video', 'title': '弓步击鼓分解教学', 'duration': 240},
+                {'type': 'demo', 'title': '老艺人弓步击鼓展示', 'duration': 180},
+                {'type': 'article', 'title': '弓步在民间舞蹈中的应用', 'duration': None},
+            ],
+            'knowledge_points': [
+                {'name': '弓步要领', 'description': '掌握标准弓步的姿势要求和发力方式', 'category': '技法要点', 'importance_level': 5},
+                {'name': '击鼓技巧', 'description': '学习正确的握槌方法和击鼓角度', 'category': '技法要点', 'importance_level': 5},
+                {'name': '腰臂协调', 'description': '腰部转动与手臂挥动的协调配合', 'category': '表演技巧', 'importance_level': 4},
+                {'name': '阳刚之美', 'description': '体现北方民间舞蹈的豪放风格', 'category': '文化内涵', 'importance_level': 3},
+            ]
+        },
+        {
+            'name': '虚步提鼓',
+            'description': '一腿屈膝半蹲支撑，另一腿脚尖点地成虚步，双手将鼓提起至胸前。要求虚实分明，重心稳定，提鼓时手腕灵活。',
+            'difficulty': 3,
+            'duration': 270,
+            'order_index': 3,
+            'attributes': {
+                'force_parts': '支撑腿大腿发力，提鼓时手腕和前臂协同用力',
+                'common_mistakes': '虚实不分、重心不稳、提鼓过高或过低',
+                'key_points': '支撑腿稳固，虚腿轻灵，提鼓至胸口高度，肘部微屈',
+                'precautions': '注意膝关节保护，避免过度负重'
+            },
+            'resources': [
+                {'type': 'video', 'title': '虚步提鼓技巧详解', 'duration': 200},
+                {'type': 'demo', 'title': '传承人虚步示范', 'duration': 150},
+            ],
+            'knowledge_points': [
+                {'name': '虚实转换', 'description': '掌握虚实步法的转换技巧', 'category': '技法要点', 'importance_level': 5},
+                {'name': '手腕灵活', 'description': '训练手腕的灵活性和控制力', 'category': '技法要点', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '仆步压鼓',
+            'description': '一腿全蹲，另一腿伸直仆地，身体重心降低，同时将鼓向下按压。要求动作舒展大方，体现太平鼓的低姿美感。',
+            'difficulty': 5,
+            'duration': 330,
+            'order_index': 4,
+            'attributes': {
+                'force_parts': '蹲腿大腿和臀部发力，压鼓时手臂下压',
+                'common_mistakes': '仆腿弯曲、重心后仰、压鼓不到位',
+                'key_points': '蹲腿膝盖不超过脚尖，仆腿伸直贴地，上身前倾',
+                'precautions': '充分热身，循序渐进，避免拉伤'
+            },
+            'resources': [
+                {'type': 'video', 'title': '仆步压鼓完整演示', 'duration': 260},
+                {'type': 'article', 'title': '低姿动作的训练方法', 'duration': None},
+            ],
+            'knowledge_points': [
+                {'name': '柔韧性训练', 'description': '提高髋关节和腿部的柔韧性', 'category': '训练方法', 'importance_level': 4},
+                {'name': '低姿美学', 'description': '理解低姿动作的艺术表现力', 'category': '表演技巧', 'importance_level': 3},
+            ]
+        },
+    ]
+    
+    for move_data in moves_module1:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 京西太平鼓 - 基本步伐模块完成（{len(moves_module1)}个招式）"))
+    
+    # 模块2：手势身段模块
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='手势身段模块',
+        description='太平鼓的手部动作和身体姿态训练，包括持鼓手法、挥臂轨迹、转身技巧等。通过优美的身段展现太平鼓的艺术魅力。',
+        order_index=2
+    )
+    
+    moves_module2 = [
+        {
+            'name': '云手翻鼓',
+            'description': '双手持鼓，做云手动作，同时翻转鼓面。要求手腕灵活，动作连贯流畅，鼓面翻转时发出清脆声响。',
+            'difficulty': 5,
+            'duration': 360,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手腕发力，小臂配合，肩部放松',
+                'common_mistakes': '手腕僵硬、动作断续、鼓面翻转不到位',
+                'key_points': '以腕为轴，圆活自然，翻转迅速，声响清脆',
+                'precautions': '先慢后快，循序渐进，避免手腕过度用力'
+            },
+            'resources': [
+                {'type': 'video', 'title': '云手翻鼓技巧详解', 'duration': 300},
+                {'type': 'demo', 'title': '大师云手展示', 'duration': 240},
+            ],
+            'knowledge_points': [
+                {'name': '手腕灵活性', 'description': '训练手腕的灵活性和控制力', 'category': '技法要点', 'importance_level': 5},
+                {'name': '圆的运动', 'description': '理解中国传统舞蹈中圆的运动轨迹', 'category': '文化内涵', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '托鼓亮相',
+            'description': '单手托鼓高举过头，身体挺拔，目光坚定，形成优美的亮相姿态。要求手臂伸直，身体舒展，展现自信和精神风貌。',
+            'difficulty': 3,
+            'duration': 180,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '手臂上举，肩膀下沉，核心收紧',
+                'common_mistakes': '手臂弯曲、耸肩、身体歪斜',
+                'key_points': '手臂伸直但不僵硬，沉肩坠肘，挺胸抬头',
+                'precautions': '注意肩部放松，避免耸肩'
+            },
+            'resources': [
+                {'type': 'video', 'title': '托鼓亮相标准姿势', 'duration': 150},
+            ],
+            'knowledge_points': [
+                {'name': '亮相技巧', 'description': '掌握舞蹈中的亮相姿态和眼神运用', 'category': '表演技巧', 'importance_level': 5},
+                {'name': '精神风貌', 'description': '通过姿态展现舞者的精神气质', 'category': '表演技巧', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '绕花击鼓',
+            'description': '手持鼓槌在鼓面上画圆绕花，同时有节奏地击鼓。要求手腕灵活，绕花圆润，击鼓准确，富有韵律感。',
+            'difficulty': 6,
+            'duration': 420,
+            'order_index': 3,
+            'attributes': {
+                'force_parts': '手腕旋转发力，手指控制鼓槌',
+                'common_mistakes': '绕花不圆、击鼓不准、节奏混乱',
+                'key_points': '以腕带指，绕花饱满，击鼓点准确',
+                'precautions': '先练绕花再练击鼓，逐步结合'
+            },
+            'resources': [
+                {'type': 'video', 'title': '绕花击鼓分解教学', 'duration': 360},
+                {'type': 'demo', 'title': '高手绕花表演', 'duration': 200},
+            ],
+            'knowledge_points': [
+                {'name': '手腕旋转', 'description': '掌握手腕的旋转技巧和力度控制', 'category': '技法要点', 'importance_level': 5},
+                {'name': '节奏感', 'description': '培养音乐节奏感和击鼓准确性', 'category': '表演技巧', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves_module2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 京西太平鼓 - 手势身段模块完成（{len(moves_module2)}个招式）"))
+    
+    # 模块3：队形变化模块
+    module3 = ActionModule.objects.create(
+        dance_project=project,
+        name='队形变化模块',
+        description='集体表演时的队形编排和变化，包括圆形、方形、穿插等传统队形。培养团队协作能力和空间意识。',
+        order_index=3
+    )
+    
+    moves_module3 = [
+        {
+            'name': '圆圈围鼓',
+            'description': '多人围成圆圈，面向圆心，同步击鼓。要求队形整齐，节奏统一，气势磅礴。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '全身协调，团队配合',
+                'common_mistakes': '队形不齐、节奏不一、间距不均',
+                'key_points': '保持等距，面向圆心，动作同步',
+                'precautions': '注意与他人的距离，避免碰撞'
+            },
+            'resources': [
+                {'type': 'video', 'title': '圆圈队形编排示范', 'duration': 280},
+            ],
+            'knowledge_points': [
+                {'name': '团队协作', 'description': '培养团队合作意识和协调能力', 'category': '表演技巧', 'importance_level': 5},
+                {'name': '空间意识', 'description': '建立舞台空间感和位置感', 'category': '表演技巧', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '交叉换位',
+            'description': '队员相互交叉穿行换位，形成动态的队形变化。要求路线清晰，避让及时，动作流畅。',
+            'difficulty': 6,
+            'duration': 360,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '腿部移动，身体转向，视线引导',
+                'common_mistakes': '路线混乱、碰撞他人、节奏打乱',
+                'key_points': '按预定路线行进，注意观察，保持节奏',
+                'precautions': '多次排练熟悉路线，注意安全'
+            },
+            'resources': [
+                {'type': 'video', 'title': '交叉换位队形教学', 'duration': 320},
+            ],
+            'knowledge_points': [
+                {'name': '队形编排', 'description': '学习舞蹈队形的设计原理', 'category': '表演技巧', 'importance_level': 5},
+                {'name': '应变能力', 'description': '培养临场应变和调整能力', 'category': '表演技巧', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves_module3:
+        create_move_with_details(module3, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 京西太平鼓 - 队形变化模块完成（{len(moves_module3)}个招式）"))
+    
+    # 模块4：节奏韵律模块
+    module4 = ActionModule.objects.create(
+        dance_project=project,
+        name='节奏韵律模块',
+        description='太平鼓的节奏训练，学习不同的鼓点和音乐配合。掌握快慢、强弱、轻重等节奏变化。',
+        order_index=4
+    )
+    
+    moves_module4 = [
+        {
+            'name': '单点基础',
+            'description': '学习最基本的单点击鼓，掌握正确的击鼓位置和力度。要求每一下都清晰有力，节奏稳定。',
+            'difficulty': 2,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手腕发力，手臂辅助',
+                'common_mistakes': '击鼓位置不准、力度不均、节奏不稳',
+                'key_points': '击鼓中心位置，力度均匀，节奏稳定',
+                'precautions': '从轻到重，循序渐进'
+            },
+            'resources': [
+                {'type': 'video', 'title': '单点击鼓基础教学', 'duration': 200},
+                {'type': 'demo', 'title': '标准单点示范', 'duration': 120},
+            ],
+            'knowledge_points': [
+                {'name': '基础节奏', 'description': '掌握最基本的击鼓节奏', 'category': '技法要点', 'importance_level': 5},
+                {'name': '力度控制', 'description': '学习控制击鼓的力度', 'category': '技法要点', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '双点连击',
+            'description': '连续两次快速击鼓，形成双点节奏。要求两次击鼓间隔均匀，声音连贯。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '手腕快速弹动',
+                'common_mistakes': '间隔不均、第二次无力、节奏加快',
+                'key_points': '两次力度相同，间隔相等',
+                'precautions': '先慢练，熟练后加速'
+            },
+            'resources': [
+                {'type': 'video', 'title': '双点连击技巧', 'duration': 250},
+            ],
+            'knowledge_points': [
+                {'name': '复合节奏', 'description': '学习更复杂的节奏型', 'category': '技法要点', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves_module4:
+        create_move_with_details(module4, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 京西太平鼓 - 节奏韵律模块完成（{len(moves_module4)}个招式）"))
+    
+    total_moves = (module1.specific_moves.count() + 
+                   module2.specific_moves.count() + 
+                   module3.specific_moves.count() + 
+                   module4.specific_moves.count())
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 京西太平鼓数据生成完成！共{total_moves}个招式\n"))
+
+
+def create_move_with_details(module, move_data):
+    """创建招式及其详细信息"""
+    move = SpecificMove.objects.create(
+        action_module=module,
+        name=move_data['name'],
+        description=move_data['description'],
+        difficulty=move_data['difficulty'],
+        duration=move_data['duration'],
+        order_index=move_data['order_index']
+    )
+    
+    # 创建动作属性
+    MoveAttribute.objects.create(
+        specific_move=move,
+        **move_data['attributes']
+    )
+    
+    # 创建学习资源
+    for res_data in move_data['resources']:
+        LearningResource.objects.create(
+            specific_move=move,
+            resource_type=res_data['type'],
+            title=res_data['title'],
+            url=f'https://example.com/resource/{move_data["name"]}_{res_data["type"]}',
+            duration=res_data['duration'],
+            order_index=1
+        )
+    
+    # 创建知识点
+    for kp_data in move_data['knowledge_points']:
+        KnowledgePoint.objects.create(
+            specific_move=move,
+            **kp_data
+        )
+
+
+def generate_ansaiyaogu_data(cmd):
+    """生成安塞腰鼓的完整数据"""
+    
+    # 先删除旧数据
+    old_project = DanceProject.objects.filter(name='安塞腰鼓').first()
+    if old_project:
+        cmd.stdout.write(cmd.style.WARNING(f'删除旧项目: {old_project.name}'))
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='安塞腰鼓',
+        category='民间舞蹈',
+        description='安塞腰鼓是陕西省延安市安塞区的传统民间舞蹈，被誉为“天下第一鼓”。表演者腰间系鼓，双手持槌，动作豪迈粗犷，气势磅礴，展现了黄土高原人民的豪放性格。',
+        difficulty_level=4,
+    )
+    
+    # 模块1：基本鼓法
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='基本鼓法模块',
+        description='安塞腰鼓的基础击鼓技法，包括单点、双点、滚奏等基本鼓法。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '单点击鼓',
+            'description': '右手持槌单击鼓面中心，声音清脆响亮。要求手腕灵活，力度均匀，节奏稳定。',
+            'difficulty': 2,
+            'duration': 200,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手腕发力，手臂辅助',
+                'common_mistakes': '击鼓位置不准、力度不均',
+                'key_points': '击鼓中心，手腕放松，力度适中',
+                'precautions': '从轻到重，循序渐进'
+            },
+            'resources': [
+                {'type': 'video', 'title': '单点击鼓基础', 'duration': 150},
+            ],
+            'knowledge_points': [
+                {'name': '基础鼓法', 'description': '掌握最基本的击鼓技法', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '双击连奏',
+            'description': '快速连续两次击鼓，形成连贯的节奏。要求两次击鼓间隔均匀，声音饱满。',
+            'difficulty': 4,
+            'duration': 280,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '手腕快速弹动',
+                'common_mistakes': '间隔不均、第二次无力',
+                'key_points': '两次力度相同，节奏均匀',
+                'precautions': '先慢练后加速'
+            },
+            'resources': [
+                {'type': 'video', 'title': '双击技巧详解', 'duration': 220},
+            ],
+            'knowledge_points': [
+                {'name': '复合节奏', 'description': '学习更复杂的节奏型', 'category': '技法要点', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 安塞腰鼓 - 基本鼓法模块完成（{len(moves)}个招式）"))
+    
+    # 模块2：跳跃动作
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='跳跃动作模块',
+        description='安塞腰鼓特色的跳跃和腾挪动作，展现黄土高原的豪放风格。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '腾空跃鼓',
+            'description': '双脚用力蹬地跳起，在空中击鼓，落地稳健。要求爆发力强，空中姿态优美。',
+            'difficulty': 7,
+            'duration': 360,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '腿部爆发力，核心收紧',
+                'common_mistakes': '跳不高、落地不稳、空中击鼓不准',
+                'key_points': '蹬地有力，空中收腹，落地缓冲',
+                'precautions': '充分热身，注意膝盖保护'
+            },
+            'resources': [
+                {'type': 'video', 'title': '腾空跃鼓示范', 'duration': 300},
+            ],
+            'knowledge_points': [
+                {'name': '爆发力训练', 'description': '提高腿部爆发力和弹跳能力', 'category': '训练方法', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 安塞腰鼓 - 跳跃动作模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 安塞腰鼓数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_peacock_dance_data(cmd):
+    """生成傣族孔雀舞的完整数据"""
+    
+    # 先删除旧数据
+    old_project = DanceProject.objects.filter(name='傣族孔雀舞').first()
+    if old_project:
+        cmd.stdout.write(cmd.style.WARNING(f'删除旧项目: {old_project.name}'))
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='傣族孔雀舞',
+        category='少数民族舞蹈',
+        description='傣族孔雀舞是云南省西双版纳傣族的传统舞蹈，模仿孔雀的姿态和动作，优美典雅，富有诗意。舞者通过手势、身段表现孔雀的开屏、饮水、飞翔等形态。',
+        difficulty_level=3,
+    )
+    
+    # 模块1：手姿训练
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='手姿训练模块',
+        description='孔雀舞独特的手部姿势训练，模拟孔雀的头、冠、翅膀等形态。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '孔雀手型',
+            'description': '拇指与食指相捏成圆，其余三指展开如扇，形似孔雀头部。要求手指柔软，姿态优美。',
+            'difficulty': 3,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手指关节灵活，手腕柔和',
+                'common_mistakes': '手指僵硬、形状不标准',
+                'key_points': '拇指食指圆润，三指舒展，手腕放松',
+                'precautions': '经常活动手指，避免抽筋'
+            },
+            'resources': [
+                {'type': 'video', 'title': '孔雀手型教学', 'duration': 200},
+                {'type': 'demo', 'title': '传承人手姿展示', 'duration': 180},
+            ],
+            'knowledge_points': [
+                {'name': '手型美学', 'description': '理解傣族舞蹈手型的审美特点', 'category': '文化内涵', 'importance_level': 5},
+                {'name': '手指灵活性', 'description': '训练手指的灵活性和控制力', 'category': '技法要点', 'importance_level': 4},
+            ]
+        },
+        {
+            'name': '展翅手势',
+            'description': '双臂展开，手腕下压，手指微翘，模仿孔雀展翅飞翔的姿态。要求动作舒展大方，富有韵律感。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '肩部展开，手臂延伸，手腕下压',
+                'common_mistakes': '手臂不够舒展、手腕角度不对',
+                'key_points': '肩背打开，手臂呈弧线，手腕柔和下压',
+                'precautions': '注意肩部放松，避免耸肩'
+            },
+            'resources': [
+                {'type': 'video', 'title': '展翅动作详解', 'duration': 260},
+            ],
+            'knowledge_points': [
+                {'name': '仿生美学', 'description': '学习模仿自然生物的舞蹈语言', 'category': '文化内涵', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 傣族孔雀舞 - 手姿训练模块完成（{len(moves)}个招式）"))
+    
+    # 模块2：身段韵律
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='身段韵律模块',
+        description='孔雀舞的身体曲线和韵律训练，展现傣族舞蹈的柔美特质。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '三道弯体态',
+            'description': '身体形成头、胸、髋三个弯曲，呈现S形曲线。这是傣族舞蹈的典型体态，要求柔韧协调。',
+            'difficulty': 5,
+            'duration': 330,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '腰部扭转，髋部侧顶，头部倾斜',
+                'common_mistakes': '弯曲不自然、过度扭曲',
+                'key_points': '三弯流畅自然，重心稳定',
+                'precautions': '循序渐进练习柔韧性'
+            },
+            'resources': [
+                {'type': 'video', 'title': '三道弯体态教学', 'duration': 280},
+            ],
+            'knowledge_points': [
+                {'name': '曲线美学', 'description': '理解傣族舞蹈的曲线美', 'category': '文化内涵', 'importance_level': 5},
+                {'name': '柔韧训练', 'description': '提高身体的柔韧性和协调性', 'category': '训练方法', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 傣族孔雀舞 - 身段韵律模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 傣族孔雀舞数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_yangge_data(cmd):
+    """生成东北秧歌的完整数据"""
+    old_project = DanceProject.objects.filter(name='东北秧歌').first()
+    if old_project:
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='东北秧歌',
+        category='民间舞蹈',
+        description='东北秧歌是流行于中国东北地区的传统民间舞蹈，以热烈欢快、幽默风趣著称。舞者手持手绢或扇子，动作夸张活泼，充满生活气息。',
+        difficulty_level=2,
+    )
+    
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='基本步法模块',
+        description='秧歌的基础步伐，包括十字步、颤步、跳步等，体现东北民间舞蹈的特色。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '十字步',
+            'description': '双脚交叉前行，形成十字形轨迹。要求步伐轻快，节奏明快，身体随节奏自然摆动。',
+            'difficulty': 2,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '腿部交替发力，腰部跟随摆动',
+                'common_mistakes': '步伐沉重、交叉不准、节奏拖沓',
+                'key_points': '脚步轻灵，交叉清晰，节奏均匀',
+                'precautions': '注意脚下安全，避免绊倒'
+            },
+            'resources': [
+                {'type': 'video', 'title': '十字步基础教学', 'duration': 200},
+            ],
+            'knowledge_points': [
+                {'name': '基础步法', 'description': '掌握秧歌的基本步伐', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '颤步扭腰',
+            'description': '膝盖微屈做颤动，同时腰部左右扭动。这是秧歌的标志性动作，要求上下协调，富有韵律。',
+            'difficulty': 3,
+            'duration': 280,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '膝盖弹动，腰部扭转',
+                'common_mistakes': '颤动不匀、扭腰过度、上下脱节',
+                'key_points': '膝颤腰扭协调，幅度适中',
+                'precautions': '腰部热身充分，避免扭伤'
+            },
+            'resources': [
+                {'type': 'video', 'title': '颤步扭腰技巧', 'duration': 240},
+            ],
+            'knowledge_points': [
+                {'name': '协调性训练', 'description': '提高上下肢协调能力', 'category': '训练方法', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 东北秧歌 - 基本步法模块完成（{len(moves)}个招式）"))
+    
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='手绢花模块',
+        description='手绢花的耍法技巧，包括转花、抛接、翻花等，展现秧歌的技巧性。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '平转手绢',
+            'description': '手持手绢在胸前水平旋转，要求手腕灵活，手绢平稳转动，形成美丽的圆形。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手腕旋转发力，手指控制',
+                'common_mistakes': '手绢不稳、转速不均、容易掉落',
+                'key_points': '手腕匀速转动，手指轻捏',
+                'precautions': '先慢练，熟练后加速'
+            },
+            'resources': [
+                {'type': 'video', 'title': '平转手绢教学', 'duration': 260},
+            ],
+            'knowledge_points': [
+                {'name': '道具运用', 'description': '掌握手绢的使用技巧', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 东北秧歌 - 手绢花模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 东北秧歌数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_lion_dance_data(cmd):
+    """生成舞狮的完整数据"""
+    old_project = DanceProject.objects.filter(name='舞狮').first()
+    if old_project:
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='舞狮',
+        category='民间舞蹈',
+        description='舞狮是中国传统民间表演艺术，分为南狮和北狮两大流派。表演者两人配合，一人舞狮头，一人舞狮尾，模仿狮子的各种形态和动作。',
+        difficulty_level=5,
+    )
+    
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='狮头技法模块',
+        description='舞狮头的技巧训练，包括狮头的操控、眼神表达、嘴部开合等。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '狮头摆动',
+            'description': '双手持狮头左右摆动，模拟狮子观察四周的姿态。要求动作流畅，眼神灵动。',
+            'difficulty': 3,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手臂控制，手腕灵活',
+                'common_mistakes': '摆动生硬、节奏单一',
+                'key_points': '摆动自然，配合眼神',
+                'precautions': '注意手臂力量分配，避免疲劳'
+            },
+            'resources': [
+                {'type': 'video', 'title': '狮头基础操控', 'duration': 200},
+            ],
+            'knowledge_points': [
+                {'name': '狮头操控', 'description': '掌握狮头的基本操作技巧', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '眨眼张嘴',
+            'description': '通过机关控制狮眼眨动和狮嘴开合，表现狮子的表情变化。要求时机准确，表情生动。',
+            'difficulty': 4,
+            'duration': 280,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '手指控制机关',
+                'common_mistakes': '时机不准、动作僵硬',
+                'key_points': '眼嘴配合，表情自然',
+                'precautions': '熟悉机关操作，避免卡住'
+            },
+            'resources': [
+                {'type': 'video', 'title': '狮头表情控制', 'duration': 240},
+            ],
+            'knowledge_points': [
+                {'name': '表情表达', 'description': '学习通过道具表达情感', 'category': '表演技巧', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 舞狮 - 狮头技法模块完成（{len(moves)}个招式）"))
+    
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='配合技巧模块',
+        description='狮头狮尾的配合训练，培养默契和协作能力。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '同步跳跃',
+            'description': '狮头狮尾同时起跳落地，动作整齐划一。要求两人配合默契，节奏一致。',
+            'difficulty': 6,
+            'duration': 360,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '腿部爆发力，核心稳定',
+                'common_mistakes': '起跳不同步、落地不稳',
+                'key_points': '口令统一，动作同步',
+                'precautions': '多次排练，建立默契'
+            },
+            'resources': [
+                {'type': 'video', 'title': '双人配合训练', 'duration': 320},
+            ],
+            'knowledge_points': [
+                {'name': '团队协作', 'description': '培养双人配合的默契', 'category': '表演技巧', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 舞狮 - 配合技巧模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 舞狮数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_mongolian_dance_data(cmd):
+    """生成蒙古族舞蹈的完整数据"""
+    old_project = DanceProject.objects.filter(name='蒙古族舞蹈').first()
+    if old_project:
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='蒙古族舞蹈',
+        category='少数民族舞蹈',
+        description='蒙古族舞蹈源于草原游牧生活，动作豪迈奔放，具有浓郁的民族特色。常见动作包括抖肩、骑马步、鹰舞等，展现蒙古族人民的豪爽性格。',
+        difficulty_level=3,
+    )
+    
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='肩部技巧模块',
+        description='蒙古族舞蹈特有的肩部动作，包括抖肩、耸肩、绕肩等，是蒙古舞的标志性技法。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '快速抖肩',
+            'description': '双肩快速上下抖动，如马奔跑时的律动。要求肩膀放松，抖动频率快而均匀。',
+            'difficulty': 4,
+            'duration': 240,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '肩部肌肉快速收缩放松',
+                'common_mistakes': '肩膀紧张、抖动不均、幅度过大',
+                'key_points': '肩部放松，频率均匀，幅度适中',
+                'precautions': '充分活动肩关节，避免拉伤'
+            },
+            'resources': [
+                {'type': 'video', 'title': '抖肩技巧详解', 'duration': 200},
+            ],
+            'knowledge_points': [
+                {'name': '肩部灵活性', 'description': '提高肩部的灵活性和控制力', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '单肩绕环',
+            'description': '单个肩膀做圆周运动，前后绕环。要求动作圆润流畅，体现蒙古舞的柔美一面。',
+            'difficulty': 3,
+            'duration': 220,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '肩关节旋转，背部肌肉配合',
+                'common_mistakes': '绕环不圆、动作断续',
+                'key_points': '以肩为轴，画圆饱满',
+                'precautions': '循序渐进，不要用力过猛'
+            },
+            'resources': [
+                {'type': 'video', 'title': '绕肩动作教学', 'duration': 180},
+            ],
+            'knowledge_points': [
+                {'name': '圆的运动', 'description': '理解蒙古舞中圆的运动美学', 'category': '文化内涵', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 蒙古族舞蹈 - 肩部技巧模块完成（{len(moves)}个招式）"))
+    
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='骑马动作模块',
+        description='模拟骑马的各种动作，体现草原游牧文化特色。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '骑马蹲裆',
+            'description': '双腿分开下蹲，模拟骑马姿势，身体随节奏上下起伏。要求重心稳定，起伏有韵律。',
+            'difficulty': 3,
+            'duration': 280,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '大腿肌肉发力，核心收紧',
+                'common_mistakes': '蹲姿不稳、起伏生硬',
+                'key_points': '重心居中，起伏柔和',
+                'precautions': '注意膝盖保护，避免过度下蹲'
+            },
+            'resources': [
+                {'type': 'video', 'title': '骑马步基础', 'duration': 240},
+            ],
+            'knowledge_points': [
+                {'name': '游牧文化', 'description': '了解蒙古族骑马文化的舞蹈表达', 'category': '文化内涵', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 蒙古族舞蹈 - 骑马动作模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 蒙古族舞蹈数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_tibetan_dance_data(cmd):
+    """生成藏族舞蹈的完整数据"""
+    old_project = DanceProject.objects.filter(name='藏族舞蹈').first()
+    if old_project:
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='藏族舞蹈',
+        category='少数民族舞蹈',
+        description='藏族舞蹈源远流长，包括锅庄、弦子、踢踏等多种形式。动作特点是屈膝颤动、长袖飞舞，具有浓厚的宗教色彩和高原特色。',
+        difficulty_level=3,
+    )
+    
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='屈膝颤动模块',
+        description='藏族舞蹈的基础屈膝和颤动技法，是所有藏舞的基本功。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '基本屈膝',
+            'description': '双膝微屈，保持弹性，身体重心下沉。这是藏舞的基本站姿，要求膝盖始终有弹性。',
+            'difficulty': 2,
+            'duration': 200,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '大腿前侧肌肉持续发力',
+                'common_mistakes': '膝盖伸直、重心过高',
+                'key_points': '膝盖微屈，保持弹性，重心稳定',
+                'precautions': '注意膝盖保暖，避免受凉'
+            },
+            'resources': [
+                {'type': 'video', 'title': '屈膝基础训练', 'duration': 180},
+            ],
+            'knowledge_points': [
+                {'name': '基本体态', 'description': '掌握藏族舞蹈的基本站立姿态', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '连续颤膝',
+            'description': '膝盖连续小幅上下颤动，带动全身产生波浪般的律动。要求颤动均匀，连绵不断。',
+            'difficulty': 4,
+            'duration': 300,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '膝盖弹动，全身放松跟随',
+                'common_mistakes': '颤动过大、节奏不均、身体僵硬',
+                'key_points': '小幅颤动，连绵不断，全身协调',
+                'precautions': '膝盖热身充分，避免过度颤动'
+            },
+            'resources': [
+                {'type': 'video', 'title': '颤膝技巧详解', 'duration': 260},
+            ],
+            'knowledge_points': [
+                {'name': '颤动韵律', 'description': '理解藏舞特有的颤动韵律', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 藏族舞蹈 - 屈膝颤动模块完成（{len(moves)}个招式）"))
+    
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='长袖技法模块',
+        description='藏族舞蹈中长袖的运用技巧，包括甩袖、抛袖、收袖等。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '甩袖亮相',
+            'description': '双臂展开，长袖向外甩出，形成优美的弧线，然后定格亮相。要求动作舒展，袖子完全展开。',
+            'difficulty': 4,
+            'duration': 280,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手臂挥动，手腕发力',
+                'common_mistakes': '袖子未展开、动作不够舒展',
+                'key_points': '手臂伸直，手腕抖动，袖子 fully 展开',
+                'precautions': '注意周围空间，避免打到他人'
+            },
+            'resources': [
+                {'type': 'video', 'title': '甩袖技巧教学', 'duration': 240},
+            ],
+            'knowledge_points': [
+                {'name': '长袖运用', 'description': '掌握藏族长袖舞的技巧', 'category': '技法要点', 'importance_level': 5},
+                {'name': '服饰文化', 'description': '了解藏族服饰在舞蹈中的作用', 'category': '文化内涵', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 藏族舞蹈 - 长袖技法模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 藏族舞蹈数据生成完成！共{total_moves}个招式\n"))
+
+
+def generate_xinjiang_dance_data(cmd):
+    """生成新疆维吾尔族舞蹈的完整数据"""
+    old_project = DanceProject.objects.filter(name='新疆维吾尔族舞蹈').first()
+    if old_project:
+        old_project.delete()
+    
+    project = DanceProject.objects.create(
+        name='新疆维吾尔族舞蹈',
+        category='少数民族舞蹈',
+        description='新疆维吾尔族舞蹈热情奔放，以快速的旋转、灵活的手腕、丰富的表情著称。代表形式有赛乃姆、刀郎舞等，具有浓郁的西域风情。',
+        difficulty_level=4,
+    )
+    
+    module1 = ActionModule.objects.create(
+        dance_project=project,
+        name='旋转技巧模块',
+        description='维吾尔族舞蹈的快速旋转技法，是其最具特色的动作之一。',
+        order_index=1
+    )
+    
+    moves = [
+        {
+            'name': '单脚旋转',
+            'description': '单脚支撑快速旋转，另一脚抬起或点地。要求平衡能力强，旋转速度快且稳定。',
+            'difficulty': 7,
+            'duration': 360,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '支撑腿稳定，核心收紧，头部定点',
+                'common_mistakes': '旋转不稳、头晕、速度不均',
+                'key_points': '重心集中，头部留头，手臂辅助平衡',
+                'precautions': '循序渐进练习，避免眩晕'
+            },
+            'resources': [
+                {'type': 'video', 'title': '旋转基础训练', 'duration': 320},
+            ],
+            'knowledge_points': [
+                {'name': '旋转技巧', 'description': '掌握快速旋转的技术要领', 'category': '技法要点', 'importance_level': 5},
+                {'name': '平衡能力', 'description': '提高身体的平衡和控制能力', 'category': '训练方法', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '移动旋转',
+            'description': '在移动过程中进行旋转，边转边走。要求移动和旋转协调，路线清晰。',
+            'difficulty': 8,
+            'duration': 400,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '腿部移动与旋转结合',
+                'common_mistakes': '路线偏离、旋转变慢',
+                'key_points': '移动旋转同步，保持速度',
+                'precautions': '场地要足够大，注意安全'
+            },
+            'resources': [
+                {'type': 'video', 'title': '移动旋转进阶', 'duration': 360},
+            ],
+            'knowledge_points': [
+                {'name': '复合技巧', 'description': '学习移动和旋转的结合', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+    ]
+    
+    for move_data in moves:
+        create_move_with_details(module1, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 新疆维吾尔族舞蹈 - 旋转技巧模块完成（{len(moves)}个招式）"))
+    
+    module2 = ActionModule.objects.create(
+        dance_project=project,
+        name='手腕颈部模块',
+        description='维吾尔族舞蹈特有的手腕和颈部动作，展现西域舞蹈的独特韵味。',
+        order_index=2
+    )
+    
+    moves2 = [
+        {
+            'name': '翻腕动作',
+            'description': '手腕快速内外翻转，配合手臂动作。要求手腕灵活，翻转迅速有力。',
+            'difficulty': 4,
+            'duration': 260,
+            'order_index': 1,
+            'attributes': {
+                'force_parts': '手腕关节灵活运动',
+                'common_mistakes': '手腕僵硬、翻转不到位',
+                'key_points': '以腕为轴，翻转饱满',
+                'precautions': '充分活动手腕，避免扭伤'
+            },
+            'resources': [
+                {'type': 'video', 'title': '翻腕技巧教学', 'duration': 220},
+            ],
+            'knowledge_points': [
+                {'name': '手腕灵活', 'description': '训练手腕的灵活性', 'category': '技法要点', 'importance_level': 5},
+            ]
+        },
+        {
+            'name': '移颈摇头',
+            'description': '头部左右平移，配合音乐节奏。这是维吾尔族舞蹈的标志性动作，要求颈部灵活。',
+            'difficulty': 3,
+            'duration': 240,
+            'order_index': 2,
+            'attributes': {
+                'force_parts': '颈部肌肉控制',
+                'common_mistakes': '幅度过大、动作生硬',
+                'key_points': '小幅移动，节奏准确',
+                'precautions': '颈部热身，动作轻柔'
+            },
+            'resources': [
+                {'type': 'video', 'title': '移颈动作详解', 'duration': 200},
+            ],
+            'knowledge_points': [
+                {'name': '颈部技巧', 'description': '掌握维吾尔族特有的颈部动作', 'category': '技法要点', 'importance_level': 4},
+                {'name': '西域风情', 'description': '理解新疆舞蹈的文化特色', 'category': '文化内涵', 'importance_level': 4},
+            ]
+        },
+    ]
+    
+    for move_data in moves2:
+        create_move_with_details(module2, move_data)
+    
+    cmd.stdout.write(cmd.style.SUCCESS(f"✓ 新疆维吾尔族舞蹈 - 手腕颈部模块完成（{len(moves2)}个招式）"))
+    
+    total_moves = module1.specific_moves.count() + module2.specific_moves.count()
+    cmd.stdout.write(cmd.style.SUCCESS(f"\n🎉 新疆维吾尔族舞蹈数据生成完成！共{total_moves}个招式\n"))
+

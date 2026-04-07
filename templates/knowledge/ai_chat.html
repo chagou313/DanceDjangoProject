@@ -1,0 +1,608 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}AI智能问答 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block extra_head %}
+<!-- 引入 marked.js 用于Markdown渲染 -->
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+    .ai-chat-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1rem;
+        height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+        background: transparent;
+    }
+
+    /* 聊天消息区域 */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(216, 191, 100, 0.3) transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(216, 191, 100, 0.3);
+        border-radius: 3px;
+    }
+
+    .message {
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    .message-user {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 1rem;
+    }
+
+    .message-ai {
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 1rem;
+    }
+
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .message-user .message-avatar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin-left: 0.8rem;
+        order: 2;
+    }
+
+    .message-ai .message-avatar {
+        background: linear-gradient(135deg, #D8BF64 0%, #F5EDC8 100%);
+        margin-right: 0.8rem;
+        color: #14161e;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        padding: 1rem 1.3rem;
+        border-radius: 1.2rem;
+        line-height: 1.7;
+        position: relative;
+    }
+
+    .message-user .message-bubble {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        color: #E8D59B;
+        border-bottom-right-radius: 0.3rem;
+    }
+
+    .message-ai .message-bubble {
+        background: rgba(20, 22, 30, 0.6);
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        color: #E8D59B;
+        border-bottom-left-radius: 0.3rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .message-content {
+        font-size: 0.95rem;
+    }
+
+    .message-content strong {
+        color: #F5EDC8;
+        font-weight: 600;
+    }
+
+    .message-content em {
+        color: rgba(232, 213, 155, 0.85);
+        font-style: italic;
+    }
+
+    .message-content code {
+        background: rgba(216, 191, 100, 0.12);
+        padding: 0.15rem 0.4rem;
+        border-radius: 0.3rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.9em;
+        color: #F5EDC8;
+    }
+
+    .message-content pre {
+        background: rgba(10, 12, 18, 0.8);
+        padding: 1rem;
+        border-radius: 0.6rem;
+        overflow-x: auto;
+        margin: 0.8rem 0;
+        border: 1px solid rgba(216, 191, 100, 0.15);
+    }
+
+    .message-content pre code {
+        background: none;
+        padding: 0;
+        color: #E8D59B;
+    }
+
+    .message-content ul, .message-content ol {
+        margin: 0.6rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .message-content li {
+        margin: 0.4rem 0;
+        line-height: 1.6;
+    }
+
+    .message-content h1, 
+    .message-content h2, 
+    .message-content h3 {
+        color: #F5EDC8;
+        margin: 1rem 0 0.5rem 0;
+        font-weight: 600;
+    }
+
+    .message-content h3 {
+        font-size: 1.1rem;
+    }
+
+    .message-content p {
+        margin: 0.5rem 0;
+    }
+
+    /* 输入区域 */
+    .chat-input-area {
+        background: rgba(20, 22, 30, 0.8);
+        border-radius: 1.5rem;
+        padding: 1.2rem;
+        border: 1px solid rgba(216, 191, 100, 0.25);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .input-wrapper {
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-end;
+    }
+
+    .chat-input {
+        flex: 1;
+        padding: 0.9rem 1.2rem;
+        background: rgba(216, 191, 100, 0.06);
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        border-radius: 1rem;
+        color: #E8D59B;
+        font-size: 0.95rem;
+        font-family: 'Noto Serif SC', serif;
+        resize: none;
+        min-height: 50px;
+        max-height: 150px;
+        transition: all 0.3s;
+        line-height: 1.5;
+    }
+
+    .chat-input::placeholder {
+        color: rgba(232, 213, 155, 0.35);
+    }
+
+    .chat-input:focus {
+        outline: none;
+        border-color: rgba(216, 191, 100, 0.5);
+        background: rgba(216, 191, 100, 0.08);
+        box-shadow: 0 0 0 3px rgba(216, 191, 100, 0.1);
+    }
+
+    .send-btn {
+        padding: 0.9rem 1.8rem;
+        background: linear-gradient(135deg, #D8BF64 0%, #F5EDC8 100%);
+        border: none;
+        border-radius: 1rem;
+        color: #14161e;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        box-shadow: 0 4px 15px rgba(216, 191, 100, 0.3);
+    }
+
+    .send-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(216, 191, 100, 0.4);
+    }
+
+    .send-btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* 加载动画 */
+    .typing-indicator {
+        display: flex;
+        gap: 0.4rem;
+        padding: 0.5rem 0;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: rgba(216, 191, 100, 0.6);
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) {
+        animation-delay: 0s;
+    }
+
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% { 
+            transform: translateY(0);
+            opacity: 0.4;
+        }
+        30% { 
+            transform: translateY(-10px);
+            opacity: 1;
+        }
+    }
+
+    /* 欢迎消息 */
+    .welcome-message {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .welcome-message i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #D8BF64 0%, #F5EDC8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-message h3 {
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .welcome-message p {
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+
+    .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .chip {
+        padding: 0.6rem 1.2rem;
+        background: rgba(216, 191, 100, 0.08);
+        border: 1px solid rgba(216, 191, 100, 0.25);
+        border-radius: 2rem;
+        color: #E8D59B;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .chip:hover {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: rgba(216, 191, 100, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* 顶部导航 */
+    .chat-header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
+    }
+
+    .chat-title {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .chat-title i {
+        font-size: 1.5rem;
+        color: #D8BF64;
+    }
+
+    .chat-title h2 {
+        color: #F5EDC8;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .back-link {
+        color: rgba(232, 213, 155, 0.6);
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.6rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+        color: #E8D59B;
+        background: rgba(216, 191, 100, 0.1);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .ai-chat-container {
+            padding: 0.5rem;
+            height: calc(100vh - 60px);
+        }
+
+        .message-bubble {
+            max-width: 85%;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .chat-title h2 {
+            font-size: 1.1rem;
+        }
+
+        .suggestion-chips {
+            gap: 0.5rem;
+        }
+
+        .chip {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+    }
+</style>
+
+<div class="ai-chat-container">
+    <!-- 页面头部 -->
+    <div class="chat-header">
+        <h1><i class="fas fa-robot"></i> AI智能问答</h1>
+        <p>基于通义千问大模型 · 非遗舞蹈知识科普助手</p>
+        <a href="{% url 'knowledge:knowledge_map' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> 返回知识图谱
+        </a>
+    </div>
+
+    <!-- 聊天消息区域 -->
+    <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+            <i class="fas fa-comments"></i>
+            <h3>欢迎使用AI智能问答</h3>
+            <p>您可以询问任何关于非遗传统舞蹈的问题，例如：<br>
+            "安塞腰鼓有哪些基本技法？"<br>
+            "孔雀舞的文化内涵是什么？"<br>
+            "如何学习傣族舞蹈的三道弯？"</p>
+        </div>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="chat-input-area">
+        <div class="input-wrapper">
+            <textarea 
+                id="chatInput" 
+                class="chat-input" 
+                placeholder="输入您的问题..."
+                rows="1"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i> 发送
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let isWaiting = false;
+
+// 自动调整输入框高度
+const chatInput = document.getElementById('chatInput');
+chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+});
+
+// 回车发送（Shift+Enter换行）
+chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// 发送消息
+function sendMessage() {
+    const message = chatInput.value.trim();
+    
+    if (!message || isWaiting) return;
+    
+    // 添加用户消息
+    addMessage(message, 'user');
+    
+    // 清空输入框
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    
+    // 显示加载状态
+    showTypingIndicator();
+    isWaiting = true;
+    document.getElementById('sendBtn').disabled = true;
+    
+    // 调用API
+    fetch('{% url "knowledge:chat_with_ai" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            message: message,
+            context: ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideTypingIndicator();
+        
+        if (data.success) {
+            addMessage(data.response, 'ai');
+        } else {
+            addMessage('抱歉，AI服务出现错误：' + data.error, 'ai');
+        }
+        
+        isWaiting = false;
+        document.getElementById('sendBtn').disabled = false;
+    })
+    .catch(error => {
+        hideTypingIndicator();
+        addMessage('网络错误，请稍后重试', 'ai');
+        isWaiting = false;
+        document.getElementById('sendBtn').disabled = false;
+    });
+}
+
+// 添加消息到聊天区
+function addMessage(content, sender) {
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    // 移除欢迎消息
+    const welcomeMsg = messagesContainer.querySelector('.welcome-message');
+    if (welcomeMsg) {
+        welcomeMsg.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${sender}`;
+    
+    const senderName = sender === 'user' ? '您' : 'AI助手';
+    
+    // 如果是AI回复，渲染Markdown
+    let formattedContent = content;
+    if (sender === 'ai') {
+        formattedContent = marked.parse(content);
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="message-bubble">
+            <div class="message-sender">${senderName}</div>
+            <div class="message-content">${formattedContent}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    
+    // 滚动到底部
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// 显示输入指示器
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message message-ai';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+        <div class="message-bubble">
+            <div class="typing-indicator">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        </div>
+    `;
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// 隐藏输入指示器
+function hideTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
+// 获取CSRF Token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{
+  "dance_project_name": "京西太平鼓",
+  "dance_project_category": "民间舞蹈",
+  "modules": [
+    {
+      "name": "基本步伐模块",
+      "description": "太平鼓的基本步法训练，包括站立姿势、移动步法、转身技巧等，是学习太平鼓的基础。通过系统练习，掌握正确的重心转移和脚步协调。",
+      "order_index": 1,
+      "moves": [
+        {
+          "name": "马步站桩",
+          "description": "双脚分开与肩同宽，屈膝下蹲成马步，双手持鼓置于胸前。要求膝盖不超过脚尖，背部挺直，重心稳定。这是太平鼓最基础的站立姿势，为后续动作打下坚实基础。",
+          "difficulty": 2,
+          "duration": 240,
+          "order_index": 1,
+          "attributes": {
+            "force_parts": "大腿肌肉发力，核心收紧，双脚均匀受力",
+            "common_mistakes": "膝盖内扣、弯腰驼背、重心偏向一侧、呼吸急促",
+            "key_points": "两脚平行开立，屈膝90度，含胸拔背，气沉丹田，目视前方",
+            "precautions": "初学者时间不宜过长，每次3-5分钟，注意膝盖保暖，避免受凉"
+          },
+          "resources": [
+            {
+              "type": "video",
+              "title": "马步站桩标准示范",
+              "url": "https://example.com/video/taipinggu_mabu.mp4",
+              "duration": 180
+            },
+            {
+              "type": "demo",
+              "title": "传承人讲解站桩要点",
+              "url": "https://example.com/demo/master_mabu.mp4",
+              "duration": 300
+            },
+            {
+              "type": "article",
+              "title": "马步训练的科学方法",
+              "url": "https://example.com/article/mabu_training.pdf",
+              "duration": null
+            }
+          ],
+          "knowledge_points": [
+            {
+              "name": "重心控制",
+              "description": "掌握身体重心的分布和转移，保持平衡稳定",
+              "category": "技法要点",
+              "importance_level": 5
+            },
+            {
+              "name": "呼吸调节",
+              "description": "配合动作进行深呼吸，增强耐力和稳定性",
+              "category": "训练方法",
+              "importance_level": 4
+            },
+            {
+              "name": "腿部力量",
+              "description": "通过站桩锻炼大腿和小腿肌肉力量",
+              "category": "训练方法",
+              "importance_level": 4
+            },
+            {
+              "name": "传统文化",
+              "description": "马步是中国武术和传统舞蹈的基础功",
+              "category": "文化内涵",
+              "importance_level": 3
+            }
+          ]
+        },
+        {
+          "name": "弓步击鼓",
+          "description": "前腿弓、后腿绷，形成弓箭步，同时右手挥槌击鼓。要求前后腿比例约为7:3，上身微向前倾，击鼓有力。此动作体现太平鼓的阳刚之气。",
+          "difficulty": 4,
+          "duration": 300,
+          "order_index": 2,
+          "attributes": {
+            "force_parts": "前腿大腿发力支撑，后腿蹬地，腰部扭转带动手臂击鼓",
+            "common_mistakes": "前后脚距离过小、后腿弯曲、击鼓无力、身体晃动",
+            "key_points": "前腿屈膝90度，后腿伸直，髋部正对前方，击鼓时腰臂合一",
+            "precautions": "注意膝盖方向与脚尖一致，避免扭伤，击鼓力度适中"
+          },
+          "resources": [
+            {
+              "type": "video",
+              "title": "弓步击鼓分解教学",
+              "url": "https://example.com/video/gongbu_jigu.mp4",
+              "duration": 240
+            },
+            {
+              "type": "demo",
+              "title": "老艺人弓步击鼓展示",
+              "url": "https://example.com/demo/master_gongbu.mp4",
+              "duration": 180
+            },
+            {
+              "type": "article",
+              "title": "弓步在民间舞蹈中的应用",
+              "url": "https://example.com/article/gongbu_application.pdf",
+              "duration": null
+            }
+          ],
+          "knowledge_points": [
+            {
+              "name": "弓步要领",
+              "description": "掌握标准弓步的姿势要求和发力方式",
+              "category": "技法要点",
+              "importance_level": 5
+            },
+            {
+              "name": "击鼓技巧",
+              "description": "学习正确的握槌方法和击鼓角度",
+              "category": "技法要点",
+              "importance_level": 5
+            },
+            {
+              "name": "腰臂协调",
+              "description": "腰部转动与手臂挥动的协调配合",
+              "category": "表演技巧",
+              "importance_level": 4
+            },
+            {
+              "name": "阳刚之美",
+              "description": "体现北方民间舞蹈的豪放风格",
+              "category": "文化内涵",
+              "importance_level": 3
+            },
+            {
+              "name": "力量训练",
+              "description": "通过弓步练习增强下肢力量和稳定性",
+              "category": "训练方法",
+              "importance_level": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "手势身段模块",
+      "description": "太平鼓的手部动作和身体姿态训练，包括持鼓手法、挥臂轨迹、转身技巧等。通过优美的身段展现太平鼓的艺术魅力。",
+      "order_index": 2,
+      "moves": [
+        {
+          "name": "云手翻鼓",
+          "description": "双手持鼓，做云手动作，同时翻转鼓面。要求手腕灵活，动作连贯流畅，鼓面翻转时发出清脆声响。",
+          "difficulty": 5,
+          "duration": 360,
+          "order_index": 1,
+          "attributes": {
+            "force_parts": "手腕发力，小臂配合，肩部放松",
+            "common_mistakes": "手腕僵硬、动作断续、鼓面翻转不到位",
+            "key_points": "以腕为轴，圆活自然，翻转迅速，声响清脆",
+            "precautions": "先慢后快，循序渐进，避免手腕过度用力"
+          },
+          "resources": [
+            {
+              "type": "video",
+              "title": "云手翻鼓技巧详解",
+              "url": "https://example.com/video/yunshou_fangu.mp4",
+              "duration": 300
+            }
+          ],
+          "knowledge_points": [
+            {
+              "name": "手腕灵活性",
+              "description": "训练手腕的灵活性和控制力",
+              "category": "技法要点",
+              "importance_level": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "队形变化模块",
+      "description": "集体表演时的队形编排和变化，包括圆形、方形、穿插等传统队形。",
+      "order_index": 3,
+      "moves": []
+    },
+    {
+      "name": "节奏韵律模块",
+      "description": "太平鼓的节奏训练，学习不同的鼓点和音乐配合。",
+      "order_index": 4,
+      "moves": []
+    }
+  ]
+}
