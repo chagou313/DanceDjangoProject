@@ -259,6 +259,20 @@
                 <span class="stat-number">{{ total_posts }}</span>
                 <span class="stat-label">发帖记录</span>
             </a>
+            
+            <a href="{% url 'quiz:wrong_questions' %}" class="stat-card" title="查看错题集">
+                <span class="stat-icon" style="color: #E74C3C;">
+                    <i class="fas fa-book-open"></i>
+                </span>
+                <span class="stat-label" style="margin-top: 0.5rem;">答题错题集</span>
+            </a>
+            
+            <a href="{% url 'quiz:user_progress' %}" class="stat-card" title="查看学习进度">
+                <span class="stat-icon" style="color: #9B59B6;">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+                <span class="stat-label" style="margin-top: 0.5rem;">学习进度</span>
+            </a>
         </div>
     </div>
 

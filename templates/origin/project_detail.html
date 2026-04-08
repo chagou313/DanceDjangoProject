@@ -12,32 +12,44 @@ window.addEventListener('DOMContentLoaded', function() {
     const backBtnBottom = document.getElementById('back-btn-bottom');
     const backTextBottom = document.getElementById('back-text-bottom');
     
-    // 获取来源页面
-    const referrer = document.referrer;
+    // 检查是否有来自答题闯关的参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const backToQuiz = urlParams.get('back_to_quiz');
     
-    // 检查是否有历史记录
-    if (window.history.length > 1) {
-        // 有历史记录，使用浏览器返回
-        backBtnTop.href = 'javascript:history.back()';
-        backBtnBottom.href = 'javascript:history.back()';
+    if (backToQuiz) {
+        // 如果有 back_to_quiz 参数，优先返回答题
+        backBtnTop.href = `/quiz/game/${backToQuiz}/`;
+        backBtnBottom.href = `/quiz/game/${backToQuiz}/`;
+        backTextTop.textContent = '返回答题';
+        backTextBottom.textContent = '返回答题';
+    } else {
+        // 获取来源页面
+        const referrer = document.referrer;
         
-        // 根据来源设置提示文字
-        if (referrer.includes('/origin/')) {
+        // 检查是否有历史记录
+        if (window.history.length > 1) {
+            // 有历史记录，使用浏览器返回
+            backBtnTop.href = 'javascript:history.back()';
+            backBtnBottom.href = 'javascript:history.back()';
+            
+            // 根据来源设置提示文字
+            if (referrer.includes('/origin/')) {
+                backTextTop.textContent = '返回列表';
+                backTextBottom.textContent = '返回列表';
+            } else if (referrer.includes('/') && !referrer.includes('/origin/')) {
+                backTextTop.textContent = '返回首页';
+                backTextBottom.textContent = '返回首页';
+            } else {
+                backTextTop.textContent = '返回';
+                backTextBottom.textContent = '返回';
+            }
+        } else {
+            // 没有历史记录（如直接访问或新标签页），默认返回舞蹈起源列表
+            backBtnTop.href = '{% url "dance_origin_list" %}';
+            backBtnBottom.href = '{% url "dance_origin_list" %}';
             backTextTop.textContent = '返回列表';
             backTextBottom.textContent = '返回列表';
-        } else if (referrer.includes('/') && !referrer.includes('/origin/')) {
-            backTextTop.textContent = '返回首页';
-            backTextBottom.textContent = '返回首页';
-        } else {
-            backTextTop.textContent = '返回';
-            backTextBottom.textContent = '返回';
         }
-    } else {
-        // 没有历史记录（如直接访问或新标签页），默认返回舞蹈起源列表
-        backBtnTop.href = '{% url "dance_origin_list" %}';
-        backBtnBottom.href = '{% url "dance_origin_list" %}';
-        backTextTop.textContent = '返回列表';
-        backTextBottom.textContent = '返回列表';
     }
 });
 </script>

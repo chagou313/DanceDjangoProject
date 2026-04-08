@@ -22,7 +22,7 @@ sys.path.append('D:\\Python_study\\DancedjangoProject')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DancedjangoProject.settings')
 django.setup()
 
-from origin.models import Region, DanceProject, Inheritor, RelatedProject, News, AcademicResearch
+from origin.models import Region, DanceProject, Inheritor, RelatedProject, AcademicResearch
 
 
 # ========== 配置区域 ==========

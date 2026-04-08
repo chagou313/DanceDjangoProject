@@ -57,7 +57,8 @@ def home(request):
     regions = []
     selected_region = None
     
-    from origin.models import DanceProject, Region, News
+    from origin.models import DanceProject, Region
+    from news.models import News
     from django.db.models import Count, Q
     
     # 获取所有省级地区用于选择
@@ -265,6 +266,7 @@ def dance_origin_list(request):
                 'dance_type': dance.get_dance_type_display(),
                 'category': dance.category,
                 'level': dance.level,
+                'image': dance.images.url if dance.images else '',
             })
     
     # 为地图准备 JSON 数据
@@ -355,7 +357,8 @@ def dance_project_list(request):
 
 def project_detail(request, project_id):
     """非遗舞蹈项目详情页"""
-    from origin.models import DanceProject, Inheritor, RelatedProject, News
+    from origin.models import DanceProject, Inheritor, RelatedProject
+    from news.models import News
     
     # 使用项目ID精确查找，避免编号重复导致的问题
     try:
@@ -372,7 +375,7 @@ def project_detail(request, project_id):
     related_projects = RelatedProject.objects.filter(main_project=project)
     
     # 获取相关资讯
-    news_list = News.objects.filter(related_projects=project)[:6]
+    news_list = News.objects.filter(dance_project=project)[:6]
     
     # 增加浏览量
     project.views += 1

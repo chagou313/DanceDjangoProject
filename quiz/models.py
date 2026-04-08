@@ -6,6 +6,7 @@ class Question(models.Model):
     QUESTION_TYPES = [
         ('choice', '选择题'),
         ('judge', '判断题'),
+        ('multi', '多选题'),
     ]
     
     DIFFICULTY_CHOICES = [
@@ -14,13 +15,22 @@ class Question(models.Model):
         (3, '困难'),
     ]
     
-    knowledge_point = models.ForeignKey('knowledge.KnowledgePoint', on_delete=models.CASCADE, verbose_name="关联知识点")
+    # 关联知识点和舞蹈项目
+    knowledge_point = models.ForeignKey('knowledge.KnowledgePoint', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="关联知识点")
+    dance_project = models.ForeignKey('origin.DanceProject', on_delete=models.SET_NULL, null=True, blank=True, related_name='questions', verbose_name="关联舞蹈项目")
+    
+    # 题目信息
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, verbose_name="题型")
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1, verbose_name="难度")
     content = models.TextField(verbose_name="题目内容")
     options = models.JSONField(blank=True, null=True, verbose_name="选项（JSON 格式）")
     correct_answer = models.CharField(max_length=500, verbose_name="正确答案")
     explanation = models.TextField(verbose_name="答案解析")
+    
+    # 延伸知识点（答对后推荐）
+    extension_knowledge_points = models.ManyToManyField('knowledge.KnowledgePoint', blank=True, related_name='extension_questions', verbose_name="延伸知识点")
+    
+    # 时间
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     
@@ -29,17 +39,36 @@ class Question(models.Model):
         verbose_name_plural = "题目"
     
     def __str__(self):
-        return f"{self.get_question_type_display()} - {self.content[:50]}"
+        return f"[{self.get_difficulty_display()}] {self.get_question_type_display()} - {self.content[:50]}"
 
 class Level(models.Model):
     """关卡表"""
+    DIFFICULTY_CHOICES = [
+        (1, '入门级'),
+        (2, '基础级'),
+        (3, '进阶级'),
+        (4, '高手级'),
+        (5, '大师级'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('origin', '起源知识'),
+        ('inheritor', '传承人知识'),
+        ('technique', '技法知识'),
+        ('culture', '文化背景'),
+        ('mixed', '综合知识'),
+    ]
+    
     name = models.CharField(max_length=100, verbose_name="关卡名称")
     description = models.TextField(verbose_name="关卡描述")
-    difficulty = models.IntegerField(default=1, verbose_name="难度等级（1-5）")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='mixed', verbose_name="知识类型")
+    difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1, verbose_name="难度等级")
     required_score = models.IntegerField(default=60, verbose_name="通关所需分数")
     time_limit = models.IntegerField(default=300, verbose_name="限时（秒）")
+    question_count = models.IntegerField(default=10, verbose_name="题目数量")
     order_index = models.IntegerField(default=0, verbose_name="排序索引")
     is_active = models.BooleanField(default=True, verbose_name="是否开启")
+    icon = models.CharField(max_length=50, default='fa-star', verbose_name="图标")
     
     class Meta:
         verbose_name = "关卡"
@@ -47,7 +76,7 @@ class Level(models.Model):
         ordering = ['order_index']
     
     def __str__(self):
-        return self.name
+        return f"[{self.get_difficulty_display()}] {self.name}"
 
 class LevelQuestion(models.Model):
     """关卡题目关联表"""
@@ -76,13 +105,18 @@ class UserQuizRecord(models.Model):
     correct_answers = models.IntegerField(default=0, verbose_name="答对题数")
     wrong_answers = models.IntegerField(default=0, verbose_name="答错题数")
     
+    # 进度追踪
+    current_question_index = models.IntegerField(default=0, verbose_name="当前题目索引")
+    is_completed = models.BooleanField(default=False, verbose_name="是否完成")
+    
     class Meta:
         verbose_name = "用户答题记录"
         verbose_name_plural = "用户答题记录"
         ordering = ['-start_time']
     
     def __str__(self):
-        return f"{self.user.username} - {self.level.name} - {self.score}分"
+        status = '✓' if self.is_passed else '✗'
+        return f"{status} {self.user.username} - {self.level.name} - {self.score}分"
 
 class UserAnswerDetail(models.Model):
     """用户答题详情表"""

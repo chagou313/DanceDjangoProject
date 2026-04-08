@@ -8,8 +8,15 @@ import requests
 
 def knowledge_map(request):
     """知识图谱页面"""
-    # 获取所有舞蹈项目
-    dance_projects = DanceProject.objects.all().order_by('name')
+    from origin.models import DanceProject as OriginDanceProject
+    # 直接使用 origin 的舞蹈项目数据，确保列表不为空
+    dance_projects = []
+    for kp in OriginDanceProject.objects.all().order_by('name'):
+        dance_projects.append({
+            'id': kp.id,
+            'name': kp.name,
+            'image': kp.images.url if kp.images else None,
+        })
     
     context = {
         'dance_projects': dance_projects,
@@ -19,17 +26,44 @@ def knowledge_map(request):
 
 def get_project_knowledge_graph(request, project_id):
     """获取指定项目的知识图谱数据"""
+    from origin.models import DanceProject as OriginDanceProject
     try:
-        project = DanceProject.objects.get(id=project_id)
+        # 先从 origin 表查找（因为前端传的是 origin 表的 ID）
+        try:
+            origin_project = OriginDanceProject.objects.get(id=project_id)
+            project_name = origin_project.name
+        except OriginDanceProject.DoesNotExist:
+            # 如果 origin 表找不到，尝试从 knowledge 表按 ID 查找
+            try:
+                project = DanceProject.objects.get(id=project_id)
+                project_name = project.name
+            except DanceProject.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': '项目不存在'
+                }, status=404)
+        
+        # 通过项目名称在 knowledge 表中查找对应的知识图谱数据
+        try:
+            project = DanceProject.objects.get(name=project_name)
+        except DanceProject.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': f'未找到「{project_name}」的知识图谱数据'
+            }, status=404)
+        
+        # 获取 origin 项目用于图片展示
+        image_url = origin_project.images.url if origin_project and origin_project.images else None
         
         # 构建知识图谱数据
         graph_data = {
             'project': {
                 'id': project.id,
                 'name': project.name,
-                'description': project.description,
-                'category': project.category,
-                'difficulty_level': project.difficulty_level,
+                'description': getattr(project, 'description', ''),
+                'category': getattr(project, 'category', '传统舞蹈'),
+                'difficulty_level': getattr(project, 'difficulty_level', 1),
+                'image': image_url,
             },
             'modules': []
         }
@@ -105,20 +139,25 @@ def get_project_knowledge_graph(request, project_id):
             'data': graph_data
         })
     
-    except DanceProject.DoesNotExist:
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': '项目不存在'
-        }, status=404)
+            'error': f'加载失败：{str(e)}'
+        }, status=500)
 
 
 def generate_learning_path(request, project_id):
     """生成个性化学习路径"""
+    from origin.models import DanceProject as OriginDanceProject
     try:
-        project = DanceProject.objects.get(id=project_id)
+        # 兼容查找
+        try:
+            project = DanceProject.objects.get(id=project_id)
+        except DanceProject.DoesNotExist:
+            project = OriginDanceProject.objects.get(id=project_id)
         
         # 根据难度等级生成学习路径
-        modules = ActionModule.objects.filter(dance_project=project).order_by('order_index')
+        modules = ActionModule.objects.filter(dance_project_id=project.id).order_by('order_index')
         
         learning_path = {
             'project_name': project.name,

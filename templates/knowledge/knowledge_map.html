@@ -1,3 +1,4 @@
+
 {% extends 'dance/base.html' %}
 
 {% block title %}知识图谱 - 非遗传统舞蹈学习交流平台{% endblock %}
@@ -764,8 +765,17 @@
 
 <div class="knowledge-container">
     <div class="page-header">
-        <h1><i class="fas fa-brain"></i> 知识图谱</h1>
-        <p>构建非遗舞蹈知识体系 · 系统化学习传承</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1;">
+                <h1><i class="fas fa-brain"></i> 知识图谱</h1>
+                <p style="color: rgba(232, 213, 155, 0.7); margin-top: 0.5rem;">构建非遗舞蹈知识体系 · 系统化学习传承</p>
+            </div>
+            {% if request.GET.back_to_quiz %}
+            <a href="/quiz/game/{{ request.GET.back_to_quiz }}/" style="padding: 0.8rem 1.5rem; background: rgba(216, 191, 100, 0.15); border: 2px solid rgba(216, 191, 100, 0.4); border-radius: 1rem; color: #E8D59B; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                <i class="fas fa-arrow-left"></i> 返回答题
+            </a>
+            {% endif %}
+        </div>
     </div>
 
     <!-- 视图切换按钮 -->
@@ -1013,25 +1023,34 @@ function renderKnowledgeGraph(data) {
     let html = `
         <!-- 项目信息卡片 -->
         <div class="project-info-card">
-            <h2 class="project-title">
-                <i class="fas fa-dragon"></i>
-                ${data.project.name}
-            </h2>
-            <div class="project-meta">
-                <span class="meta-tag">
-                    <i class="fas fa-tag"></i> ${data.project.category}
-                </span>
-                <span class="meta-tag">
-                    <i class="fas fa-layer-group"></i> 难度等级 ${data.project.difficulty_level}
-                </span>
-                <span class="meta-tag">
-                    <i class="fas fa-cubes"></i> ${data.modules.length} 个动作模块
-                </span>
-                <span class="meta-tag">
-                    <i class="fas fa-fist-raised"></i> ${data.modules.reduce((sum, m) => sum + m.moves.length, 0)} 个招式
-                </span>
+            <div style="display: flex; gap: 2rem; align-items: start; flex-wrap: wrap;">
+                ${data.project.image ? `
+                <div style="flex-shrink: 0;">
+                    <img src="${data.project.image}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 1rem; border: 3px solid rgba(216, 191, 100, 0.6); box-shadow: 0 8px 25px rgba(218, 165, 32, 0.3);" alt="${data.project.name}"/>
+                </div>
+                ` : ''}
+                <div style="flex: 1; min-width: 300px;">
+                    <h2 class="project-title">
+                        <i class="fas fa-dragon"></i>
+                        ${data.project.name}
+                    </h2>
+                    <div class="project-meta">
+                        <span class="meta-tag">
+                            <i class="fas fa-tag"></i> ${data.project.category}
+                        </span>
+                        <span class="meta-tag">
+                            <i class="fas fa-layer-group"></i> 难度等级 ${data.project.difficulty_level}
+                        </span>
+                        <span class="meta-tag">
+                            <i class="fas fa-cubes"></i> ${data.modules.length} 个动作模块
+                        </span>
+                        <span class="meta-tag">
+                            <i class="fas fa-fist-raised"></i> ${data.modules.reduce((sum, m) => sum + m.moves.length, 0)} 个招式
+                        </span>
+                    </div>
+                    <p class="project-description">${data.project.description}</p>
+                </div>
             </div>
-            <p class="project-description">${data.project.description}</p>
         </div>
     `;
     
@@ -1350,20 +1369,29 @@ function renderVisualGraph(data) {
     const links = [];
     
     // 项目节点（中心）
-    nodes.push({
+    const projectNode = {
         id: `project_${data.project.id}`,
         name: data.project.name,
         category: 0,
-        symbolSize: 80,
+        symbolSize: data.project.image ? 100 : 80,
         value: data.project.name,
+        image: data.project.image || null,
+        symbol: data.project.image ? 'image://' + data.project.image : 'circle',
         itemStyle: {
-            color: '#D8BF64'
+            color: data.project.image ? 'transparent' : '#D8BF64',
+            borderColor: '#D8BF64',
+            borderWidth: 2,
         },
         label: {
             fontSize: 14,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            show: true,
+            position: 'bottom',
+            color: '#F5EDC8'
         }
-    });
+    };
+    
+    nodes.push(projectNode);
     
     // 模块节点和招式节点
     data.modules.forEach((module, mIndex) => {
@@ -1432,7 +1460,11 @@ function renderVisualGraph(data) {
             trigger: 'item',
             formatter: function(params) {
                 if (params.dataType === 'node') {
-                    return `<strong>${params.name}</strong>`;
+                    let content = `<strong style="font-size: 14px; color: #F5EDC8;">${params.name}</strong>`;
+                    if (params.data.image) {
+                        content += `<br/><img src="${params.data.image}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 2px solid rgba(216, 191, 100, 0.6);"/>`;
+                    }
+                    return content;
                 } else {
                     return `${params.data.source} → ${params.data.target}<br/>关系: ${params.data.value}`;
                 }

@@ -1,0 +1,259 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}答题结果 - {{ quiz_record.level.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .result-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .result-header {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        text-align: center;
+        border: 2px solid {% if quiz_record.is_passed %}rgba(76, 175, 80, 0.6){% else %}rgba(244, 67, 54, 0.6){% endif %};
+        margin-bottom: 2rem;
+    }
+
+    .result-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .result-icon.passed {
+        color: #81C784;
+    }
+
+    .result-icon.failed {
+        color: #E57373;
+    }
+
+    .result-title {
+        font-size: 2.2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1rem;
+    }
+
+    .result-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .stat-item {
+        background: rgba(216, 191, 100, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #DAA520;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .answers-section {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1.5rem;
+    }
+
+    .answer-item {
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        border: 2px solid;
+    }
+
+    .answer-item.correct {
+        background: rgba(76, 175, 80, 0.1);
+        border-color: rgba(76, 175, 80, 0.3);
+    }
+
+    .answer-item.wrong {
+        background: rgba(244, 67, 54, 0.1);
+        border-color: rgba(244, 67, 54, 0.3);
+    }
+
+    .answer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .question-number {
+        font-weight: bold;
+        color: #D8BF64;
+    }
+
+    .answer-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .answer-status.correct {
+        background: rgba(76, 175, 80, 0.2);
+        color: #81C784;
+    }
+
+    .answer-status.wrong {
+        background: rgba(244, 67, 54, 0.2);
+        color: #E57373;
+    }
+
+    .question-text {
+        color: #F5EDC8;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .answer-detail {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .answer-detail strong {
+        color: #D8BF64;
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, #DAA520, #B8860B);
+        border: none;
+        color: #FFD700;
+    }
+
+    .action-btn.secondary {
+        background: transparent;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        color: #E8D59B;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="result-container">
+    <div class="result-header">
+        <div class="result-icon {% if quiz_record.is_passed %}passed{% else %}failed{% endif %}">
+            <i class="fas {% if quiz_record.is_passed %}fa-trophy{% else %}fa-times-circle{% endif %}"></i>
+        </div>
+        <h1 class="result-title">{{ quiz_record.level.name }}</h1>
+        <p style="color: rgba(232, 213, 155, 0.7); font-size: 1.1rem;">
+            {% if quiz_record.is_passed %}
+                <i class="fas fa-check-circle" style="color: #81C784;"></i> 恭喜通关！
+            {% else %}
+                <i class="fas fa-times-circle" style="color: #E57373;"></i> 继续加油！
+            {% endif %}
+        </p>
+
+        <div class="result-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ quiz_record.score }}</div>
+                <div class="stat-label">得分</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ quiz_record.correct_answers }}</div>
+                <div class="stat-label">答对题数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ quiz_record.wrong_answers }}</div>
+                <div class="stat-label">答错题数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ answer_details|length }}</div>
+                <div class="stat-label">总题数</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="answers-section">
+        <h2 class="section-title"><i class="fas fa-list"></i> 答题详情</h2>
+        
+        {% for detail in answer_details %}
+        <div class="answer-item {% if detail.is_correct %}correct{% else %}wrong{% endif %}">
+            <div class="answer-header">
+                <span class="question-number">第{{ forloop.counter }}题</span>
+                <span class="answer-status {% if detail.is_correct %}correct{% else %}wrong{% endif %}">
+                    {% if detail.is_correct %}
+                        <i class="fas fa-check"></i> 正确
+                    {% else %}
+                        <i class="fas fa-times"></i> 错误
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="question-text">{{ detail.question.content }}</div>
+            
+            <div class="answer-detail">
+                <strong>你的答案：</strong>{{ detail.user_answer }}<br>
+                {% if not detail.is_correct %}
+                <strong>正确答案：</strong>{{ detail.question.correct_answer }}<br>
+                <strong>解析：</strong>{{ detail.question.explanation }}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="actions">
+        <a href="/quiz/" class="action-btn secondary">
+            <i class="fas fa-th-list"></i> 返回关卡列表
+        </a>
+        {% if quiz_record.wrong_answers > 0 %}
+        <a href="{% url 'quiz:wrong_questions' %}" class="action-btn secondary" style="border-color: rgba(244, 67, 54, 0.6); color: #E57373;">
+            <i class="fas fa-book-open"></i> 查看错题集 ({{ quiz_record.wrong_answers }}题)
+        </a>
+        {% endif %}
+        <a href="/quiz/game/{{ quiz_record.level.id }}/" class="action-btn primary">
+            <i class="fas fa-redo"></i> 重新挑战
+        </a>
+    </div>
+</div>
+{% endblock %}

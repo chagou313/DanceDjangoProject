@@ -1,0 +1,356 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}我的答题进度 - 非遗传统舞蹈学习交流平台{% endblock %}
+
+{% block content %}
+<style>
+    .progress-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        margin-bottom: 3rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+    }
+
+    .page-header h1 {
+        font-size: 2.2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1rem;
+    }
+
+    .overall-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #DAA520;
+        margin-bottom: 1rem;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #FFD700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 1rem;
+    }
+
+    .levels-progress {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 1.5rem;
+    }
+
+    .level-progress-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        transition: all 0.3s;
+    }
+
+    .level-progress-item:hover {
+        border-color: rgba(216, 191, 100, 0.4);
+        transform: translateX(5px);
+    }
+
+    .level-status {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .level-status.passed {
+        background: rgba(76, 175, 80, 0.2);
+        border: 2px solid rgba(76, 175, 80, 0.6);
+        color: #81C784;
+    }
+
+    .level-status.not-passed {
+        background: rgba(255, 193, 7, 0.2);
+        border: 2px solid rgba(255, 193, 7, 0.6);
+        color: #FFD54F;
+    }
+
+    .level-status.not-attempted {
+        background: rgba(158, 158, 158, 0.2);
+        border: 2px solid rgba(158, 158, 158, 0.4);
+        color: #9E9E9E;
+    }
+
+    .level-info {
+        flex: 1;
+    }
+
+    .level-name {
+        font-size: 1.2rem;
+        color: #F5EDC8;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .level-detail {
+        display: flex;
+        gap: 1.5rem;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .level-score {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .score-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #DAA520;
+    }
+
+    .level-progress-item .level-status.passed + .level-info + .level-score .score-value {
+        color: #81C784;
+    }
+
+    .score-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+    }
+
+    .recent-records {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .record-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.2rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .record-status {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .record-status.passed {
+        background: rgba(76, 175, 80, 0.2);
+        color: #81C784;
+    }
+
+    .record-status.failed {
+        background: rgba(244, 67, 54, 0.2);
+        color: #E57373;
+    }
+
+    .record-info {
+        flex: 1;
+    }
+
+    .record-level {
+        color: #F5EDC8;
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+    }
+
+    .record-time {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+    }
+
+    .record-score {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #DAA520;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        border-radius: 1rem;
+        color: #E8D59B;
+        text-decoration: none;
+        transition: all 0.3s;
+        margin-top: 2rem;
+    }
+
+    .back-btn:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        background: rgba(216, 191, 100, 0.2);
+    }
+</style>
+
+<div class="progress-container">
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> 我的答题进度</h1>
+        <p style="color: rgba(232, 213, 155, 0.7);">追踪你的学习轨迹，见证每一次进步</p>
+    </div>
+
+    <!-- 总体统计 -->
+    <div class="overall-stats">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+            <div class="stat-value">{{ total_passed }}</div>
+            <div class="stat-label">已通关关卡</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-play-circle"></i></div>
+            <div class="stat-value">{{ total_attempts }}</div>
+            <div class="stat-label">总尝试次数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+            <div class="stat-value">{{ pass_rate|floatformat:1 }}%</div>
+            <div class="stat-label">通关率 ({{ total_passed }}/{{ total_levels }})</div>
+        </div>
+    </div>
+
+    <!-- 关卡进度 -->
+    <div class="levels-progress">
+        <h2 class="section-title"><i class="fas fa-layer-group"></i> 关卡进度</h2>
+        
+        {% for level_id, stats in level_stats.items %}
+        <div class="level-progress-item" onclick="window.location.href='/quiz/game/{{ stats.level.id }}/'" style="cursor: pointer;">
+            <div class="level-status {% if stats.is_passed %}passed{% else %}not-passed{% endif %}">
+                {% if stats.is_passed %}
+                    <i class="fas fa-check"></i>
+                {% else %}
+                    <i class="fas fa-star"></i>
+                {% endif %}
+            </div>
+            
+            <div class="level-info">
+                <div class="level-name">{{ stats.level.name }}</div>
+                <div class="level-detail">
+                    <span><i class="fas fa-redo"></i> 尝试 {{ stats.attempt_count }} 次</span>
+                    <span><i class="fas fa-layer-group"></i> {{ stats.level.get_difficulty_display }}</span>
+                </div>
+            </div>
+            
+            <div class="level-score">
+                <div class="score-value">{{ stats.best_score }}</div>
+                <div class="score-label">最高分</div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-gamepad"></i>
+            <p>还没有开始答题哦，快去挑战吧！</p>
+            <a href="/quiz/" class="back-btn">
+                <i class="fas fa-arrow-right"></i> 前往关卡列表
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 最近记录 -->
+    <div class="recent-records">
+        <h2 class="section-title"><i class="fas fa-history"></i> 最近答题记录</h2>
+        
+        {% for record in records %}
+        <div class="record-item">
+            <div class="record-status {% if record.is_passed %}passed{% else %}failed{% endif %}">
+                {% if record.is_passed %}
+                    <i class="fas fa-check"></i>
+                {% else %}
+                    <i class="fas fa-times"></i>
+                {% endif %}
+            </div>
+            
+            <div class="record-info">
+                <div class="record-level">{{ record.level.name }}</div>
+                <div class="record-time">
+                    {{ record.start_time|date:"Y-m-d H:i" }} · 
+                    答对 {{ record.correct_answers }} / 答错 {{ record.wrong_answers }}
+                </div>
+            </div>
+            
+            <div class="record-score">{{ record.score }}分</div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p>暂无答题记录</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{% url 'quiz:wrong_questions' %}" class="back-btn" style="margin-right: 1rem;">
+            <i class="fas fa-book-open"></i> 查看错题集
+        </a>
+        <a href="javascript:history.back()" class="back-btn">
+            <i class="fas fa-arrow-left"></i> 返回上一页
+        </a>
+    </div>
+</div>
+{% endblock %}

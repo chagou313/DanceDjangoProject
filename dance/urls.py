@@ -11,7 +11,6 @@ urlpatterns = [
     path('origin/', views.dance_origin_list, name='dance_origin_list'),
     path('origin/projects/', views.dance_project_list, name='dance_project_list'),
     path('origin/<int:project_id>/', views.project_detail, name='project_detail'),
-    path('quiz/', views.quiz_list, name='quiz_list'),
     
     # 个人主页相关
     path('profile/', views.profile, name='profile'),
