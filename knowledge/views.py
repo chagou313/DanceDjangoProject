@@ -1,8 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .models import DanceProject, ActionModule, SpecificMove, MoveAttribute, LearningResource, KnowledgePoint
+from .models import DanceProject, ActionModule, SpecificMove, MoveAttribute, LearningResource, KnowledgePoint, UserLearningProgress
 import json
 import requests
 
@@ -308,3 +309,235 @@ def generate_mock_response(message):
     
     else:
         return f"感谢您的提问！\n\n关于「{message}」，建议您：\n\n1. 在知识图谱中选择具体的舞蹈项目查看详细招式\n2. 浏览学习资源中的教学视频\n3. 参考相关知识点的详细说明\n\n如需更专业的解答，请配置文心一言API密钥以获得AI智能回答。"
+
+
+@login_required
+def personalized_recommendations(request):
+    """个性化推荐页面"""
+    from .recommendation_engine import get_user_recommendations
+    
+    # 获取推荐列表
+    recommendations = get_user_recommendations(request.user, limit=12)
+    
+    context = {
+        'recommendations': recommendations,
+    }
+    return render(request, 'knowledge/recommendations.html', context)
+
+
+@login_required
+def get_recommendations_api(request):
+    """获取推荐列表API"""
+    from .recommendation_engine import get_user_recommendations, RecommendationLog
+    
+    limit = int(request.GET.get('limit', 10))
+    recommendations = get_user_recommendations(request.user, limit=limit)
+    
+    # 记录推荐日志
+    for rec in recommendations:
+        RecommendationLog.objects.create(
+            user=request.user,
+            recommended_project=rec['project'],
+            recommendation_algorithm='content_based',
+            recommendation_score=rec['score'],
+            recommendation_reason='; '.join(rec['reasons'])
+        )
+    
+    # 格式化返回数据
+    data = []
+    for rec in recommendations:
+        project = rec['project']
+        data.append({
+            'id': project.id,
+            'name': project.name,
+            'category': project.category,
+            'difficulty_level': project.difficulty_level,
+            'description': project.description[:100] + '...' if len(project.description) > 100 else project.description,
+            'image': project.image.url if project.image else None,
+            'score': round(rec['score'], 2),
+            'reasons': rec['reasons'][:3],  # 最多显示3个理由
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'data': data
+    })
+
+
+@login_required
+def learning_path_view(request, project_id):
+    """学习路径页面"""
+    from .recommendation_engine import generate_learning_path_for_user
+    from origin.models import DanceProject as OriginDanceProject
+    
+    # 获取项目信息
+    try:
+        origin_project = OriginDanceProject.objects.get(id=project_id)
+        project_name = origin_project.name
+    except OriginDanceProject.DoesNotExist:
+        # 项目不存在，返回知识图谱页面并显示错误信息
+        from django.contrib import messages
+        messages.error(request, '找不到该舞蹈项目')
+        return redirect('knowledge:knowledge_map')
+    
+    # 生成学习路径
+    learning_path = generate_learning_path_for_user(request.user, project_id)
+    
+    if not learning_path:
+        # 没有学习路径数据，返回知识图谱页面
+        from django.contrib import messages
+        messages.warning(request, f'「{project_name}」暂无学习路径数据')
+        return redirect('knowledge:knowledge_map')
+    
+    context = {
+        'learning_path': learning_path,
+        'origin_project': origin_project,
+    }
+    return render(request, 'knowledge/learning_path.html', context)
+
+
+@login_required
+def my_progress(request):
+    """我的学习进度页面"""
+    from origin.models import DanceProject as OriginDanceProject
+    
+    # 获取用户所有学习进度，按项目分组
+    progress_records = UserLearningProgress.objects.filter(
+        user=request.user
+    ).select_related(
+        'dance_project',
+        'specific_move',
+        'specific_move__action_module'
+    ).order_by('-updated_at')
+    
+    # 按项目分组统计
+    project_progress = {}
+    for record in progress_records:
+        project = record.dance_project
+        project_id = project.id
+        
+        if project_id not in project_progress:
+            project_progress[project_id] = {
+                'project': project,
+                'total_moves': 0,
+                'not_started': 0,
+                'learning': 0,
+                'completed': 0,
+                'mastered': 0,
+                'avg_proficiency': 0,
+                'proficiency_sum': 0,
+            }
+        
+        pp = project_progress[project_id]
+        pp['total_moves'] += 1
+        pp[record.status] += 1
+        pp['proficiency_sum'] += record.proficiency_score
+    
+    # 计算平均熟练度和完成度
+    for pp in project_progress.values():
+        if pp['total_moves'] > 0:
+            pp['avg_proficiency'] = pp['proficiency_sum'] / pp['total_moves']
+            # 完成度 = (已完成 + 已掌握) / 总数
+            pp['completion_rate'] = (pp['completed'] + pp['mastered']) / pp['total_moves'] * 100
+        else:
+            pp['completion_rate'] = 0
+    
+    # 转换为列表并排序（按完成度降序）
+    progress_list = sorted(
+        project_progress.values(),
+        key=lambda x: x['completion_rate'],
+        reverse=True
+    )
+    
+    # 总体统计
+    total_projects = len(progress_list)
+    total_moves = sum(pp['total_moves'] for pp in progress_list)
+    mastered_projects = sum(1 for pp in progress_list if pp['completion_rate'] == 100)
+    avg_completion = sum(pp['completion_rate'] for pp in progress_list) / total_projects if total_projects > 0 else 0
+    
+    context = {
+        'progress_list': progress_list,
+        'total_projects': total_projects,
+        'total_moves': total_moves,
+        'mastered_projects': mastered_projects,
+        'avg_completion': avg_completion,
+    }
+    return render(request, 'knowledge/my_progress.html', context)
+
+
+@login_required
+@csrf_exempt
+def update_learning_progress(request, move_id):
+    """
+    更新招式学习进度（自动根据学习时间计算熟练度）
+    POST /knowledge/api/update-progress/<move_id>/
+    {
+        "practice_time": 秒数（必填）
+    }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': '仅支持POST请求'}, status=405)
+    
+    try:
+        move = SpecificMove.objects.get(id=move_id)
+        data = json.loads(request.body)
+        practice_time = data.get('practice_time', 0)
+        
+        if practice_time <= 0:
+            return JsonResponse({'success': False, 'error': '练习时间必须大于0'}, status=400)
+        
+        # 获取或创建学习进度记录
+        progress, created = UserLearningProgress.objects.get_or_create(
+            user=request.user,
+            specific_move=move,
+            defaults={
+                'dance_project': move.action_module.dance_project,
+                'status': 'learning',
+                'proficiency_score': 0,
+                'practice_count': 1,
+                'total_practice_time': practice_time,
+            }
+        )
+        
+        if not created:
+            # 累加练习时间和次数
+            progress.total_practice_time += practice_time
+            progress.practice_count += 1
+        
+        # 自动计算熟练度（基于总练习时长和招式难度）
+        # 标准练习时长 = 招式duration * 难度系数 * 3（建议练习天数）
+        estimated_standard_time = move.duration * move.difficulty * 3
+        
+        # 熟练度 = (总练习时间 / 标准时间) * 100，最高100
+        proficiency = min((progress.total_practice_time / estimated_standard_time) * 100, 100)
+        progress.proficiency_score = round(proficiency, 1)
+        
+        # 根据熟练度自动判断状态
+        if proficiency >= 85:
+            progress.status = 'mastered'
+        elif proficiency >= 70:
+            progress.status = 'completed'
+        elif proficiency > 0:
+            progress.status = 'learning'
+        else:
+            progress.status = 'not_started'
+        
+        progress.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '进度已更新',
+            'data': {
+                'status': progress.status,
+                'status_display': dict(UserLearningProgress.STATUS_CHOICES)[progress.status],
+                'proficiency_score': progress.proficiency_score,
+                'practice_count': progress.practice_count,
+                'total_practice_time': progress.total_practice_time,
+                'estimated_standard_time': estimated_standard_time,
+            }
+        })
+    
+    except SpecificMove.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '招式不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

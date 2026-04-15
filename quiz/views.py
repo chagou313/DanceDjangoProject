@@ -17,13 +17,8 @@ def quiz_list(request):
     if not request.user.is_authenticated:
         return render(request, 'quiz/quiz_list.html', {'require_login': True, 'levels': []})
     
-    # 获取所有开启的关卡（直接使用QuerySet，不在视图中转换）
+    # 获取所有开启的关卡
     levels = Level.objects.filter(is_active=True).order_by('order_index')
-    
-    # 调试：打印关卡信息
-    print(f"[QUIZ DEBUG] Levels count: {levels.count()}")
-    for level in levels:
-        print(f"  - Level {level.id}: {level.name}")
     
     # 获取用户各关卡的最佳成绩
     user_progress = {}
@@ -39,9 +34,19 @@ def quiz_list(request):
             'is_passed': record['is_passed'],
         }
     
+    # 统计已完成和进行中的关卡数
+    completed_count = sum(1 for v in user_progress.values() if v['is_passed'])
+    in_progress_count = sum(1 for v in user_progress.values() if not v['is_passed'])
+    
+    # 获取已完成关卡的ID列表
+    completed_levels = [k for k, v in user_progress.items() if v['is_passed']]
+    
     context = {
         'levels': levels,
         'user_progress': user_progress,
+        'completed_count': completed_count,
+        'in_progress_count': in_progress_count,
+        'completed_levels': completed_levels,
     }
     return render(request, 'quiz/quiz_list.html', context)
 

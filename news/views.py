@@ -42,6 +42,20 @@ def news_detail(request, news_id):
     news.views += 1
     news.save(update_fields=['views'])
     
+    # 记录用户访问过的资讯 ID 到 session
+    if 'visited_news' not in request.session:
+        request.session['visited_news'] = []
+    
+    visited_news = request.session['visited_news']
+    # 移除已存在的（避免重复）
+    if news_id in visited_news:
+        visited_news.remove(news_id)
+    # 添加到开头
+    visited_news.insert(0, news_id)
+    # 只保留最近 20 个
+    request.session['visited_news'] = visited_news[:20]
+    request.session.modified = True
+    
     # 检查用户是否已点赞/收藏
     user_liked = False
     user_collected = False

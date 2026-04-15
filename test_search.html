@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>搜索框测试</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: #0A0A0F;
+            color: #F5E7B2;
+            padding: 2rem;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #D4AF37;
+        }
+        
+        /* 搜索框样式 */
+        .search-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .project-search-input {
+            width: 100%;
+            padding: 1.2rem 3.5rem 1.2rem 3.5rem;
+            background: rgba(216, 191, 100, 0.06);
+            border: 2px solid rgba(216, 191, 100, 0.25);
+            border-radius: 1.2rem;
+            color: #E8D59B;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+        }
+
+        .project-search-input:focus {
+            outline: none;
+            border-color: rgba(216, 191, 100, 0.6);
+            box-shadow: 0 0 30px rgba(216, 191, 100, 0.25);
+        }
+
+        .search-box::before {
+            content: '\f002';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 1.3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(216, 191, 100, 0.5);
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        /* 下拉列表 */
+        .project-dropdown {
+            position: absolute;
+            top: calc(100% + 0.8rem);
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(20, 22, 30, 0.98);
+            border: 2px solid rgba(216, 191, 100, 0.3);
+            border-radius: 1.2rem;
+            max-height: 320px;
+            overflow-y: auto;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            display: none;
+        }
+
+        .dropdown-list {
+            padding: 0.6rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            color: #E8D59B;
+            font-size: 1rem;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-bottom: 0.3rem;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(216, 191, 100, 0.15);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            color: rgba(216, 191, 100, 0.6);
+        }
+
+        .status-box {
+            background: rgba(216, 191, 100, 0.1);
+            border: 2px solid rgba(216, 191, 100, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .status-box h3 {
+            color: #D4AF37;
+            margin-bottom: 1rem;
+        }
+
+        .status-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(216, 191, 100, 0.2);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-test-tube"></i> 搜索框功能测试</h1>
+        
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="projectSearch" class="project-search-input" placeholder="点击搜索查看所有项目..." autocomplete="off">
+        </div>
+        
+        <!-- 下拉列表 -->
+        <div class="project-dropdown" id="projectDropdown">
+            <div class="dropdown-list" id="dropdownList"></div>
+        </div>
+        
+        <!-- 状态显示 -->
+        <div class="status-box">
+            <h3><i class="fas fa-info-circle"></i> 测试状态</h3>
+            <div id="status-content">
+                <div class="status-item">正在加载测试数据...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测试数据
+        const allProjects = [
+            {id: 1, name: '藏族锅庄舞'},
+            {id: 2, name: '蒙古族安代舞'},
+            {id: 3, name: '维吾尔族赛乃姆'},
+            {id: 4, name: '傣族孔雀舞'},
+            {id: 5, name: '朝鲜族长鼓舞'},
+            {id: 6, name: '彝族跳菜'},
+            {id: 7, name: '苗族芦笙舞'},
+            {id: 8, name: '壮族扁担舞'},
+        ];
+        
+        const searchInput = document.getElementById('projectSearch');
+        const dropdown = document.getElementById('projectDropdown');
+        const dropdownList = document.getElementById('dropdownList');
+        const statusContent = document.getElementById('status-content');
+        
+        // 显示初始状态
+        function updateStatus(message) {
+            statusContent.innerHTML = `<div class="status-item">${message}</div>`;
+        }
+        
+        // 渲染下拉列表
+        function renderDropdownList(projects, keyword) {
+            if (projects.length > 0) {
+                dropdownList.innerHTML = projects.map(p => `
+                    <div class="dropdown-item" data-id="${p.id}" data-name="${p.name}">
+                        <i class="fas fa-dragon"></i>
+                        <span>${p.name}</span>
+                    </div>
+                `).join('');
+                dropdown.style.display = 'block';
+                updateStatus(`✅ 成功显示 ${projects.length} 个项目`);
+            } else {
+                dropdownList.innerHTML = `
+                    <div class="dropdown-item">
+                        <i class="fas fa-search"></i>
+                        <span>没有找到匹配的项目</span>
+                    </div>
+                `;
+                dropdown.style.display = 'block';
+                updateStatus('❌ 没有找到匹配的项目');
+            }
+        }
+        
+        // 点击搜索框时显示所有项目
+        searchInput.addEventListener('focus', function() {
+            console.log('搜索框被点击');
+            renderDropdownList(allProjects, '');
+            updateStatus(` 点击搜索框，显示 ${allProjects.length} 个项目`);
+        });
+        
+        // 输入时过滤
+        searchInput.addEventListener('input', function() {
+            const keyword = this.value.trim();
+            if (keyword.length === 0) {
+                renderDropdownList(allProjects, '');
+                updateStatus(`⌨️ 清空搜索，显示全部 ${allProjects.length} 个项目`);
+            } else {
+                const filtered = allProjects.filter(p => 
+                    p.name.toLowerCase().includes(keyword.toLowerCase())
+                );
+                renderDropdownList(filtered, keyword);
+                updateStatus(`🔍 搜索 "${keyword}"，找到 ${filtered.length} 个项目`);
+            }
+        });
+        
+        // 点击下拉项
+        dropdownList.addEventListener('click', function(e) {
+            const item = e.target.closest('.dropdown-item');
+            if (item) {
+                const projectName = item.dataset.name;
+                searchInput.value = projectName;
+                dropdown.style.display = 'none';
+                updateStatus(`🎯 选择了项目: ${projectName}`);
+            }
+        });
+        
+        // 点击外部关闭
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-box')) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 初始状态
+        updateStatus(`✅ 页面加载完成，共 ${allProjects.length} 个测试项目。<br>请点击搜索框测试功能！`);
+        console.log('测试页面加载完成，项目数:', allProjects.length);
+    </script>
+</body>
+</html>

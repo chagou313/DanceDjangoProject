@@ -1,0 +1,409 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}个性化推荐 - 舞蹈知识图谱{% endblock %}
+
+{% block content %}
+<style>
+    .recommendations-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.1) 0%, rgba(216, 191, 100, 0.05) 100%);
+        border-radius: 1.5rem;
+        border: 2px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-header p {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 1.1rem;
+    }
+
+    .user-preferences {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .preferences-title {
+        color: #DAA520;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preferences-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .preference-item {
+        background: rgba(216, 191, 100, 0.05);
+        padding: 1rem;
+        border-radius: 0.8rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .preference-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .preference-value {
+        color: #F5EDC8;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .recommendation-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(216, 191, 100, 0.6);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+    }
+
+    .card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(216, 191, 100, 0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 3rem;
+    }
+
+    .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        color: #F5EDC8;
+        font-size: 1.3rem;
+        font-weight: bold;
+        flex: 1;
+    }
+
+    .score-badge {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-weight: bold;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        margin-left: 1rem;
+    }
+
+    .card-category {
+        display: inline-block;
+        background: rgba(216, 191, 100, 0.15);
+        color: #DAA520;
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .card-description {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .difficulty-stars {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .star {
+        color: #DAA520;
+        font-size: 1rem;
+    }
+
+    .star.empty {
+        color: rgba(218, 165, 32, 0.3);
+    }
+
+    .recommendation-reasons {
+        background: rgba(216, 191, 100, 0.05);
+        padding: 1rem;
+        border-radius: 0.8rem;
+        border-left: 3px solid #DAA520;
+        margin-bottom: 1rem;
+    }
+
+    .reasons-title {
+        color: #DAA520;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+
+    .reason-item {
+        color: rgba(232, 213, 155, 0.8);
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .reason-item::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #81C784;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.8rem;
+        border-radius: 0.8rem;
+        text-align: center;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(218, 165, 32, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(216, 191, 100, 0.1);
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        color: #E8D59B;
+    }
+
+    .btn-secondary:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        background: rgba(216, 191, 100, 0.2);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        border-radius: 1rem;
+        color: #E8D59B;
+        text-decoration: none;
+        transition: all 0.3s;
+        margin-top: 2rem;
+    }
+
+    .back-link:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        background: rgba(216, 191, 100, 0.2);
+    }
+</style>
+
+<div class="recommendations-container">
+
+    <!-- 用户偏好信息 -->
+    <div class="user-preferences">
+        <div class="preferences-grid">
+            <div class="preference-item">
+                <div class="preference-label">技能等级</div>
+                <div class="preference-value">
+                    {% if user.userprofile.skill_level %}
+                        {{ user.userprofile.skill_level }}级
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">每周学习时间</div>
+                <div class="preference-value">
+                    {% if user.userprofile.available_time_per_week %}
+                        {{ user.userprofile.available_time_per_week }}小时
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">学习目标</div>
+                <div class="preference-value" style="font-size: 0.95rem;">
+                    {% if user.userprofile.learning_goal %}
+                        {{ user.userprofile.learning_goal }}
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">偏好舞种</div>
+                <div class="preference-value" style="font-size: 0.95rem;">
+                    {% if user.userprofile.preferred_dance_types %}
+                        {{ user.userprofile.preferred_dance_types|join:"、" }}
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推荐列表 -->
+    {% if recommendations %}
+    <div class="recommendations-grid">
+        {% for rec in recommendations %}
+        <div class="recommendation-card" onclick="window.location.href='/knowledge/learning-path/{{ rec.project.id }}/'">
+            <div class="card-image">
+                {% if rec.project.image %}
+                    <img src="{{ rec.project.image.url }}" alt="{{ rec.project.name }}">
+                {% else %}
+                    <i class="fas fa-drum"></i>
+                {% endif %}
+            </div>
+            
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="card-title">{{ rec.project.name }}</div>
+                    <div class="score-badge">
+                        <i class="fas fa-star"></i> {{ rec.score|floatformat:1 }}
+                    </div>
+                </div>
+                
+                <span class="card-category">{{ rec.project.category }}</span>
+                
+                <div class="difficulty-stars">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= rec.project.difficulty_level %}
+                            <i class="fas fa-star star"></i>
+                        {% else %}
+                            <i class="far fa-star star empty"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span style="color: rgba(232, 213, 155, 0.6); margin-left: 0.5rem; font-size: 0.9rem;">
+                        难度 {{ rec.project.difficulty_level }}/5
+                    </span>
+                </div>
+                
+                <div class="card-description">
+                    {{ rec.project.description|truncatewords:20 }}
+                </div>
+                
+                <div class="recommendation-reasons">
+                    <div class="reasons-title">
+                        <i class="fas fa-lightbulb"></i> 推荐理由
+                    </div>
+                    {% for reason in rec.reasons|slice:":3" %}
+                    <div class="reason-item">{{ reason }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="card-actions" onclick="event.stopPropagation();">
+                    <a href="/knowledge/learning-path/{{ rec.project.id }}/" class="action-btn btn-primary">
+                        <i class="fas fa-route"></i> 查看学习路径
+                    </a>
+                    <a href="/knowledge/?project={{ rec.project.id }}" class="action-btn btn-secondary">
+                        <i class="fas fa-info-circle"></i> 详情
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-compass"></i>
+        <h3 style="color: #F5EDC8; margin-bottom: 1rem;">暂无推荐</h3>
+        <p>完善您的个人资料，即可获得个性化推荐</p>
+        <a href="/dance/profile/edit/" class="back-link" style="margin-top: 1.5rem;">
+            <i class="fas fa-edit"></i> 编辑个人资料
+        </a>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center;">
+        <a href="{% url 'knowledge:knowledge_map' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> 返回知识图谱
+        </a>
+    </div>
+</div>
+{% endblock %}

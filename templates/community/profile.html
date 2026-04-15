@@ -5,134 +5,380 @@
 {% block content %}
 <style>
     .profile-container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: 2rem;
     }
 
     /* 个人主页头部 */
     .profile-header {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 3rem;
-        text-align: center;
-        border: 2px solid rgba(216, 191, 100, 0.4);
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.05) 0%, rgba(20, 22, 30, 0.95) 50%, rgba(28, 30, 38, 0.98) 100%);
+        border-radius: 0.8rem;
+        padding: 2rem 3rem;
         margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: radial-gradient(circle at right, rgba(216, 191, 100, 0.08), transparent 70%);
+        pointer-events: none;
+    }
+
+    .profile-header-content {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .avatar-section {
+        flex-shrink: 0;
     }
 
     .avatar {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
         background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 3rem;
+        font-size: 2.8rem;
         color: #0F0F1A;
-        border: 4px solid rgba(216, 191, 100, 0.6);
-        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.3);
+        border: 3px solid rgba(216, 191, 100, 0.6);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.25);
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    .avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.4);
+    }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .avatar-edit-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0F0F1A;
+        border: 2px solid rgba(20, 22, 30, 0.9);
+        text-decoration: none;
+        transition: all 0.3s;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .avatar-edit-btn:hover {
+        transform: scale(1.15) rotate(15deg);
+        box-shadow: 0 6px 20px rgba(216, 191, 100, 0.5);
+    }
+
+    .user-info-section {
+        flex: 1;
     }
 
     .username {
-        font-size: 2rem;
-        color: #F5EDC8;
-        font-family: 'Noto Serif SC', serif;
-        margin-bottom: 0.5rem;
-    }
-
-    .user-email {
-        font-size: 1rem;
-        color: rgba(232, 213, 155, 0.6);
-        margin-bottom: 2rem;
-    }
-
-    /* 统计数据卡片 */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.5rem;
-        margin-top: 2rem;
-    }
-
-    .stat-card {
-        background: rgba(216, 191, 100, 0.08);
-        border: 2px solid rgba(216, 191, 100, 0.3);
-        border-radius: 1.5rem;
-        padding: 2rem 1.5rem;
-        text-align: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
-    }
-
-    .stat-card:hover {
-        background: rgba(216, 191, 100, 0.15);
-        border-color: rgba(216, 191, 100, 0.6);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
-    }
-
-    .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        color: #D8BF64;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-
-    .stat-label {
-        font-size: 1rem;
-        color: rgba(232, 213, 155, 0.7);
-        display: block;
-    }
-
-    /* 最近动态区域 */
-    .recent-activity {
-        margin-top: 3rem;
-    }
-
-    .section-title {
         font-size: 1.8rem;
         color: #F5EDC8;
         font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.3rem;
+        font-weight: 700;
+    }
+
+    .user-email {
+        font-size: 0.95rem;
+        color: rgba(232, 213, 155, 0.6);
         margin-bottom: 1.5rem;
+    }
+
+    /* 统计信息 */
+    .stats-bar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-badge {
         display: flex;
         align-items: center;
         gap: 0.8rem;
+        background: rgba(216, 191, 100, 0.06);
+        border: none;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        text-decoration: none;
     }
 
-    .activity-grid {
+    .stat-badge:hover {
+        background: rgba(216, 191, 100, 0.12);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-badge-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-badge-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-badge-number {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        line-height: 1;
+    }
+
+    .stat-badge-label {
+        font-size: 0.8rem;
+        color: rgba(232, 213, 155, 0.6);
+        margin-top: 0.2rem;
+    }
+
+    /* 功能区 */
+    .sections-container {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 2rem;
+        align-items: stretch;
     }
 
-    .activity-section {
+    .section {
         background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
+        border-radius: 0.8rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    .activity-item {
-        padding: 1.5rem 0;
-        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(216, 191, 100, 0.2);
     }
 
-    .activity-item:last-child {
-        border-bottom: none;
+    .section-header i {
+        font-size: 1.5rem;
+        color: #D8BF64;
     }
 
-    .activity-title {
+    .section-header h2 {
+        font-size: 1.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin: 0;
+    }
+
+    /* 滑动块容器 */
+    .slider-wrapper {
+        position: relative;
+        margin-top: 1rem;
+    }
+
+    .slider-container {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(216, 191, 100, 0.4) rgba(20, 22, 30, 0.5);
+        padding-bottom: 0.8rem;
+        scroll-snap-type: x mandatory;
+    }
+
+    .slider-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .slider-container::-webkit-scrollbar-track {
+        background: rgba(20, 22, 30, 0.5);
+        border-radius: 3px;
+    }
+
+    .slider-container::-webkit-scrollbar-thumb {
+        background: rgba(216, 191, 100, 0.4);
+        border-radius: 3px;
+        transition: background 0.3s;
+    }
+
+    .slider-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(216, 191, 100, 0.6);
+    }
+
+    /* 滑动提示箭头 */
+    .slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(216, 191, 100, 0.9);
+        color: #0F0F1A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: all 0.3s;
+        border: none;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        pointer-events: auto;
+    }
+
+    .slider-arrow:hover {
+        background: #D8BF64;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 6px 16px rgba(216, 191, 100, 0.4);
+    }
+
+    .slider-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .slider-arrow-left {
+        left: -18px;
+    }
+
+    .slider-arrow-right {
+        right: -18px;
+    }
+
+    .slider-item {
+        flex: 0 0 28%;
+        min-width: 200px;
+        scroll-snap-align: start;
+    }
+
+    /* 滑动块样式 */
+    .slide-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 0.8rem;
+        overflow: hidden;
+        border: none;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+    }
+
+    .slide-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .slide-cover {
+        height: 120px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .slide-cover .slide-badge {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: #D8BF64;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.8rem;
+        font-size: 0.7rem;
+        border: none;
+    }
+
+    .slide-content {
+        padding: 0.8rem;
+    }
+
+    .slide-title {
+        font-size: 0.9rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .slide-meta {
+        display: flex;
+        gap: 0.8rem;
+        font-size: 0.7rem;
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .slide-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    .slide-meta-item i {
+        color: #D8BF64;
+        font-size: 0.65rem;
+    }
+
+    /* 列表项 */
+    .list-item {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: rgba(216, 191, 100, 0.05);
+        border: 1px solid rgba(216, 191, 100, 0.15);
+        border-radius: 0.6rem;
+        transition: all 0.3s;
+    }
+
+    .list-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .list-item:hover {
+        background: rgba(216, 191, 100, 0.08);
+        border-color: rgba(216, 191, 100, 0.3);
+        transform: translateX(5px);
+    }
+
+    .list-item-title {
         color: #F5EDC8;
         font-size: 1.1rem;
         font-family: 'Noto Serif SC', serif;
@@ -142,19 +388,27 @@
         transition: all 0.3s;
     }
 
-    .activity-title:hover {
+    .list-item-title:hover {
         color: #E8D59B;
         text-shadow: 0 0 10px rgba(216, 191, 100, 0.3);
     }
 
-    .activity-meta {
-        font-size: 0.85rem;
+    .list-item-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
         color: rgba(232, 213, 155, 0.5);
+    }
+
+    .list-item-meta i {
+        color: #D8BF64;
+        margin-right: 0.3rem;
     }
 
     .empty-state {
         text-align: center;
-        padding: 3rem 2rem;
+        padding: 4rem 2rem;
         color: rgba(232, 213, 155, 0.5);
     }
 
@@ -166,188 +420,606 @@
 
     .btn-action {
         display: inline-block;
-        margin-top: 1rem;
-        padding: 0.8rem 2rem;
+        margin-top: 1.5rem;
+        padding: 1rem 2.5rem;
         background: linear-gradient(135deg, #D8BF64, #E8D59B);
         color: #0F0F1A;
-        border-radius: 2rem;
+        border-radius: 0.6rem;
         text-decoration: none;
         font-weight: 600;
         font-family: 'Noto Serif SC', serif;
         transition: all 0.3s;
+        box-shadow: 0 6px 20px rgba(216, 191, 100, 0.3);
     }
 
     .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(216, 191, 100, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.5);
     }
 
-    @media (max-width: 768px) {
-        .activity-grid {
+    /* 右侧快捷入口 */
+    .quick-links {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1.2rem;
+        background: rgba(216, 191, 100, 0.04);
+        border: none;
+        border-radius: 0.8rem;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .quick-link:hover {
+        background: rgba(216, 191, 100, 0.08);
+        transform: translateY(-3px) translateX(5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-link-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .quick-link-text {
+        flex: 1;
+    }
+
+    .quick-link-title {
+        color: #F5EDC8;
+        font-size: 1.1rem;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.3rem;
+    }
+
+    .quick-link-desc {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+    }
+
+    .quick-link-arrow {
+        color: rgba(216, 191, 100, 0.4);
+        font-size: 1.2rem;
+        transition: all 0.3s;
+    }
+
+    .quick-link:hover .quick-link-arrow {
+        color: #D8BF64;
+        transform: translateX(5px);
+    }
+
+    /* 滑动块容器 */
+    .slider-wrapper {
+        position: relative;
+        margin-top: 1rem;
+    }
+
+    .slider-container {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 0.5rem;
+    }
+
+    .slider-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .slider-item {
+        flex: 0 0 calc(33.333% - 0.67rem);
+        min-width: 200px;
+    }
+
+    /* 滑动块样式 */
+    .slide-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 0.8rem;
+        overflow: hidden;
+        border: none;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+    }
+
+    .slide-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .slide-cover {
+        height: 120px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .slide-cover .slide-badge {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: #D8BF64;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.8rem;
+        font-size: 0.7rem;
+        border: none;
+    }
+
+    .slide-content {
+        padding: 0.8rem;
+    }
+
+    .slide-title {
+        font-size: 0.9rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .slide-meta {
+        display: flex;
+        gap: 0.8rem;
+        font-size: 0.7rem;
+        color: rgba(232, 213, 155, 0.5);
+    }
+
+    .slide-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    .slide-meta-item i {
+        color: #D8BF64;
+        font-size: 0.65rem;
+    }
+
+    /* 缩略图网格 */
+    .thumbnail-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .thumbnail-card {
+        position: relative;
+        border-radius: 0.8rem;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        aspect-ratio: 4 / 3;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .thumbnail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(216, 191, 100, 0.25);
+    }
+
+    .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s;
+    }
+
+    .thumbnail-card:hover .thumbnail-image {
+        transform: scale(1.05);
+    }
+
+    .thumbnail-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.15), rgba(232, 213, 155, 0.08));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: rgba(216, 191, 100, 0.4);
+    }
+
+    .thumbnail-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(10, 10, 15, 0.95) 0%, rgba(10, 10, 15, 0.6) 60%, transparent 100%);
+        padding: 0.8rem;
+        transition: all 0.3s;
+    }
+
+    .thumbnail-title {
+        color: #F5EDC8;
+        font-size: 0.85rem;
+        font-family: 'Noto Serif SC', serif;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .thumbnail-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-size: 0.7rem;
+        color: rgba(232, 213, 155, 0.5);
+        margin-top: 0.3rem;
+    }
+
+    .thumbnail-meta i {
+        color: #D8BF64;
+        margin-right: 0.2rem;
+    }
+
+    .thumbnail-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(216, 191, 100, 0.9);
+        color: #0F0F1A;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+        .sections-container {
             grid-template-columns: 1fr;
         }
         
-        .stats-grid {
+        .thumbnail-grid {
             grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 2rem;
+        }
+
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stats-bar {
+            justify-content: center;
+        }
+
+        .stat-badge {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .username {
+            font-size: 2rem;
         }
     }
 </style>
 
 <div class="profile-container">
+    <!-- 头部信息 -->
     <div class="profile-header">
-        <div class="avatar" style="position: relative; display: inline-block;">
-            {% if user.userprofile.avatar %}
-                <img src="{{ user.userprofile.avatar.url }}" alt="头像" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-            {% else %}
-                <i class="fas fa-user"></i>
-            {% endif %}
-            <a href="{% url 'edit_avatar' %}" style="position: absolute; bottom: 0; right: 0; background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0F0F1A; border: 3px solid rgba(20, 22, 30, 0.9); text-decoration: none; transition: all 0.3s;" title="修改头像" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                <i class="fas fa-camera"></i>
-            </a>
-        </div>
-        <h1 class="username">{{ user.username }}</h1>
-        {% if user.email %}
-        <p class="user-email">{{ user.email }}</p>
-        {% endif %}
+        <div class="profile-header-content">
+            <div class="avatar-section">
+                <div class="avatar">
+                    {% if user.userprofile.avatar %}
+                        <img src="{{ user.userprofile.avatar.url }}" alt="头像">
+                    {% else %}
+                        <i class="fas fa-user"></i>
+                    {% endif %}
+                    <a href="{% url 'edit_avatar' %}" class="avatar-edit-btn" title="修改头像">
+                        <i class="fas fa-camera"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-info-section">
+                <h1 class="username">{{ user.get_full_name|default:user.username }}</h1>
+                {% if user.email %}
+                <p class="user-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                {% endif %}
 
-        <!-- 统计数据 -->
-        <div class="stats-grid">
-            <a href="{% url 'user_liked_posts' %}" class="stat-card" title="查看我的点赞">
-                <span class="stat-icon" style="color: #E74C3C;">
-                    <i class="fas fa-heart"></i>
-                </span>
-                <span class="stat-number">{{ total_likes }}</span>
-                <span class="stat-label">帖子点赞</span>
-            </a>
-            
-            <a href="{% url 'user_collected_posts' %}" class="stat-card" title="查看我的收藏">
-                <span class="stat-icon" style="color: #F39C12;">
-                    <i class="fas fa-star"></i>
-                </span>
-                <span class="stat-number">{{ total_collections }}</span>
-                <span class="stat-label">帖子收藏</span>
-            </a>
-            
-            <a href="{% url 'user_liked_news' %}" class="stat-card" title="查看我点赞的资讯">
-                <span class="stat-icon" style="color: #FF6B81;">
-                    <i class="fas fa-thumbs-up"></i>
-                </span>
-                <span class="stat-number">{{ news_liked_count }}</span>
-                <span class="stat-label">资讯点赞</span>
-            </a>
-            
-            <a href="{% url 'user_collected_news' %}" class="stat-card" title="查看我收藏的资讯">
-                <span class="stat-icon" style="color: #FFA502;">
-                    <i class="fas fa-bookmark"></i>
-                </span>
-                <span class="stat-number">{{ news_collected_count }}</span>
-                <span class="stat-label">资讯收藏</span>
-            </a>
-            
-            <a href="{% url 'user_comments' %}" class="stat-card" title="查看我的评论">
-                <span class="stat-icon" style="color: #3498DB;">
-                    <i class="fas fa-comments"></i>
-                </span>
-                <span class="stat-number">{{ total_comments }}</span>
-                <span class="stat-label">评论记录</span>
-            </a>
-            
-            <a href="{% url 'user_posts' %}" class="stat-card" title="查看我的帖子">
-                <span class="stat-icon" style="color: #2ECC71;">
-                    <i class="fas fa-file-alt"></i>
-                </span>
-                <span class="stat-number">{{ total_posts }}</span>
-                <span class="stat-label">发帖记录</span>
-            </a>
-            
-            <a href="{% url 'quiz:wrong_questions' %}" class="stat-card" title="查看错题集">
-                <span class="stat-icon" style="color: #E74C3C;">
-                    <i class="fas fa-book-open"></i>
-                </span>
-                <span class="stat-label" style="margin-top: 0.5rem;">答题错题集</span>
-            </a>
-            
-            <a href="{% url 'quiz:user_progress' %}" class="stat-card" title="查看学习进度">
-                <span class="stat-icon" style="color: #9B59B6;">
-                    <i class="fas fa-chart-pie"></i>
-                </span>
-                <span class="stat-label" style="margin-top: 0.5rem;">学习进度</span>
-            </a>
+                <!-- 统计数据 -->
+                <div class="stats-bar">
+                    <a href="{% url 'user_liked_posts' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.3), rgba(231, 76, 60, 0.1)); color: #E74C3C;">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ total_likes }}</div>
+                            <div class="stat-badge-label">帖子点赞</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'user_collected_posts' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), rgba(243, 156, 18, 0.1)); color: #F39C12;">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ total_collections }}</div>
+                            <div class="stat-badge-label">帖子收藏</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'user_liked_news' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(255, 107, 129, 0.3), rgba(255, 107, 129, 0.1)); color: #FF6B81;">
+                            <i class="fas fa-thumbs-up"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ news_liked_count }}</div>
+                            <div class="stat-badge-label">资讯点赞</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'user_collected_news' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(255, 165, 2, 0.3), rgba(255, 165, 2, 0.1)); color: #FFA502;">
+                            <i class="fas fa-bookmark"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ news_collected_count }}</div>
+                            <div class="stat-badge-label">资讯收藏</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'user_comments' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(52, 152, 219, 0.1)); color: #3498DB;">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ total_comments }}</div>
+                            <div class="stat-badge-label">评论记录</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'user_posts' %}" class="stat-badge">
+                        <div class="stat-badge-icon" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.3), rgba(46, 204, 113, 0.1)); color: #2ECC71;">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-badge-info">
+                            <div class="stat-badge-number">{{ total_posts }}</div>
+                            <div class="stat-badge-label">发帖记录</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 最近动态 -->
-    <div class="recent-activity">
-        <h2 class="section-title">
-            <i class="fas fa-chart-line"></i>
-            最近动态
-        </h2>
-        
-        <div class="activity-grid">
-            <!-- 最近发帖 -->
-            <div class="activity-section">
-                <h3 style="color: #F5EDC8; margin-bottom: 1.5rem; font-size: 1.3rem; font-family: 'Noto Serif SC', serif;">
-                    <i class="fas fa-pen-fancy"></i> 最近发帖
-                </h3>
+    <!-- 内容区域 -->
+    <div class="sections-container">
+        <!-- 左侧：最近浏览 -->
+        <div>
+            <!-- 最近浏览的资讯 -->
+            <div class="section" style="margin-bottom: 2rem;">
+                <div class="section-header">
+                    <i class="fas fa-newspaper"></i>
+                    <h2>最近浏览的资讯</h2>
+                </div>
                 
-                {% if recent_posts %}
-                    {% for post in recent_posts %}
-                    <div class="activity-item">
-                        <a href="{% url 'post_detail' post.id %}" class="activity-title">
-                            {{ post.title }}
-                        </a>
-                        <div class="activity-meta">
-                            <span><i class="fas fa-calendar"></i> {{ post.created_at|date:"Y-m-d H:i" }}</span>
-                            <span style="margin-left: 1rem;"><i class="fas fa-eye"></i> {{ post.views }} 浏览</span>
-                            <span style="margin-left: 1rem;"><i class="fas fa-heart"></i> {{ post.likes }} 点赞</span>
+                {% if recent_news %}
+                <div class="slider-wrapper">
+                    <button class="slider-arrow slider-arrow-left" data-slider="newsSlider" data-direction="-1">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider-container" id="newsSlider">
+                        {% for news in recent_news %}
+                        <div class="slider-item">
+                            <a href="{% url 'news_detail' news.id %}" class="slide-card">
+                                {% if news.cover_image %}
+                                <div class="slide-cover" style="background-image: url('{{ news.cover_image.url }}');">
+                                    {% if news.category %}
+                                    <span class="slide-badge">{{ news.get_category_display }}</span>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="slide-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.1) 0%, rgba(28, 30, 38, 0.8) 100%); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-newspaper" style="font-size: 2rem; color: rgba(216, 191, 100, 0.3);"></i>
+                                </div>
+                                {% endif %}
+                                <div class="slide-content">
+                                    <div class="slide-title">{{ news.title }}</div>
+                                    <div class="slide-meta">
+                                        <span class="slide-meta-item">
+                                            <i class="fas fa-eye"></i> {{ news.views }}
+                                        </span>
+                                        <span class="slide-meta-item">
+                                            <i class="fas fa-heart"></i> {{ news.likes }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                    
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <a href="{% url 'create_post' %}" class="btn-action">
-                            <i class="fas fa-plus-circle"></i> 发布新帖子
-                        </a>
-                    </div>
+                    <button class="slider-arrow slider-arrow-right" data-slider="newsSlider" data-direction="1">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
                 {% else %}
                 <div class="empty-state">
-                    <i class="fas fa-file-alt"></i>
-                    <p>暂无发帖记录</p>
-                    <a href="{% url 'create_post' %}" class="btn-action">
-                        <i class="fas fa-pen-fancy"></i> 发布第一个帖子
+                    <i class="fas fa-newspaper"></i>
+                    <p>还没有浏览过资讯</p>
+                    <a href="{% url 'news_list' %}" class="btn-action" style="margin-top: 1rem;">
+                        <i class="fas fa-compass"></i> 去浏览资讯
                     </a>
                 </div>
                 {% endif %}
             </div>
-            
-            <!-- 最近评论 -->
-            <div class="activity-section">
-                <h3 style="color: #F5EDC8; margin-bottom: 1.5rem; font-size: 1.3rem; font-family: 'Noto Serif SC', serif;">
-                    <i class="fas fa-comment-dots"></i> 最近评论
-                </h3>
+
+            <!-- 最近浏览的帖子 -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fas fa-comments"></i>
+                    <h2>最近浏览的帖子</h2>
+                </div>
                 
-                {% if recent_comments %}
-                    {% for comment in recent_comments %}
-                    <div class="activity-item">
-                        <a href="{% url 'post_detail' comment.post.id %}#comment-{{ comment.id }}" class="activity-title" style="font-size: 1rem;">
-                            {{ comment.content|truncatechars:50 }}
-                        </a>
-                        <div class="activity-meta">
-                            <span><i class="fas fa-calendar"></i> {{ comment.created_at|date:"Y-m-d H:i" }}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.8rem; color: rgba(232, 213, 155, 0.6);">
-                                评论于：{{ comment.post.title|truncatechars:20 }}
-                            </div>
+                {% if recent_posts_browsed %}
+                <div class="slider-wrapper">
+                    <button class="slider-arrow slider-arrow-left" data-slider="postsSlider" data-direction="-1">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider-container" id="postsSlider">
+                        {% for post in recent_posts_browsed %}
+                        <div class="slider-item">
+                            <a href="{% url 'post_detail' post.id %}" class="slide-card">
+                                {% if post.cover_image %}
+                                <div class="slide-cover" style="background-image: url('{{ post.cover_image.url }}');">
+                                    {% if post.topic %}
+                                    <span class="slide-badge">{{ post.topic.name }}</span>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="slide-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.1) 0%, rgba(28, 30, 38, 0.8) 100%); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-file-alt" style="font-size: 2rem; color: rgba(216, 191, 100, 0.3);"></i>
+                                </div>
+                                {% endif %}
+                                <div class="slide-content">
+                                    <div class="slide-title">{{ post.title }}</div>
+                                    <div class="slide-meta">
+                                        <span class="slide-meta-item">
+                                            <i class="fas fa-eye"></i> {{ post.views }}
+                                        </span>
+                                        <span class="slide-meta-item">
+                                            <i class="fas fa-heart"></i> {{ post.likes }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    <button class="slider-arrow slider-arrow-right" data-slider="postsSlider" data-direction="1">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-comments"></i>
-                    <p>暂无评论记录</p>
+                    <p>还没有浏览过帖子</p>
+                    <a href="{% url 'community_posts' %}" class="btn-action" style="margin-top: 1rem;">
+                        <i class="fas fa-compass"></i> 去浏览帖子
+                    </a>
                 </div>
                 {% endif %}
             </div>
         </div>
+
+        <!-- 右侧：快捷入口 -->
+        <div>
+            <div class="section" style="height: 100%;">
+                <div class="section-header">
+                    <i class="fas fa-bolt"></i>
+                    <h2>快捷入口</h2>
+                </div>
+                
+                <div class="quick-links">
+                    <a href="{% url 'quiz:wrong_questions' %}" class="quick-link">
+                        <div class="quick-link-icon" style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.3), rgba(231, 76, 60, 0.1)); color: #E74C3C;">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="quick-link-text">
+                            <div class="quick-link-title">答题错题集</div>
+                            <div class="quick-link-desc">查看和复习错题</div>
+                        </div>
+                        <i class="fas fa-chevron-right quick-link-arrow"></i>
+                    </a>
+                    
+                    <a href="{% url 'quiz:user_progress' %}" class="quick-link">
+                        <div class="quick-link-icon" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.3), rgba(155, 89, 182, 0.1)); color: #9B59B6;">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="quick-link-text">
+                            <div class="quick-link-title">答题进度</div>
+                            <div class="quick-link-desc">查看闯关记录</div>
+                        </div>
+                        <i class="fas fa-chevron-right quick-link-arrow"></i>
+                    </a>
+                    
+                    <a href="{% url 'knowledge:my_progress' %}" class="quick-link">
+                        <div class="quick-link-icon" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1)); color: #FFD700;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="quick-link-text">
+                            <div class="quick-link-title">舞蹈学习进度</div>
+                            <div class="quick-link-desc">查看学习记录</div>
+                        </div>
+                        <i class="fas fa-chevron-right quick-link-arrow"></i>
+                    </a>
+                    
+                    <a href="{% url 'knowledge:knowledge_map' %}" class="quick-link">
+                        <div class="quick-link-icon" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.3), rgba(216, 191, 100, 0.1)); color: #D8BF64;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="quick-link-text">
+                            <div class="quick-link-title">知识图谱</div>
+                            <div class="quick-link-desc">探索舞蹈知识</div>
+                        </div>
+                        <i class="fas fa-chevron-right quick-link-arrow"></i>
+                    </a>
+                    
+                    <a href="{% url 'knowledge:recommendations' %}" class="quick-link">
+                        <div class="quick-link-icon" style="background: linear-gradient(135deg, rgba(255, 107, 129, 0.3), rgba(255, 107, 129, 0.1)); color: #FF6B81;">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div class="quick-link-text">
+                            <div class="quick-link-title">个性化推荐</div>
+                            <div class="quick-link-desc">发现适合你的内容</div>
+                        </div>
+                        <i class="fas fa-chevron-right quick-link-arrow"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// 滑动块箭头按钮事件处理
+document.querySelectorAll('.slider-arrow').forEach(function(arrow) {
+    arrow.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var sliderId = this.getAttribute('data-slider');
+        var direction = parseInt(this.getAttribute('data-direction'));
+        var slider = document.getElementById(sliderId);
+        
+        if (slider) {
+            var scrollAmount = 300;
+            slider.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

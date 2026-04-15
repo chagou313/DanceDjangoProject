@@ -1,0 +1,467 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}我的学习进度 - 舞蹈知识图谱{% endblock %}
+
+{% block content %}
+<style>
+    .progress-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* 页面头部 */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2.5rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.4);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 3px;
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 1.1rem;
+    }
+
+    /* 总体统计 */
+    .overall-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #DAA520;
+        margin-bottom: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #F5EDC8;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+    }
+
+    /* 项目进度列表 */
+    .projects-section {
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .project-progress-item {
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid rgba(216, 191, 100, 0.2);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .project-progress-item:hover {
+        border-color: rgba(216, 191, 100, 0.5);
+        background: rgba(216, 191, 100, 0.08);
+        transform: translateX(5px);
+    }
+
+    .project-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .project-name {
+        font-size: 1.5rem;
+        color: #F5EDC8;
+        font-weight: bold;
+        flex: 1;
+    }
+
+    .project-category {
+        display: inline-block;
+        background: rgba(216, 191, 100, 0.15);
+        color: #DAA520;
+        padding: 0.4rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        margin-left: 1rem;
+    }
+
+    .completion-badge {
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        font-weight: bold;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .completion-badge.completed {
+        background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+        color: #1a1c24;
+    }
+
+    .completion-badge.in-progress {
+        background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+        color: #1a1c24;
+    }
+
+    .completion-badge.not-started {
+        background: rgba(158, 158, 158, 0.3);
+        color: #9E9E9E;
+    }
+
+    /* 进度条 */
+    .progress-bar-container {
+        background: rgba(216, 191, 100, 0.1);
+        border-radius: 1rem;
+        height: 12px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #DAA520 0%, #FFD700 100%);
+        border-radius: 1rem;
+        transition: width 0.5s ease;
+        position: relative;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%
+        );
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* 状态统计 */
+    .status-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .status-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(20, 22, 30, 0.5);
+        border-radius: 0.8rem;
+        border: 1px solid rgba(216, 191, 100, 0.15);
+    }
+
+    .status-count {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+    }
+
+    .status-label {
+        font-size: 0.8rem;
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    .status-item.not-started .status-count { color: #9E9E9E; }
+    .status-item.learning .status-count { color: #FFB74D; }
+    .status-item.completed .status-count { color: #64B5F6; }
+    .status-item.mastered .status-count { color: #81C784; }
+
+    /* 熟练度指示 */
+    .proficiency-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .proficiency-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .proficiency-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(216, 191, 100, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .proficiency-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #DAA520 0%, #FFD700 100%);
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+
+    .proficiency-value {
+        color: #DAA520;
+        font-weight: bold;
+        font-size: 0.9rem;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    /* 空状态 */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h3 {
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: rgba(232, 213, 155, 0.6);
+        margin-bottom: 2rem;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(218, 165, 32, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.3);
+        color: #E8D59B;
+    }
+
+    .btn-secondary:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        background: rgba(216, 191, 100, 0.2);
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+        .progress-container {
+            padding: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .status-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .project-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .project-category {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<div class="progress-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> 我的学习进度</h1>
+        <p>追踪你的学习轨迹，见证每一次进步</p>
+    </div>
+
+    {% if progress_list %}
+    <!-- 总体统计 -->
+    <div class="overall-stats">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-value">{{ total_projects }}</div>
+            <div class="stat-label">学习项目</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-drum"></i></div>
+            <div class="stat-value">{{ total_moves }}</div>
+            <div class="stat-label">学习招式</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+            <div class="stat-value">{{ mastered_projects }}</div>
+            <div class="stat-label">已掌握项目</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+            <div class="stat-value">{{ avg_completion|floatformat:1 }}%</div>
+            <div class="stat-label">平均完成度</div>
+        </div>
+    </div>
+
+    <!-- 项目进度列表 -->
+    <div class="projects-section">
+        <h2 class="section-title">
+            <i class="fas fa-list"></i> 各项目进度详情
+        </h2>
+
+        {% for pp in progress_list %}
+        <div class="project-progress-item" onclick="window.location.href='/knowledge/learning-path/{{ pp.project.id }}/'">
+            <div class="project-header">
+                <div>
+                    <div class="project-name">{{ pp.project.name }}</div>
+                    <span class="project-category">{{ pp.project.category }}</span>
+                </div>
+                
+                {% if pp.completion_rate == 100 %}
+                    <span class="completion-badge completed">
+                        <i class="fas fa-check-circle"></i> 已完成
+                    </span>
+                {% elif pp.completion_rate > 0 %}
+                    <span class="completion-badge in-progress">
+                        <i class="fas fa-spinner"></i> 进行中 {{ pp.completion_rate|floatformat:0 }}%
+                    </span>
+                {% else %}
+                    <span class="completion-badge not-started">
+                        <i class="fas fa-hourglass-start"></i> 未开始
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- 进度条 -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ pp.completion_rate }}%;"></div>
+            </div>
+
+            <!-- 状态统计 -->
+            <div class="status-stats">
+                <div class="status-item not-started">
+                    <div class="status-count">{{ pp.not_started }}</div>
+                    <div class="status-label">未开始</div>
+                </div>
+                <div class="status-item learning">
+                    <div class="status-count">{{ pp.learning }}</div>
+                    <div class="status-label">学习中</div>
+                </div>
+                <div class="status-item completed">
+                    <div class="status-count">{{ pp.completed }}</div>
+                    <div class="status-label">已完成</div>
+                </div>
+                <div class="status-item mastered">
+                    <div class="status-count">{{ pp.mastered }}</div>
+                    <div class="status-label">已掌握</div>
+                </div>
+            </div>
+
+            <!-- 熟练度指示 -->
+            <div class="proficiency-indicator">
+                <span class="proficiency-label">平均熟练度:</span>
+                <div class="proficiency-bar">
+                    <div class="proficiency-fill" style="width: {{ pp.avg_proficiency }}%;"></div>
+                </div>
+                <span class="proficiency-value">{{ pp.avg_proficiency|floatformat:1 }}%</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- 空状态 -->
+    <div class="empty-state" style="background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%); border-radius: 2rem; border: 2px solid rgba(216, 191, 100, 0.3);">
+        <i class="fas fa-book-reader"></i>
+        <h3>还没有开始学习</h3>
+        <p>去知识图谱选择一个舞蹈项目，开始你的学习之旅吧！</p>
+        <a href="{% url 'knowledge:knowledge_map' %}" class="action-btn btn-primary">
+            <i class="fas fa-brain"></i> 前往知识图谱
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 操作按钮 -->
+    <div style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'knowledge:recommendations' %}" class="action-btn btn-secondary">
+            <i class="fas fa-magic"></i> 个性化推荐
+        </a>
+        <a href="{% url 'knowledge:knowledge_map' %}" class="action-btn btn-secondary">
+            <i class="fas fa-brain"></i> 知识图谱
+        </a>
+    </div>
+</div>
+{% endblock %}

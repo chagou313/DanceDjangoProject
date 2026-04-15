@@ -1,199 +1,234 @@
 {% extends 'dance/base.html' %}
 
-{% block title %}{{ page_title }} - 非遗传统舞蹈学习交流平台{% endblock %}
+{% block title %}{{ page_title }} - 个人中心{% endblock %}
 
 {% block content %}
 <style>
-    .page-container {
+    .profile-container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
     }
 
-    .page-header {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 3rem;
-        text-align: center;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        margin-bottom: 2rem;
-    }
-
-    .page-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-
-    .page-title {
-        font-size: 2.5rem;
-        color: #F5EDC8;
-        font-family: 'Noto Serif SC', serif;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-count {
-        font-size: 1.2rem;
-        color: rgba(232, 213, 155, 0.7);
-    }
-
     .back-link {
-        display: inline-block;
-        margin-top: 1.5rem;
-        padding: 0.8rem 2rem;
-        background: transparent;
-        border: 2px solid rgba(216, 191, 100, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         color: #E8D59B;
-        border-radius: 2rem;
         text-decoration: none;
-        font-family: 'Noto Serif SC', serif;
+        padding: 0.6rem 1.2rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 1px solid rgba(216, 191, 100, 0.3);
+        border-radius: 0.8rem;
+        margin-bottom: 2rem;
         transition: all 0.3s;
     }
 
     .back-link:hover {
-        background: rgba(216, 191, 100, 0.15);
-        border-color: rgba(216, 191, 100, 0.6);
-        transform: translateX(-5px);
+        background: rgba(216, 191, 100, 0.2);
+        border-color: rgba(216, 191, 100, 0.5);
+        transform: translateX(-3px);
     }
 
-    /* 帖子列表 */
-    .posts-list {
+    .page-title {
+        font-size: 2rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 2rem;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .page-title i {
+        color: {{ color }};
+    }
+
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 1.5rem;
     }
 
     .post-card {
         background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 1.5rem;
-        padding: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.3);
+        border-radius: 0.8rem;
+        overflow: hidden;
+        border: none;
         transition: all 0.3s;
         text-decoration: none;
-        display: block;
+        display: flex;
+        flex-direction: column;
     }
 
     .post-card:hover {
-        border-color: rgba(216, 191, 100, 0.6);
-        transform: translateX(10px);
-        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .post-title {
-        color: #F5EDC8;
-        font-size: 1.4rem;
-        font-family: 'Noto Serif SC', serif;
-        margin-bottom: 1rem;
-        line-height: 1.4;
+    .post-card-cover {
+        height: 180px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
     }
 
-    .post-meta {
+    .post-card-cover .topic-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: #D8BF64;
+        padding: 0.3rem 0.8rem;
+        border-radius: 0.8rem;
+        font-size: 0.8rem;
+        border: none;
+    }
+
+    .post-card-content {
+        padding: 1.5rem;
+        flex: 1;
         display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .post-card-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .post-card-summary {
         font-size: 0.9rem;
-        color: rgba(232, 213, 155, 0.6);
+        color: rgba(232, 213, 155, 0.7);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .post-card-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: rgba(232, 213, 155, 0.5);
+        padding-top: 1rem;
+        border-top: 1px solid rgba(216, 191, 100, 0.15);
     }
 
     .meta-item {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
 
-    .topic-tag {
-        display: inline-block;
-        padding: 0.4rem 1rem;
-        background: rgba(216, 191, 100, 0.15);
-        border-radius: 1rem;
-        font-size: 0.85rem;
+    .meta-item i {
         color: #D8BF64;
     }
 
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.3);
+        color: rgba(232, 213, 155, 0.6);
     }
 
     .empty-state i {
-        font-size: 5rem;
+        font-size: 4rem;
+        margin-bottom: 1rem;
         color: rgba(216, 191, 100, 0.3);
-        margin-bottom: 1.5rem;
     }
 
     .empty-state p {
-        font-size: 1.2rem;
-        color: rgba(232, 213, 155, 0.6);
-        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
     }
 
     @media (max-width: 768px) {
-        .page-title {
-            font-size: 1.8rem;
+        .profile-container {
+            padding: 1rem;
         }
-        
-        .post-meta {
-            flex-direction: column;
-            gap: 0.8rem;
+
+        .posts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
         }
     }
 </style>
 
 <div class="page-container">
-    <div class="page-header">
-        <span class="page-icon" style="color: {{ color }};">
-            <i class="{{ icon }}"></i>
-        </span>
-        <h1 class="page-title">{{ page_title }}</h1>
-        <p class="page-count">共 {{ total_count }} 条记录</p>
+    <div class="profile-container">
         <a href="{% url 'profile' %}" class="back-link">
             <i class="fas fa-arrow-left"></i> 返回个人主页
         </a>
-    </div>
 
-    {% if posts %}
-    <div class="posts-list">
-        {% for post in posts %}
-        <a href="{% url 'post_detail' post.id %}" class="post-card">
-            <h2 class="post-title">{{ post.title }}</h2>
-            <div class="post-meta">
-                <span class="meta-item">
-                    <i class="fas fa-user"></i>
-                    {{ post.author.username }}
-                </span>
-                {% if post.topic %}
-                <span class="meta-item">
-                    <i class="fas fa-tag"></i>
-                    <span class="topic-tag">{{ post.topic.name }}</span>
-                </span>
+        <h1 class="page-title">
+            <i class="fas {{ icon }}"></i> {{ page_title }}
+            <span style="font-size: 1rem; color: rgba(232, 213, 155, 0.5); margin-left: 0.5rem;">
+                (共 {{ total_count }} 条)
+            </span>
+        </h1>
+
+        {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}" class="post-card">
+                {% if post.cover_image %}
+                <div class="post-card-cover" style="background-image: url('{{ post.cover_image.url }}');">
+                    {% if post.topic %}
+                    <span class="topic-badge">{{ post.topic.name }}</span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="post-card-cover" style="background: linear-gradient(135deg, rgba(216, 191, 100, 0.1) 0%, rgba(28, 30, 38, 0.8) 100%); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-file-alt" style="font-size: 3rem; color: rgba(216, 191, 100, 0.3);"></i>
+                    {% if post.topic %}
+                    <span class="topic-badge">{{ post.topic.name }}</span>
+                    {% endif %}
+                </div>
                 {% endif %}
-                <span class="meta-item">
-                    <i class="fas fa-calendar"></i>
-                    {{ post.created_at|date:"Y-m-d H:i" }}
-                </span>
-                <span class="meta-item">
-                    <i class="fas fa-eye"></i>
-                    {{ post.views }} 浏览
-                </span>
-                <span class="meta-item">
-                    <i class="fas fa-heart"></i>
-                    {{ post.likes }} 点赞
-                </span>
-            </div>
-        </a>
-        {% endfor %}
+                <div class="post-card-content">
+                    <h3 class="post-card-title">{{ post.title }}</h3>
+                    {% if post.content %}
+                    <p class="post-card-summary">{{ post.content|truncatewords:30 }}</p>
+                    {% endif %}
+                    <div class="post-card-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i> {{ post.author.username }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i> {{ post.created_at|date:"Y-m-d" }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-eye"></i> {{ post.views }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-heart"></i> {{ post.likes }}
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas {{ icon }}"></i>
+            <p>还没有{{ page_title }}的记录</p>
+            <a href="{% url 'community_posts' %}" class="back-link" style="margin-top: 1.5rem; display: inline-flex;">
+                <i class="fas fa-compass"></i> 去逛逛社区
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <i class="{{ icon }}"></i>
-        <p>暂无相关记录</p>
-        <a href="{% url 'community_posts' %}" style="display: inline-block; padding: 0.8rem 2rem; background: linear-gradient(135deg, #D8BF64, #E8D59B); color: #0F0F1A; border-radius: 2rem; text-decoration: none; font-weight: 600; font-family: 'Noto Serif SC', serif;">
-            <i class="fas fa-compass"></i> 去逛逛社区
-        </a>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

@@ -57,37 +57,6 @@
         font-family: 'Noto Serif SC', serif;
     }
 
-    .project-select {
-        width: 100%;
-        padding: 1rem 1.5rem;
-        background: rgba(216, 191, 100, 0.08);
-        border: 2px solid rgba(216, 191, 100, 0.3);
-        border-radius: 1rem;
-        color: #E8D59B;
-        font-size: 1rem;
-        font-family: 'Noto Serif SC', serif;
-        cursor: pointer;
-        transition: all 0.3s;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D8BF64' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1.5rem center;
-        padding-right: 3rem;
-    }
-
-    .project-select:focus {
-        outline: none;
-        border-color: rgba(216, 191, 100, 0.6);
-        box-shadow: 0 0 20px rgba(216, 191, 100, 0.2);
-    }
-
-    .project-select option {
-        background: #14161e;
-        color: #E8D59B;
-    }
-
     /* 搜索框样式 */
     .search-box {
         position: relative;
@@ -96,95 +65,37 @@
 
     .project-search-input {
         width: 100%;
-        padding: 1rem 3rem 1rem 1.5rem;
-        background: rgba(216, 191, 100, 0.08);
+        padding: 0.8rem 2.5rem 0.8rem 1rem;
+        background: rgba(20, 22, 30, 0.9);
         border: 2px solid rgba(216, 191, 100, 0.3);
-        border-radius: 1rem;
+        border-radius: 0.5rem;
         color: #E8D59B;
         font-size: 1rem;
         font-family: 'Noto Serif SC', serif;
-        transition: all 0.3s;
+    }
+
+    .project-search-input:focus {
+        outline: none;
+        border-color: rgba(216, 191, 100, 0.6);
     }
 
     .project-search-input::placeholder {
         color: rgba(232, 213, 155, 0.4);
     }
 
-    .project-search-input:focus {
-        outline: none;
-        border-color: rgba(216, 191, 100, 0.6);
-        box-shadow: 0 0 20px rgba(216, 191, 100, 0.2);
-    }
-
     .search-clear {
         position: absolute;
-        right: 1.5rem;
+        right: 0.8rem;
         top: 50%;
         transform: translateY(-50%);
         color: rgba(232, 213, 155, 0.5);
         cursor: pointer;
-        transition: all 0.2s;
         font-size: 0.9rem;
+        padding: 0.3rem;
     }
 
     .search-clear:hover {
         color: #F5EDC8;
-    }
-
-    /* 下拉列表 */
-    .project-dropdown {
-        position: absolute;
-        top: calc(100% + 0.5rem);
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        background: rgba(20, 22, 30, 0.98);
-        border: 2px solid rgba(216, 191, 100, 0.3);
-        border-radius: 1rem;
-        max-height: 300px;
-        overflow-y: auto;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .dropdown-list {
-        padding: 0.5rem;
-    }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        padding: 0.8rem 1rem;
-        color: #E8D59B;
-        font-size: 0.95rem;
-        border-radius: 0.6rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .dropdown-item:hover {
-        background: rgba(216, 191, 100, 0.15);
-    }
-
-    .dropdown-item i {
-        color: rgba(216, 191, 100, 0.6);
-        font-size: 0.9rem;
-    }
-
-    .dropdown-item.no-result {
-        color: rgba(232, 213, 155, 0.4);
-        cursor: default;
-    }
-
-    .dropdown-item.no-result:hover {
-        background: transparent;
-    }
-
-    .dropdown-item mark {
-        background: rgba(216, 191, 100, 0.3);
-        color: #F5EDC8;
-        padding: 0 0.2rem;
-        border-radius: 0.2rem;
     }
 
     /* 知识图谱展示区 */
@@ -541,6 +452,7 @@
         cursor: pointer;
         transition: all 0.3s;
         margin-top: 2rem;
+        text-decoration: none;
     }
 
     .learning-path-btn:hover {
@@ -739,6 +651,19 @@
         transform: translateY(-2px);
     }
 
+    .recommendation-link {
+        text-decoration: none;
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(255, 215, 0, 0.2) 100%);
+        border-color: rgba(216, 191, 100, 0.5);
+    }
+
+    .recommendation-link:hover {
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.3) 0%, rgba(255, 215, 0, 0.3) 100%);
+        border-color: #FFD700;
+        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+        transform: translateY(-2px);
+    }
+
     /* 响应式设计 */
     @media (max-width: 768px) {
         .knowledge-container {
@@ -764,19 +689,6 @@
 </style>
 
 <div class="knowledge-container">
-    <div class="page-header">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-            <div style="flex: 1;">
-                <h1><i class="fas fa-brain"></i> 知识图谱</h1>
-                <p style="color: rgba(232, 213, 155, 0.7); margin-top: 0.5rem;">构建非遗舞蹈知识体系 · 系统化学习传承</p>
-            </div>
-            {% if request.GET.back_to_quiz %}
-            <a href="/quiz/game/{{ request.GET.back_to_quiz }}/" style="padding: 0.8rem 1.5rem; background: rgba(216, 191, 100, 0.15); border: 2px solid rgba(216, 191, 100, 0.4); border-radius: 1rem; color: #E8D59B; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
-                <i class="fas fa-arrow-left"></i> 返回答题
-            </a>
-            {% endif %}
-        </div>
-    </div>
 
     <!-- 视图切换按钮 -->
     <div class="view-toggle">
@@ -786,6 +698,9 @@
         <button class="toggle-btn" id="graphViewBtn" onclick="switchView('graph')">
             <i class="fas fa-project-diagram"></i> 图谱视图
         </button>
+        <a href="{% url 'knowledge:recommendations' %}" class="toggle-btn recommendation-link">
+            <i class="fas fa-magic"></i> 个性化推荐
+        </a>
         <a href="{% url 'knowledge:ai_chat' %}" class="toggle-btn ai-chat-link">
             <i class="fas fa-robot"></i> AI智能问答
         </a>
@@ -797,34 +712,31 @@
             <i class="fas fa-list"></i> 选择舞蹈项目
         </label>
         
-        <!-- 搜索框 -->
-        <div class="search-box" style="margin-bottom: 1rem;">
-            <input type="text" id="projectSearch" class="project-search-input" placeholder="输入关键词快速搜索..." autocomplete="off">
-            <i class="fas fa-times search-clear" id="searchClear" style="display: none;"></i>
-        </div>
-        
-        <!-- 搜索结果下拉列表 -->
-        <div class="project-dropdown" id="projectDropdown" style="display: none;">
-            <div class="dropdown-list" id="dropdownList">
-                <!-- 搜索结果将在这里动态显示 -->
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <!-- 左侧搜索框 -->
+            <div class="search-box" style="flex: 1; position: relative;">
+                <input type="text" id="projectSearch" class="project-search-input" placeholder="输入关键词搜索项目..." autocomplete="off">
+                <i class="fas fa-times search-clear" id="searchClear" style="display: none; cursor: pointer;" onclick="clearSearch()"></i>
+                <!-- 搜索结果下拉 -->
+                <div id="projectDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: rgba(20, 22, 30, 0.98); border: 2px solid rgba(216, 191, 100, 0.3); border-radius: 0.5rem; max-height: 300px; overflow-y: auto; margin-top: 0.5rem;"></div>
             </div>
-        </div>
-        
-        <!-- 下拉选择框 -->
-        <select id="projectSelect" class="project-select">
-            <option value="">-- 请选择一个舞蹈项目 --</option>
-            {% if dance_projects %}
+            
+            <!-- 右侧下拉选择框 -->
+            <select id="projectSelect" class="project-select" onchange="selectProjectFromSelect(this.value)" style="padding: 0.8rem 1rem; background: rgba(20, 22, 30, 0.9); border: 2px solid rgba(216, 191, 100, 0.3); border-radius: 0.5rem; color: #E8D59B; font-size: 1rem; font-family: 'Noto Serif SC', serif; cursor: pointer; min-width: 220px;">
+                <option value="">-- 查看所有项目 --</option>
                 {% for project in dance_projects %}
                 <option value="{{ project.id }}">{{ project.name }}</option>
                 {% endfor %}
-            {% else %}
-                <option value="" disabled>暂无舞蹈项目数据</option>
-            {% endif %}
-        </select>
+            </select>
+        </div>
         
         {% if dance_projects %}
         <p style="color: rgba(232, 213, 155, 0.5); font-size: 0.85rem; margin-top: 0.8rem;">
-            <i class="fas fa-info-circle"></i> 共有 {{ dance_projects.count }} 个舞蹈项目可供选择 · 可使用搜索框快速查找
+            <i class="fas fa-info-circle"></i> 共有 {{ dance_projects|length }} 个舞蹈项目 · 使用搜索框或右侧下拉框选择
+        </p>
+        {% else %}
+        <p style="color: rgba(255, 0, 0, 0.7); font-size: 0.85rem; margin-top: 0.8rem;">
+            <i class="fas fa-exclamation-triangle"></i> 警告：没有舞蹈项目数据！
         </p>
         {% endif %}
     </div>
@@ -833,8 +745,7 @@
     <div class="graph-display" id="graphDisplay">
         <div class="empty-state">
             <i class="fas fa-sitemap"></i>
-            <h3>请选择舞蹈项目</h3>
-            <p>使用上方搜索框快速查找，或从下拉菜单中选择舞蹈项目，查看其完整的知识图谱和学习路径</p>
+            <p>点击上方搜索框浏览所有项目，或输入关键词快速查找，查看其完整的知识图谱和学习路径</p>
         </div>
     </div>
     
@@ -859,131 +770,96 @@
 <script>
 let currentProjectId = null;
 let allProjects = [];
-let currentView = 'card'; // 'card' 或 'graph'
-let myChart = null; // ECharts 实例
-let currentGraphData = null; // 保存当前图谱数据
+let currentView = 'card';
+let myChart = null;
+let currentGraphData = null;
 
-// 初始化项目数据
 {% if dance_projects %}
 allProjects = [
     {% for project in dance_projects %}
-    {id: {{ project.id }}, name: '{{ project.name }}'},
+    {id: {{ project.id }}, name: '{{ project.name|escapejs }}'},
     {% endfor %}
 ];
+{% else %}
+allProjects = [];
 {% endif %}
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('知识图谱页面已加载');
-    console.log('项目总数:', allProjects.length);
-    
-    const searchInput = document.getElementById('projectSearch');
-    const searchClear = document.getElementById('searchClear');
-    const dropdown = document.getElementById('projectDropdown');
-    const dropdownList = document.getElementById('dropdownList');
-    
-    // 搜索输入事件
-    searchInput.addEventListener('input', function() {
-        const keyword = this.value.trim();
-        
-        // 显示/隐藏清除按钮
-        searchClear.style.display = keyword ? 'block' : 'none';
-        
-        if (keyword.length === 0) {
-            dropdown.style.display = 'none';
-            return;
-        }
-        
-        // 过滤项目
-        const filtered = allProjects.filter(p => 
-            p.name.toLowerCase().includes(keyword.toLowerCase())
-        );
-        
-        // 渲染下拉列表
-        if (filtered.length > 0) {
-            dropdownList.innerHTML = filtered.map(p => `
-                <div class="dropdown-item" data-id="${p.id}" data-name="${p.name}">
-                    <i class="fas fa-dragon"></i>
-                    <span>${highlightMatch(p.name, keyword)}</span>
-                </div>
-            `).join('');
-            dropdown.style.display = 'block';
-        } else {
-            dropdownList.innerHTML = `
-                <div class="dropdown-item no-result">
-                    <i class="fas fa-search"></i>
-                    <span>没有找到匹配的项目</span>
-                </div>
-            `;
-            dropdown.style.display = 'block';
-        }
-    });
-    
-    // 清除按钮
-    searchClear.addEventListener('click', function() {
-        searchInput.value = '';
-        searchClear.style.display = 'none';
-        dropdown.style.display = 'none';
-        searchInput.focus();
-    });
-    
-    // 点击下拉列表项
-    dropdownList.addEventListener('click', function(e) {
-        const item = e.target.closest('.dropdown-item');
-        if (item && !item.classList.contains('no-result')) {
-            const projectId = item.dataset.id;
-            const projectName = item.dataset.name;
-            
-            // 更新搜索框和下拉框
-            searchInput.value = projectName;
-            document.getElementById('projectSelect').value = projectId;
-            
-            dropdown.style.display = 'none';
-            loadKnowledgeGraph(projectId);
-        }
-    });
-    
-    // 点击外部关闭下拉列表
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.project-selector')) {
-            dropdown.style.display = 'none';
-        }
-    });
-    
-    // 键盘事件
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            dropdown.style.display = 'none';
-        }
-        if (e.key === 'Enter') {
-            const firstItem = dropdownList.querySelector('.dropdown-item:not(.no-result)');
-            if (firstItem) {
-                firstItem.click();
-            }
-        }
-    });
-});
-
-// 高亮匹配文本
-function highlightMatch(text, keyword) {
-    if (!keyword) return text;
-    const regex = new RegExp(`(${keyword})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
+function selectProjectFromSelect(projectId) {
+    if (!projectId) return;
+    var searchInput = document.getElementById('projectSearch');
+    var searchClear = document.getElementById('searchClear');
+    var dropdown = document.getElementById('projectDropdown');
+    var project = allProjects.find(function(p) { return p.id === parseInt(projectId); });
+    if (project) { searchInput.value = project.name; searchClear.style.display = 'block'; }
+    if (dropdown) dropdown.style.display = 'none';
+    loadKnowledgeGraph(parseInt(projectId));
 }
 
-// 项目选择变化事件（保留备用）
-document.getElementById('projectSelect').addEventListener('change', function() {
-    const projectId = this.value;
-    console.log('下拉框选择的项目ID:', projectId);
-    if (projectId) {
-        // 同步更新搜索框
-        const projectName = this.options[this.selectedIndex].text;
-        document.getElementById('projectSearch').value = projectName;
-        loadKnowledgeGraph(projectId);
-    } else {
-        showEmptyState();
-    }
-});
+function clearSearch() {
+    document.getElementById('projectSearch').value = '';
+    document.getElementById('searchClear').style.display = 'none';
+    var dropdown = document.getElementById('projectDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+    var sel = document.getElementById('projectSelect');
+    if (sel) sel.value = '';
+}
+
+function highlightMatch(text, keyword) {
+    if (!keyword) return text;
+    return text.replace(new RegExp('(' + keyword + ')', 'gi'), '<mark style="background:rgba(216,191,100,0.3);color:#FFD700;padding:0.1rem 0.2rem;border-radius:0.2rem;">$1</mark>');
+}
+
+window.onload = function() {
+    var searchInput = document.getElementById('projectSearch');
+    var searchClear = document.getElementById('searchClear');
+    var dropdown = document.getElementById('projectDropdown');
+    var searchBox = document.querySelector('.search-box');
+    
+    searchInput.addEventListener('input', function() {
+        var keyword = this.value.trim();
+        if (!keyword) {
+            searchClear.style.display = 'none';
+            if (dropdown) dropdown.style.display = 'none';
+            return;
+        }
+        searchClear.style.display = 'block';
+        var kw = keyword.toLowerCase();
+        var filtered = [];
+        for (var i = 0; i < allProjects.length; i++) {
+            if (allProjects[i].name.toLowerCase().indexOf(kw) !== -1) filtered.push(allProjects[i]);
+        }
+        if (filtered.length === 0) {
+            dropdown.innerHTML = '<div style="padding:0.8rem 1rem;color:rgba(232,213,155,0.5);text-align:center;"><i class="fas fa-search"></i> 没有找到匹配的项目</div>';
+        } else {
+            var html = '<div style="padding:0.5rem;">';
+            for (var i = 0; i < filtered.length; i++) {
+                var p = filtered[i];
+                var nm = p.name.replace(/'/g, "\\'");
+                html += '<div onclick="selectProject(' + p.id + ',\'' + nm + '\')" style="display:flex;align-items:center;gap:0.8rem;padding:0.8rem 1rem;color:#E8D59B;font-size:0.95rem;cursor:pointer;border-radius:0.4rem;margin-bottom:0.2rem;" onmouseover="this.style.background=\'rgba(216,191,100,0.15)\'" onmouseout="this.style.background=\'transparent\'">';
+                html += '<i class="fas fa-dragon" style="color:rgba(216,191,100,0.6);font-size:0.9rem;"></i>';
+                html += '<span>' + highlightMatch(p.name, kw) + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+            dropdown.innerHTML = html;
+        }
+        dropdown.style.display = 'block';
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (dropdown && !searchBox.contains(e.target)) dropdown.style.display = 'none';
+    });
+};
+
+function selectProject(id, name) {
+    document.getElementById('projectSearch').value = name;
+    document.getElementById('searchClear').style.display = 'block';
+    var dropdown = document.getElementById('projectDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+    var sel = document.getElementById('projectSelect');
+    if (sel) sel.value = '';
+    loadKnowledgeGraph(id);
+}
 
 // 加载知识图谱
 function loadKnowledgeGraph(projectId) {
@@ -1030,10 +906,6 @@ function renderKnowledgeGraph(data) {
                 </div>
                 ` : ''}
                 <div style="flex: 1; min-width: 300px;">
-                    <h2 class="project-title">
-                        <i class="fas fa-dragon"></i>
-                        ${data.project.name}
-                    </h2>
                     <div class="project-meta">
                         <span class="meta-tag">
                             <i class="fas fa-tag"></i> ${data.project.category}
@@ -1061,7 +933,6 @@ function renderKnowledgeGraph(data) {
                 <div class="module-header">
                     <span class="module-number">${index + 1}</span>
                     <div>
-                        <h3 class="module-title">${module.name}</h3>
                         <p class="module-description">${module.description}</p>
                     </div>
                 </div>
@@ -1182,12 +1053,12 @@ function renderKnowledgeGraph(data) {
         `;
     });
     
-    // 添加生成学习路径按钮
+    // 添加生成学习路径按钮（链接到新页面）
     html += `
-        <button class="learning-path-btn" onclick="showLearningPath()">
+        <a href="/knowledge/learning-path/${currentProjectId}/" class="learning-path-btn">
             <i class="fas fa-route"></i>
             生成个性化学习路径
-        </button>
+        </a>
     `;
     
     display.innerHTML = html;
@@ -1234,9 +1105,6 @@ function renderLearningPath(data) {
     const content = document.getElementById('learningPathContent');
     
     let html = `
-        <h2 style="color: #F5EDC8; font-family: 'Noto Serif SC', serif; margin-bottom: 0.5rem; font-size: 1.8rem;">
-            <i class="fas fa-route"></i> ${data.project_name} - 学习路径
-        </h2>
         <p style="color: rgba(232, 213, 155, 0.6); margin-bottom: 2rem;">
             共 ${data.total_modules} 个阶段 · 预计总时长 ${Math.round(data.estimated_time)} 小时
         </p>
@@ -1246,10 +1114,6 @@ function renderLearningPath(data) {
         html += `
             <div class="path-stage">
                 <div class="stage-header">
-                    <h3 class="stage-title">
-                        <i class="fas fa-flag-checkered" style="color: #D8BF64; margin-right: 0.5rem;"></i>
-                        第${stage.stage}阶段：${stage.module_name}
-                    </h3>
                     <span class="stage-time">
                         <i class="fas fa-clock"></i> 约${stage.estimated_hours}小时
                     </span>
@@ -1302,7 +1166,6 @@ function showEmptyState() {
     document.getElementById('graphDisplay').innerHTML = `
         <div class="empty-state">
             <i class="fas fa-sitemap"></i>
-            <h3>请选择舞蹈项目</h3>
             <p>使用上方搜索框快速查找，或从下拉菜单中选择舞蹈项目，查看其完整的知识图谱和学习路径</p>
         </div>
     `;
@@ -1321,7 +1184,6 @@ function showError(message) {
     document.getElementById('graphDisplay').innerHTML = `
         <div class="empty-state">
             <i class="fas fa-exclamation-circle" style="color: #E57373;"></i>
-            <h3 style="color: #E57373;">加载失败</h3>
             <p>${message}</p>
         </div>
     `;

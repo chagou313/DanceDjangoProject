@@ -4,38 +4,27 @@
 
 {% block content %}
 <script>
-// 智能返回功能 - 如果没有历史记录则返回交流社区
+// 智能返回功能
 function smartBack() {
     const backBtn = document.getElementById('back-btn');
-    
-    // 检查是否有历史记录
     if (window.history.length > 1) {
-        // 有历史记录，返回上一页
         backBtn.href = 'javascript:history.back()';
     } else {
-        // 没有历史记录（如直接访问或新标签页），返回交流社区
         backBtn.href = '/community/';
     }
 }
 
-// 页面加载时执行
 window.addEventListener('DOMContentLoaded', function() {
     smartBack();
-    console.log('帖子详情页加载完成');
     
-    // 检查来源页面，如果是交流社区，设置标记
     const referrer = document.referrer;
-    console.log('来源页面:', referrer);
     if (referrer && referrer.includes('/community/')) {
-        console.log('来源是交流社区，设置刷新标记');
         sessionStorage.setItem('shouldRefreshCommunity', 'true');
     }
 });
 
 // AJAX 点赞功能
 function toggleLike(postId, btnElement) {
-    console.log('点赞按钮被点击，postId:', postId, 'btnElement:', btnElement);
-    
     fetch(`/community/post/${postId}/like/`, {
         method: 'POST',
         headers: {
@@ -43,51 +32,34 @@ function toggleLike(postId, btnElement) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => {
-        console.log('响应状态:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('点赞响应数据:', data);
-        
-        // 使用传入的按钮元素
         const likeBtn = btnElement;
-        const likeCountEl = document.querySelector('.stat-item .fa-heart').parentNode;
-        
-        if (!likeBtn || !likeCountEl) {
-            console.error('找不到按钮或计数元素');
-            return;
-        }
+        const likeCountEl = document.getElementById('like-count');
         
         if (data.liked) {
-            likeBtn.innerHTML = '<i class="fas fa-heart"></i> 已点赞';
-            likeBtn.classList.add('active');
+            likeBtn.innerHTML = '<i class="fas fa-heart" style="color: #E74C3C;"></i>';
             showMessage('success', '点赞成功');
         } else {
-            likeBtn.innerHTML = '<i class="fas fa-heart"></i> 点赞';
-            likeBtn.classList.remove('active');
+            likeBtn.innerHTML = '<i class="far fa-heart"></i>';
             showMessage('info', '已取消点赞');
         }
         
-        // 更新计数
-        likeCountEl.innerHTML = `<i class="fas fa-heart" style="color: #D8BF64;"></i> ${data.likes_count}`;
+        likeCountEl.textContent = data.likes_count;
         
-        // 添加动画效果
-        likeBtn.style.transform = 'scale(1.1)';
+        // 添加弹跳动画
+        likeBtn.style.transform = 'scale(1.3)';
         setTimeout(() => {
             likeBtn.style.transform = 'scale(1)';
         }, 200);
     })
     .catch(error => {
         console.error('点赞失败:', error);
-        showMessage('error', '点赞失败，请重试');
     });
 }
 
 // AJAX 收藏功能
 function toggleCollection(postId, btnElement) {
-    console.log('收藏按钮被点击，postId:', postId, 'btnElement:', btnElement);
-    
     fetch(`/community/post/${postId}/collect/`, {
         method: 'POST',
         headers: {
@@ -95,118 +67,60 @@ function toggleCollection(postId, btnElement) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => {
-        console.log('响应状态:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('收藏响应数据:', data);
-        
-        // 使用传入的按钮元素
         const collectBtn = btnElement;
-        const collectCountEl = document.querySelector('.stat-item .fa-star').parentNode;
-        
-        if (!collectBtn || !collectCountEl) {
-            console.error('找不到按钮或计数元素');
-            return;
-        }
+        const collectCountEl = document.getElementById('collect-count');
         
         if (data.collected) {
-            collectBtn.innerHTML = '<i class="fas fa-star"></i> 已收藏';
-            collectBtn.classList.add('active');
+            collectBtn.innerHTML = '<i class="fas fa-star" style="color: #F39C12;"></i>';
             showMessage('success', '收藏成功');
         } else {
-            collectBtn.innerHTML = '<i class="fas fa-star"></i> 收藏';
-            collectBtn.classList.remove('active');
+            collectBtn.innerHTML = '<i class="far fa-star"></i>';
             showMessage('info', '已取消收藏');
         }
         
-        // 更新计数
-        collectCountEl.innerHTML = `<i class="fas fa-star" style="color: #D8BF64;"></i> ${data.collections_count}`;
+        collectCountEl.textContent = data.collections_count;
         
-        // 添加动画效果
-        collectBtn.style.transform = 'scale(1.1)';
+        // 添加弹跳动画
+        collectBtn.style.transform = 'scale(1.3)';
         setTimeout(() => {
             collectBtn.style.transform = 'scale(1)';
         }, 200);
     })
     .catch(error => {
         console.error('收藏失败:', error);
-        showMessage('error', '收藏失败，请重试');
     });
 }
 
 // 显示提示消息
 function showMessage(type, message) {
-    // 创建消息元素
     const messageDiv = document.createElement('div');
-    messageDiv.className = `messages`;
-    
-    // 根据类型设置样式
-    let bgColor, borderColor, icon;
-    switch(type) {
-        case 'success':
-            bgColor = 'rgba(46, 204, 113, 0.95)';
-            borderColor = 'rgba(46, 204, 113, 0.6)';
-            icon = 'fa-check-circle';
-            break;
-        case 'info':
-            bgColor = 'rgba(52, 152, 219, 0.95)';
-            borderColor = 'rgba(52, 152, 219, 0.6)';
-            icon = 'fa-info-circle';
-            break;
-        case 'warning':
-            bgColor = 'rgba(243, 156, 18, 0.95)';
-            borderColor = 'rgba(243, 156, 18, 0.6)';
-            icon = 'fa-exclamation-triangle';
-            break;
-        case 'error':
-            bgColor = 'rgba(231, 76, 60, 0.95)';
-            borderColor = 'rgba(231, 76, 60, 0.6)';
-            icon = 'fa-times-circle';
-            break;
-        default:
-            bgColor = 'rgba(52, 152, 219, 0.95)';
-            borderColor = 'rgba(52, 152, 219, 0.6)';
-            icon = 'fa-info-circle';
-    }
-    
     messageDiv.style.cssText = `
         position: fixed;
-        top: 90px;
-        right: 30px;
-        background: ${bgColor};
-        border: 2px solid ${borderColor};
-        color: #F5E7B2;
-        padding: 1rem 1.5rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 22, 30, 0.95);
+        border: 1px solid rgba(216, 191, 100, 0.3);
+        color: #F5EDC8;
+        padding: 0.8rem 1.5rem;
+        border-radius: 2rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        font-size: 0.95rem;
-        animation: slideInRight 0.3s ease-out;
-        max-width: 400px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
     `;
-    
-    messageDiv.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.2rem;"></i>
-        <span>${message}</span>
-    `;
-    
+    messageDiv.textContent = message;
     document.body.appendChild(messageDiv);
     
-    // 3 秒后自动消失
     setTimeout(() => {
-        messageDiv.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 300);
-    }, 3000);
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transition = 'opacity 0.3s';
+        setTimeout(() => messageDiv.remove(), 300);
+    }, 2000);
 }
 
-// 获取 CSRF Token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -224,84 +138,26 @@ function getCookie(name) {
 </script>
 
 <style>
-    .post-detail-container {
-        max-width: 1000px;
+    .post-detail-page {
+        max-width: 800px;
         margin: 0 auto;
-        padding: 3rem 2rem;
+        padding: 1rem 2rem 3rem;
     }
 
-    /* 返回按钮 */
-    .back-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.7rem 1.5rem;
-        background: transparent;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        color: #E8D59B;
-        border-radius: 2rem;
-        text-decoration: none;
-        font-family: 'Noto Serif SC', serif;
-        font-size: 0.95rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-bottom: 2rem;
-    }
-
-    .back-btn:hover {
-        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
-        color: #0F0F1A;
-        border-color: rgba(216, 191, 100, 0.8);
-        transform: translateX(-5px);
-        box-shadow: 0 4px 15px rgba(216, 191, 100, 0.3);
-    }
-
-    .back-btn i {
-        transition: transform 0.3s;
-    }
-
-    .back-btn:hover i {
-        transform: translateX(-3px);
-    }
-
-    /* 帖子主体 */
+    /* 帖子主体 - 简洁设计 */
     .post-main {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 3rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        margin-bottom: 2rem;
+        padding: 2rem 0;
     }
 
-    .post-header {
-        margin-bottom: 2rem;
-        padding-bottom: 2rem;
-        border-bottom: 2px solid rgba(216, 191, 100, 0.2);
-    }
-
-    .post-title {
-        font-size: 2.5rem;
-        color: #F5EDC8;
-        font-family: 'Noto Serif SC', serif;
-        margin-bottom: 1rem;
-        line-height: 1.3;
-    }
-
-    .post-meta {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        align-items: center;
-        font-size: 0.9rem;
-        color: rgba(232, 213, 155, 0.7);
-    }
-
-    .post-meta span {
+    /* 作者信息区 */
+    .post-author-section {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
     }
 
-    .author-info {
+    .author-left {
         display: flex;
         align-items: center;
         gap: 0.8rem;
@@ -311,150 +167,241 @@ function getCookie(name) {
         width: 45px;
         height: 45px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.3), rgba(232, 213, 155, 0.2));
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.2rem;
-        color: #0F0F1A;
-        font-weight: 700;
+        color: #D8BF64;
+        font-weight: 600;
+        overflow: hidden;
+    }
+
+    .author-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .author-name {
+        color: #F5EDC8;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .post-time {
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.8rem;
+    }
+
+    .author-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .follow-btn {
+        padding: 0.5rem 1.5rem;
+        background: transparent;
+        border: 1px solid rgba(216, 191, 100, 0.4);
+        border-radius: 2rem;
+        color: #D8BF64;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .follow-btn:hover {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.6);
+    }
+
+    .share-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .share-btn:hover {
+        background: rgba(216, 191, 100, 0.1);
+        color: #D8BF64;
+    }
+
+    /* 帖子标题和内容 */
+    .post-title {
+        font-size: 1.6rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+        line-height: 1.4;
+    }
+
+    .post-content {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: rgba(232, 213, 155, 0.85);
+        white-space: pre-line;
+        margin-bottom: 1.5rem;
     }
 
     .post-cover {
         width: 100%;
-        max-height: 500px;
-        object-fit: cover;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
+        border-radius: 0.8rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
     }
 
-    .post-content {
-        font-size: 1.05rem;
-        line-height: 1.8;
-        color: rgba(232, 213, 155, 0.9);
-        white-space: pre-line;
-        margin-bottom: 2rem;
+    .post-cover img {
+        width: 100%;
+        display: block;
     }
 
+    /* 话题标签 */
     .post-tags {
         display: flex;
-        gap: 0.8rem;
+        gap: 0.5rem;
         flex-wrap: wrap;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .tag {
-        padding: 0.4rem 1rem;
-        background: rgba(216, 191, 100, 0.15);
-        border: 1px solid rgba(216, 191, 100, 0.4);
-        border-radius: 2rem;
-        font-size: 0.85rem;
-        color: #E8D59B;
-    }
-
-    /* 互动按钮 */
-    .post-actions {
-        display: flex;
-        gap: 1rem;
-        padding-top: 2rem;
-        border-top: 2px solid rgba(216, 191, 100, 0.2);
-    }
-
-    .action-btn {
-        padding: 0.8rem 2rem;
-        background: transparent;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        color: #E8D59B;
-        border-radius: 2rem;
-        cursor: pointer;
-        font-family: 'Noto Serif SC', serif;
-        font-size: 0.95rem;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .action-btn:hover,
-    .action-btn.active {
-        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
-        color: #0F0F1A;
-        border-color: rgba(216, 191, 100, 0.8);
-    }
-
-    .stats {
-        display: flex;
-        gap: 2rem;
-        margin-left: auto;
+        color: #64B5F6;
         font-size: 0.9rem;
-        color: rgba(232, 213, 155, 0.6);
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
-    .stat-item {
+    .tag:hover {
+        color: #90CAF9;
+    }
+
+    /* 底部信息 */
+    .post-footer {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-top: 1px solid rgba(216, 191, 100, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .post-footer-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.85rem;
+    }
+
+    .dislike-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: rgba(232, 213, 155, 0.4);
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .dislike-btn:hover {
+        color: rgba(232, 213, 155, 0.6);
     }
 
     /* 评论区 */
     .comments-section {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
+        margin-top: 2rem;
     }
 
     .comments-header {
-        font-size: 1.5rem;
-        color: #F5EDC8;
-        margin-bottom: 2rem;
+        font-size: 1rem;
+        color: rgba(232, 213, 155, 0.7);
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
+    }
+
+    .comment-input-wrapper {
+        display: flex;
         gap: 0.8rem;
-    }
-
-    .comment-form {
         margin-bottom: 2rem;
+        align-items: flex-start;
     }
 
-    .comment-form textarea {
+    .comment-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(216, 191, 100, 0.2);
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .comment-avatar img {
         width: 100%;
-        min-height: 120px;
-        padding: 1rem 1.5rem;
-        background: rgba(0, 0, 0, 0.6);
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        border-radius: 1rem;
-        color: #F5EDC8;
-        font-family: 'Noto Serif SC', serif;
-        font-size: 1rem;
-        outline: none;
-        resize: vertical;
-        margin-bottom: 1rem;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .comment-form textarea:focus {
-        border-color: #D8BF64;
-        box-shadow: 0 0 0 3px rgba(216, 191, 100, 0.2);
-    }
-
-    .btn-comment {
-        padding: 0.8rem 2.5rem;
-        background: linear-gradient(135deg, #D8BF64 0%, #E8D59B 100%);
-        border: none;
+    .comment-input-box {
+        flex: 1;
+        background: rgba(20, 22, 30, 0.6);
         border-radius: 2rem;
-        color: #0F0F1A;
-        font-weight: 600;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .comment-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #F5EDC8;
+        font-size: 0.9rem;
+        outline: none;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .comment-input::placeholder {
+        color: rgba(232, 213, 155, 0.4);
+    }
+
+    .comment-tools {
+        display: flex;
+        gap: 0.8rem;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 1.1rem;
+    }
+
+    .comment-tools i {
         cursor: pointer;
         transition: all 0.3s;
-        font-family: 'Noto Serif SC', serif;
     }
 
-    .btn-comment:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(216, 191, 100, 0.4);
+    .comment-tools i:hover {
+        color: #D8BF64;
     }
 
+    /* 评论列表 */
     .comment-list {
         display: flex;
         flex-direction: column;
@@ -462,202 +409,423 @@ function getCookie(name) {
     }
 
     .comment-item {
-        background: rgba(216, 191, 100, 0.05);
-        border: 1px solid rgba(216, 191, 100, 0.2);
-        border-radius: 1.5rem;
-        padding: 1.5rem;
+        display: flex;
+        gap: 0.8rem;
     }
 
-    .comment-header {
+    .comment-body {
+        flex: 1;
+    }
+
+    .comment-user {
         display: flex;
         align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 1rem;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
-    .comment-author {
-        font-weight: 600;
-        color: #E8D59B;
+    .comment-username {
+        color: #F5EDC8;
+        font-weight: 500;
+        font-size: 0.9rem;
     }
 
-    .comment-time {
-        font-size: 0.85rem;
+    .author-badge {
+        background: rgba(231, 76, 60, 0.2);
+        color: #E74C3C;
+        font-size: 0.7rem;
+        padding: 0.1rem 0.5rem;
+        border-radius: 0.3rem;
+    }
+
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         color: rgba(232, 213, 155, 0.5);
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
     }
 
     .comment-content {
-        font-size: 0.95rem;
-        line-height: 1.6;
         color: rgba(232, 213, 155, 0.8);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
     }
 
     .comment-actions {
         display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(216, 191, 100, 0.15);
+        gap: 1.5rem;
+        align-items: center;
     }
 
-    .comment-action-btn {
-        font-size: 0.85rem;
-        color: rgba(232, 213, 155, 0.6);
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s;
+    .comment-action {
         display: flex;
         align-items: center;
         gap: 0.3rem;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.8rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
-    .comment-action-btn:hover {
+    .comment-action:hover {
         color: #D8BF64;
     }
 
-    .empty-comments {
-        text-align: center;
-        padding: 3rem;
-        color: rgba(232, 213, 155, 0.6);
+    .expand-replies {
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem 0;
+        transition: all 0.3s;
+    }
+
+    .expand-replies:hover {
+        color: #D8BF64;
+    }
+
+    .replies-wrapper {
+        margin-left: 2rem;
+        margin-top: 0.8rem;
+        padding-left: 1rem;
+        border-left: 2px solid rgba(216, 191, 100, 0.1);
+    }
+
+    /* 底部操作栏 - 随内容流动 */
+    .bottom-action-bar {
+        margin-top: 3rem;
+        padding: 1.5rem 0;
+        border-top: 1px solid rgba(216, 191, 100, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .bottom-input-wrapper {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .bottom-input {
+        width: 100%;
+        background: rgba(20, 22, 30, 0.8);
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        border-radius: 2rem;
+        padding: 0.6rem 1.2rem;
+        color: #F5EDC8;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .bottom-input:focus {
+        border-color: rgba(216, 191, 100, 0.4);
+    }
+
+    .bottom-input::placeholder {
+        color: rgba(232, 213, 155, 0.4);
+    }
+
+    .bottom-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .bottom-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .bottom-stat i {
+        font-size: 1.3rem;
+        transition: all 0.3s;
+    }
+
+    .bottom-stat:hover {
+        color: #D8BF64;
+    }
+
+    .bottom-stat:hover i {
+        transform: scale(1.2);
+    }
+
+    /* 返回按钮 */
+    .back-btn {
+        position: fixed;
+        top: 100px;
+        left: 2rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(20, 22, 30, 0.8);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #D8BF64;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 1001;
+    }
+
+    .back-btn:hover {
+        background: rgba(20, 22, 30, 0.95);
+        transform: scale(1.1);
     }
 
     @media (max-width: 768px) {
-        .post-main,
-        .comments-section {
-            padding: 2rem 1.5rem;
+        .post-detail-page {
+            padding: 1rem;
         }
 
-        .post-title {
-            font-size: 1.8rem;
+        .bottom-stats {
+            gap: 1.2rem;
         }
 
-        .post-actions {
-            flex-wrap: wrap;
-        }
-
-        .stats {
-            width: 100%;
-            margin-left: 0;
-            margin-top: 1rem;
+        .bottom-input-wrapper {
+            max-width: 200px;
         }
     }
 </style>
 
-<div class="post-detail-container">
+<div class="post-detail-page">
+    <a href="javascript:history.back()" class="back-btn" id="back-btn">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
     <!-- 帖子主体 -->
     <div class="post-main">
-        <div class="post-header">
-            <h1 class="post-title">{{ post.title }}</h1>
-            
-            <div class="post-meta">
-                <div class="author-info">
-                    <div class="author-avatar">{{ post.author.username|first|upper }}</div>
-                    <span>{{ post.author.username }}</span>
+        <!-- 作者信息 -->
+        <div class="post-author-section">
+            <div class="author-left">
+                <div class="author-avatar">
+                    {% if post.author.userprofile.avatar %}
+                        <img src="{{ post.author.userprofile.avatar.url }}" alt="{{ post.author.username }}">
+                    {% else %}
+                        {{ post.author.username|first|upper }}
+                    {% endif %}
                 </div>
-                <span><i class="fas fa-calendar"></i> {{ post.created_at|date:"Y-m-d H:i" }}</span>
-                <span><i class="fas fa-eye"></i> {{ post.views }} 次浏览</span>
+                <div class="author-info">
+                    <span class="author-name">{{ post.author.username }}</span>
+                    <span class="post-time">{{ post.created_at|date:"Y-m-d H:i" }}</span>
+                </div>
+            </div>
+            <div class="author-right">
+                <button class="follow-btn">关注</button>
+                <button class="share-btn">
+                    <i class="fas fa-share-alt"></i>
+                </button>
             </div>
         </div>
 
+        <!-- 帖子内容 -->
+        <h1 class="post-title">{{ post.title }}</h1>
+
         {% if post.cover_image %}
-        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="post-cover">
+        <div class="post-cover">
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+        </div>
         {% endif %}
 
         <div class="post-content">{{ post.content }}</div>
 
+        <!-- 标签 -->
         {% if tags_list %}
         <div class="post-tags">
             {% for tag in tags_list %}
-            <span class="tag">{{ tag }}</span>
+            <span class="tag">#{{ tag }}</span>
             {% endfor %}
         </div>
         {% endif %}
 
-        <div class="post-actions">
-            {% if user.is_authenticated %}
-            <button onclick="toggleLike({{ post.id }}, this)" class="action-btn {% if user_liked %}active{% endif %}">
-                <i class="fas fa-heart"></i>
-                {% if user_liked %}已点赞{% else %}点赞{% endif %}
-            </button>
-            <button onclick="toggleCollection({{ post.id }}, this)" class="action-btn {% if user_collected %}active{% endif %}">
-                <i class="fas fa-star"></i>
-                {% if user_collected %}已收藏{% else %}收藏{% endif %}
-            </button>
-            {% else %}
-            <span style="color: rgba(232, 213, 155, 0.5); font-size: 0.9rem;">登录后即可点赞、收藏</span>
-            {% endif %}
-
-            <div class="stats">
-                <span class="stat-item"><i class="fas fa-heart" style="color: #D8BF64;"></i> {{ post.likes }}</span>
-                <span class="stat-item"><i class="fas fa-star" style="color: #D8BF64;"></i> {{ post.collections }}</span>
-                <span class="stat-item"><i class="fas fa-comment"></i> {{ post.comments_count }}</span>
+        <!-- 底部信息 -->
+        <div class="post-footer">
+            <div class="post-footer-left">
+                <span>{{ post.created_at|date:"Y-m-d" }}</span>
+                {% if post.location %}
+                <span>{{ post.location }}</span>
+                {% endif %}
             </div>
+            <button class="dislike-btn">
+                <i class="far fa-frown"></i> 不喜欢
+            </button>
         </div>
     </div>
 
     <!-- 评论区 -->
     <div class="comments-section">
-        <h2 class="comments-header">
-            <i class="fas fa-comments"></i> 评论 ({{ post.comments_count }})
-        </h2>
+        <div class="comments-header">
+            共 {{ actual_comments_count }} 条评论
+        </div>
 
         {% if user.is_authenticated %}
-        <div class="comment-form">
-            <form method="post" action="{% url 'create_comment' post.id %}">
-                {% csrf_token %}
-                <textarea name="content" placeholder="写下你的评论..." required></textarea>
-                <button type="submit" class="btn-comment">
-                    <i class="fas fa-paper-plane"></i> 发表评论
-                </button>
-            </form>
+        <!-- 评论输入框 -->
+        <div class="comment-input-wrapper">
+            <div class="comment-avatar">
+                {% if user.userprofile.avatar %}
+                    <img src="{{ user.userprofile.avatar.url }}" alt="{{ user.username }}">
+                {% endif %}
+            </div>
+            <div class="comment-input-box">
+                <form method="post" action="{% url 'create_comment' post.id %}" style="display: contents;">
+                    {% csrf_token %}
+                    <input type="text" name="content" class="comment-input" placeholder="说点什么..." required>
+                    <div class="comment-tools">
+                        <i class="fas fa-microphone"></i>
+                        <i class="fas fa-image"></i>
+                        <button type="submit" style="display: none;"></button>
+                    </div>
+                </form>
+            </div>
         </div>
         {% else %}
-        <p style="text-align: center; color: rgba(232, 213, 155, 0.6); margin-bottom: 2rem;">
+        <p style="text-align: center; color: rgba(232, 213, 155, 0.5); margin-bottom: 2rem; font-size: 0.9rem;">
             登录后即可发表评论
         </p>
         {% endif %}
 
+        <!-- 评论列表 -->
         <div class="comment-list">
             {% for comment in comments %}
             <div class="comment-item">
-                <div class="comment-header">
-                    <div class="author-avatar" style="width: 35px; height: 35px; font-size: 1rem;">
+                <div class="comment-avatar">
+                    {% if comment.user.userprofile.avatar %}
+                        <img src="{{ comment.user.userprofile.avatar.url }}" alt="{{ comment.user.username }}">
+                    {% else %}
                         {{ comment.user.username|first|upper }}
-                    </div>
-                    <span class="comment-author">{{ comment.user.username }}</span>
-                    <span class="comment-time">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
-                </div>
-                <div class="comment-content">{{ comment.content }}</div>
-                <div class="comment-actions">
-                    <span class="comment-action-btn">
-                        <i class="fas fa-heart"></i> {{ comment.likes }}
-                    </span>
-                    {% if user == comment.user or user.is_staff %}
-                    <a href="{% url 'delete_comment' comment.id %}" class="comment-action-btn" 
-                       onclick="return confirm('确定要删除这条评论吗？')">
-                        <i class="fas fa-trash"></i> 删除
-                    </a>
                     {% endif %}
-                    <button class="comment-action-btn">
-                        <i class="fas fa-flag"></i> 举报
+                </div>
+                <div class="comment-body">
+                    <div class="comment-user">
+                        <span class="comment-username">{{ comment.user.username }}</span>
+                        {% if comment.user == post.author %}
+                        <span class="author-badge">作者</span>
+                        {% endif %}
+                    </div>
+                    <div class="comment-meta">
+                        <span>{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+                        {% if comment.location %}
+                        <span>{{ comment.location }}</span>
+                        {% endif %}
+                        <span>回复</span>
+                    </div>
+                    <div class="comment-content">{{ comment.content }}</div>
+                    <div class="comment-actions">
+                        <button class="comment-action">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="comment-action">
+                            <i class="far fa-frown"></i>
+                        </button>
+                        <span style="color: rgba(232, 213, 155, 0.5); font-size: 0.8rem;">{{ comment.likes }} 赞</span>
+                    </div>
+                    
+                    {% if comment.replies.exists %}
+                    <button class="expand-replies" onclick="toggleReplies(this)">
+                        展开 {{ comment.replies.count }} 条回复
                     </button>
+                    <div class="replies-wrapper" style="display: none;">
+                        {% for reply in comment.replies.all %}
+                        <div class="comment-item" style="margin-bottom: 1rem;">
+                            <div class="comment-avatar" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                                {% if reply.user.userprofile.avatar %}
+                                    <img src="{{ reply.user.userprofile.avatar.url }}" alt="{{ reply.user.username }}">
+                                {% else %}
+                                    {{ reply.user.username|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="comment-body">
+                                <div class="comment-user">
+                                    <span class="comment-username" style="font-size: 0.85rem;">{{ reply.user.username }}</span>
+                                </div>
+                                <div class="comment-content" style="font-size: 0.85rem;">{{ reply.content }}</div>
+                                <div class="comment-meta" style="font-size: 0.75rem;">
+                                    <span>{{ reply.created_at|date:"Y-m-d H:i" }}</span>
+                                    <span>回复</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}
-            <div class="empty-comments">
-                <i class="fas fa-comment-slash" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <p>暂无评论，快来抢沙发吧！</p>
+            <div style="text-align: center; padding: 3rem; color: rgba(232, 213, 155, 0.5);">
+                <p style="font-size: 0.9rem;">暂无评论，快来抢沙发吧！</p>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- 返回按钮 - 移到底部 -->
-    <div style="text-align: center; margin-top: 2rem;">
-        <a href="javascript:history.back()" class="back-btn" id="back-btn" style="display: inline-block;">
-            <i class="fas fa-arrow-left"></i>
-            <span>返回</span>
-        </a>
+    <!-- 底部操作栏 - 随内容流动 -->
+    <div class="bottom-action-bar">
+        <div class="bottom-input-wrapper">
+            <input type="text" class="bottom-input" placeholder="说点什么..." onclick="document.querySelector('.comment-input').focus()">
+        </div>
+        <div class="bottom-stats">
+            {% if user.is_authenticated %}
+            <button class="bottom-stat" onclick="toggleLike({{ post.id }}, this)">
+                <i class="{% if user_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                <span id="like-count">{{ post.likes }}</span>
+            </button>
+            <button class="bottom-stat" onclick="toggleCollection({{ post.id }}, this)">
+                <i class="{% if user_collected %}fas{% else %}far{% endif %} fa-star"></i>
+                <span id="collect-count">{{ post.collections }}</span>
+            </button>
+            {% else %}
+            <span class="bottom-stat">
+                <i class="far fa-heart"></i>
+                <span id="like-count">{{ post.likes }}</span>
+            </span>
+            <span class="bottom-stat">
+                <i class="far fa-star"></i>
+                <span id="collect-count">{{ post.collections }}</span>
+            </span>
+            {% endif %}
+            <span class="bottom-stat">
+                <i class="far fa-comment"></i>
+                <span>{{ actual_comments_count }}</span>
+            </span>
+        </div>
     </div>
 </div>
+
+<script>
+// 展开/收起回复
+function toggleReplies(btn) {
+    const repliesWrapper = btn.nextElementSibling;
+    if (repliesWrapper.style.display === 'none') {
+        repliesWrapper.style.display = 'block';
+        btn.textContent = `收起 ${btn.textContent.match(/\d+/)[0]} 条回复`;
+    } else {
+        repliesWrapper.style.display = 'none';
+        btn.textContent = `展开 ${btn.textContent.match(/\d+/)[0]} 条回复`;
+    }
+}
+
+// 监听 Enter 键提交评论
+document.querySelector('.comment-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        this.form.submit();
+    }
+});
+</script>
 {% endblock %}
