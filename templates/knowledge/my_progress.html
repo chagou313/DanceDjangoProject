@@ -5,69 +5,67 @@
 {% block content %}
 <style>
     .progress-container {
-        max-width: 1400px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 2rem;
     }
 
     /* 页面头部 */
     .page-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        padding: 2.5rem;
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.2);
     }
 
-    .page-header h1 {
-        font-size: 2.5rem;
+    .page-title {
+        font-size: 1.8rem;
         color: #F5EDC8;
         font-family: 'Noto Serif SC', serif;
-        letter-spacing: 3px;
-        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
     }
 
-    .page-header p {
-        color: rgba(232, 213, 155, 0.7);
-        font-size: 1.1rem;
+    .page-title i {
+        color: #DAA520;
     }
 
     /* 总体统计 */
     .overall-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 3rem;
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     .stat-card {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 1.5rem;
-        padding: 2rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 0.5rem;
+        padding: 1.2rem;
         text-align: center;
-        border: 2px solid rgba(216, 191, 100, 0.3);
-        transition: all 0.3s;
+        border: 1px solid rgba(216, 191, 100, 0.15);
+        transition: all 0.2s;
     }
 
     .stat-card:hover {
-        border-color: rgba(216, 191, 100, 0.6);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+        border-color: rgba(216, 191, 100, 0.3);
+        transform: translateY(-3px);
     }
 
     .stat-icon {
-        font-size: 2.5rem;
+        font-size: 2rem;
         color: #DAA520;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.6rem;
     }
 
     .stat-value {
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: bold;
         color: #F5EDC8;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
     }
 
     .stat-label {
@@ -77,36 +75,34 @@
 
     /* 项目进度列表 */
     .projects-section {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        border: 2px solid rgba(216, 191, 100, 0.3);
+        background: transparent;
     }
 
     .section-title {
-        font-size: 1.8rem;
+        font-size: 1.3rem;
         color: #F5EDC8;
         font-family: 'Noto Serif SC', serif;
-        margin-bottom: 2rem;
+        margin-bottom: 1.2rem;
         display: flex;
         align-items: center;
-        gap: 0.8rem;
+        gap: 0.6rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
     }
 
     .project-progress-item {
-        background: rgba(216, 191, 100, 0.05);
-        border-radius: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        border: 2px solid rgba(216, 191, 100, 0.2);
-        transition: all 0.3s;
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0.5rem;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid rgba(216, 191, 100, 0.4);
+        transition: all 0.2s;
         cursor: pointer;
     }
 
     .project-progress-item:hover {
-        border-color: rgba(216, 191, 100, 0.5);
-        background: rgba(216, 191, 100, 0.08);
-        transform: translateX(5px);
+        background: rgba(216, 191, 100, 0.06);
+        transform: translateX(3px);
     }
 
     .project-header {
@@ -117,7 +113,7 @@
     }
 
     .project-name {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         color: #F5EDC8;
         font-weight: bold;
         flex: 1;
@@ -125,94 +121,75 @@
 
     .project-category {
         display: inline-block;
-        background: rgba(216, 191, 100, 0.15);
+        background: rgba(216, 191, 100, 0.1);
         color: #DAA520;
-        padding: 0.4rem 1rem;
-        border-radius: 1rem;
-        font-size: 0.85rem;
-        margin-left: 1rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 0.3rem;
+        font-size: 0.8rem;
+        margin-left: 0.8rem;
     }
 
     .completion-badge {
-        padding: 0.5rem 1.2rem;
-        border-radius: 2rem;
+        padding: 0.4rem 1rem;
+        border-radius: 0.4rem;
         font-weight: bold;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         white-space: nowrap;
     }
 
     .completion-badge.completed {
-        background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
-        color: #1a1c24;
+        background: rgba(76, 175, 80, 0.15);
+        color: #81C784;
+        border: 1px solid rgba(76, 175, 80, 0.3);
     }
 
     .completion-badge.in-progress {
-        background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
-        color: #1a1c24;
+        background: rgba(255, 183, 77, 0.15);
+        color: #FFB74D;
+        border: 1px solid rgba(255, 183, 77, 0.3);
     }
 
     .completion-badge.not-started {
-        background: rgba(158, 158, 158, 0.3);
+        background: rgba(158, 158, 158, 0.15);
         color: #9E9E9E;
+        border: 1px solid rgba(158, 158, 158, 0.3);
     }
 
     /* 进度条 */
     .progress-bar-container {
         background: rgba(216, 191, 100, 0.1);
-        border-radius: 1rem;
-        height: 12px;
+        border-radius: 0.4rem;
+        height: 10px;
         overflow: hidden;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
     }
 
     .progress-bar {
         height: 100%;
         background: linear-gradient(90deg, #DAA520 0%, #FFD700 100%);
-        border-radius: 1rem;
+        border-radius: 0.4rem;
         transition: width 0.5s ease;
-        position: relative;
-    }
-
-    .progress-bar::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.3) 50%,
-            transparent 100%
-        );
-        animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
     }
 
     /* 状态统计 */
     .status-stats {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
     .status-item {
         text-align: center;
-        padding: 1rem;
-        background: rgba(20, 22, 30, 0.5);
-        border-radius: 0.8rem;
-        border: 1px solid rgba(216, 191, 100, 0.15);
+        padding: 0.8rem;
+        background: rgba(20, 22, 30, 0.3);
+        border-radius: 0.4rem;
+        border: 1px solid rgba(216, 191, 100, 0.1);
     }
 
     .status-count {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: bold;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.2rem;
     }
 
     .status-label {
@@ -229,10 +206,10 @@
     .proficiency-indicator {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(216, 191, 100, 0.2);
+        gap: 0.8rem;
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid rgba(216, 191, 100, 0.15);
     }
 
     .proficiency-label {
@@ -243,16 +220,16 @@
 
     .proficiency-bar {
         flex: 1;
-        height: 8px;
+        height: 6px;
         background: rgba(216, 191, 100, 0.1);
-        border-radius: 4px;
+        border-radius: 3px;
         overflow: hidden;
     }
 
     .proficiency-fill {
         height: 100%;
         background: linear-gradient(90deg, #DAA520 0%, #FFD700 100%);
-        border-radius: 4px;
+        border-radius: 3px;
         transition: width 0.3s;
     }
 
@@ -289,13 +266,14 @@
     .action-btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.8rem;
-        padding: 1rem 2rem;
-        border-radius: 1rem;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.4rem;
         text-decoration: none;
         font-weight: bold;
-        transition: all 0.3s;
-        border: 2px solid transparent;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        font-size: 0.9rem;
     }
 
     .btn-primary {
@@ -304,19 +282,19 @@
     }
 
     .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(218, 165, 32, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(218, 165, 32, 0.3);
     }
 
     .btn-secondary {
-        background: rgba(216, 191, 100, 0.1);
-        border-color: rgba(216, 191, 100, 0.3);
+        background: rgba(216, 191, 100, 0.08);
+        border-color: rgba(216, 191, 100, 0.2);
         color: #E8D59B;
     }
 
     .btn-secondary:hover {
-        border-color: rgba(216, 191, 100, 0.6);
-        background: rgba(216, 191, 100, 0.2);
+        border-color: rgba(216, 191, 100, 0.4);
+        background: rgba(216, 191, 100, 0.15);
     }
 
     /* 响应式 */
@@ -325,8 +303,8 @@
             padding: 1rem;
         }
 
-        .page-header h1 {
-            font-size: 2rem;
+        .page-title {
+            font-size: 1.5rem;
         }
 
         .status-stats {
@@ -336,7 +314,7 @@
         .project-header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
         .project-category {
@@ -348,8 +326,8 @@
 <div class="progress-container">
     <!-- 页面头部 -->
     <div class="page-header">
-        <h1><i class="fas fa-chart-line"></i> 我的学习进度</h1>
-        <p>追踪你的学习轨迹，见证每一次进步</p>
+        <h1 class="page-title"><i class="fas fa-chart-line"></i> 我的学习进度</h1>
+        <p style="color: rgba(232, 213, 155, 0.6); font-size: 0.9rem;">追踪你的学习轨迹，见证每一次进步</p>
     </div>
 
     {% if progress_list %}
@@ -395,7 +373,7 @@
                     <span class="completion-badge completed">
                         <i class="fas fa-check-circle"></i> 已完成
                     </span>
-                {% elif pp.completion_rate > 0 %}
+                {% elif pp.learning_progress_rate > 0 %}
                     <span class="completion-badge in-progress">
                         <i class="fas fa-spinner"></i> 进行中 {{ pp.completion_rate|floatformat:0 }}%
                     </span>
@@ -444,7 +422,7 @@
     </div>
     {% else %}
     <!-- 空状态 -->
-    <div class="empty-state" style="background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%); border-radius: 2rem; border: 2px solid rgba(216, 191, 100, 0.3);">
+    <div class="empty-state" style="background: rgba(216, 191, 100, 0.03); border-radius: 0.5rem; border: 1px solid rgba(216, 191, 100, 0.15);">
         <i class="fas fa-book-reader"></i>
         <h3>还没有开始学习</h3>
         <p>去知识图谱选择一个舞蹈项目，开始你的学习之旅吧！</p>
@@ -455,7 +433,7 @@
     {% endif %}
 
     <!-- 操作按钮 -->
-    <div style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+    <div style="display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(216, 191, 100, 0.15);">
         <a href="{% url 'knowledge:recommendations' %}" class="action-btn btn-secondary">
             <i class="fas fa-magic"></i> 个性化推荐
         </a>

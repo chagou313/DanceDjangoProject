@@ -65,31 +65,59 @@ class ContentBasedRecommender:
         difficulty_score = self._calculate_difficulty_match(project)
         if difficulty_score > 0:
             total_score += difficulty_score * 0.25
-            reasons.append(f"难度适合您当前的水平")
+            if self.user_profile and self.user_profile.skill_level:
+                reasons.append(f"难度等级{project.difficulty_level}，匹配您当前的{self.user_profile.skill_level}级水平")
+            else:
+                reasons.append(f"难度等级{project.difficulty_level}，适合入门学习")
         
         # 2. 类别偏好匹配 (权重: 0.25)
         category_score = self._calculate_category_match(project)
         if category_score > 0:
             total_score += category_score * 0.25
-            reasons.append(f"符合您的舞种偏好")
+            if self.user_profile and self.user_profile.preferred_dance_types and project.category in self.user_profile.preferred_dance_types:
+                reasons.append(f"{project.category}是您偏好的舞种")
+            else:
+                reasons.append(f"属于{project.category}类别")
         
         # 3. 知识点相关性 (权重: 0.20)
         knowledge_score = self._calculate_knowledge_relevance(project)
         if knowledge_score > 0:
             total_score += knowledge_score * 0.20
-            reasons.append(f"与您已掌握的知识点相关")
+            mastered_count = UserLearningProgress.objects.filter(
+                user=self.user,
+                proficiency_score__gte=70
+            ).count()
+            if mastered_count > 0:
+                reasons.append(f"与您已学习的{mastered_count}个知识点相关")
+            else:
+                reasons.append("丰富的知识点体系，适合系统学习")
         
         # 4. 社区热度 (权重: 0.15)
         popularity_score = self._calculate_popularity(project)
         if popularity_score > 0:
             total_score += popularity_score * 0.15
-            reasons.append(f"社区热门项目")
+            from community.models import Post
+            post_count = Post.objects.filter(
+                Q(title__icontains=project.name) | 
+                Q(content__icontains=project.name)
+            ).count()
+            if post_count > 0:
+                reasons.append(f"社区有{post_count}个相关讨论")
+            else:
+                reasons.append("社区热门项目")
         
         # 5. 学习进度连续性 (权重: 0.15)
         continuity_score = self._calculate_learning_continuity(project)
         if continuity_score > 0:
             total_score += continuity_score * 0.15
-            reasons.append(f"与您正在学习的项目相关")
+            learning_count = UserLearningProgress.objects.filter(
+                user=self.user,
+                status='learning'
+            ).count()
+            if learning_count > 0:
+                reasons.append(f"与您正在学习的{learning_count}个项目相关")
+            else:
+                reasons.append("适合开始新的学习")
         
         return total_score, reasons
     

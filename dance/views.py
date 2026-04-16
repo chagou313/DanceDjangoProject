@@ -612,3 +612,57 @@ def edit_avatar(request):
             messages.error(request, '请选择要上传的图片')
     
     return render(request, 'community/edit_avatar.html', {'user_profile': user_profile})
+
+
+@login_required
+def edit_profile(request):
+    """编辑个人资料（技能等级、偏好舞种等）"""
+    from .models import UserProfile
+    
+    user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
+    
+    # 可选的舞种列表
+    dance_type_choices = [
+        '古典舞蹈', '民间舞蹈', '民族舞蹈', '传统舞蹈',
+        '现代舞', '芭蕾舞', '街舞', '国标舞'
+    ]
+    
+    if request.method == 'POST':
+        # 获取表单数据
+        skill_level = request.POST.get('skill_level', 1)
+        learning_goal = request.POST.get('learning_goal', '')
+        available_time = request.POST.get('available_time_per_week', 5)
+        
+        # 获取偏好舞种（复选框）
+        preferred_types = request.POST.getlist('preferred_dance_types')
+        
+        # 验证数据
+        try:
+            skill_level = int(skill_level)
+            if skill_level < 1 or skill_level > 5:
+                skill_level = 1
+        except (ValueError, TypeError):
+            skill_level = 1
+        
+        try:
+            available_time = int(available_time)
+            if available_time < 1 or available_time > 50:
+                available_time = 5
+        except (ValueError, TypeError):
+            available_time = 5
+        
+        # 更新用户资料
+        user_profile.skill_level = skill_level
+        user_profile.learning_goal = learning_goal[:200]  # 限制长度
+        user_profile.available_time_per_week = available_time
+        user_profile.preferred_dance_types = preferred_types
+        user_profile.save()
+        
+        messages.success(request, '个人资料更新成功！推荐结果已刷新')
+        return redirect('knowledge:recommendations')
+    
+    context = {
+        'user_profile': user_profile,
+        'dance_type_choices': dance_type_choices,
+    }
+    return render(request, 'community/edit_profile.html', context)

@@ -144,6 +144,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ==================== 认证配置 ====================
+LOGIN_URL = '/login/'  # 自定义登录页面URL
+LOGIN_REDIRECT_URL = '/'  # 登录成功后重定向到首页
+LOGOUT_REDIRECT_URL = '/'  # 登出后重定向到首页
+
 # ==================== 通义千问 API 配置 ====================
 # 在阿里云百炼平台申请：https://bailian.console.aliyun.com/
 # 创建应用 -> 获取 API Key

@@ -65,6 +65,9 @@ def get_project_knowledge_graph(request, project_id):
                 'category': getattr(project, 'category', '传统舞蹈'),
                 'difficulty_level': getattr(project, 'difficulty_level', 1),
                 'image': image_url,
+                # 从 origin 项目获取批次和年份
+                'announce_batch': getattr(origin_project, 'announce_batch', ''),
+                'announce_time': getattr(origin_project, 'announce_time', ''),
             },
             'modules': []
         }
@@ -315,9 +318,21 @@ def generate_mock_response(message):
 def personalized_recommendations(request):
     """个性化推荐页面"""
     from .recommendation_engine import get_user_recommendations
+    from origin.models import DanceProject as OriginDanceProject
     
     # 获取推荐列表
     recommendations = get_user_recommendations(request.user, limit=12)
+    
+    # 为每个推荐项添加 origin 项目 ID 和图片
+    for rec in recommendations:
+        project = rec['project']
+        try:
+            origin_project = OriginDanceProject.objects.get(name=project.name)
+            rec['origin_project_id'] = origin_project.id
+            rec['project_image'] = origin_project.images.url if origin_project.images else None
+        except OriginDanceProject.DoesNotExist:
+            rec['origin_project_id'] = project.id  # 如果找不到，使用 knowledge 表的 ID
+            rec['project_image'] = project.image.url if project.image else None
     
     context = {
         'recommendations': recommendations,
@@ -439,12 +454,16 @@ def my_progress(request):
             pp['avg_proficiency'] = pp['proficiency_sum'] / pp['total_moves']
             # 完成度 = (已完成 + 已掌握) / 总数
             pp['completion_rate'] = (pp['completed'] + pp['mastered']) / pp['total_moves'] * 100
+            # 学习进度 = (学习中 + 已完成 + 已掌握) / 总数（用于判断是否已开始学习）
+            pp['learning_progress_rate'] = (pp['learning'] + pp['completed'] + pp['mastered']) / pp['total_moves'] * 100
         else:
             pp['completion_rate'] = 0
+            pp['learning_progress_rate'] = 0
     
     # 转换为列表并排序（按完成度降序）
+    # 过滤掉完全没有学习进度的项目（所有招式都是未开始状态）
     progress_list = sorted(
-        project_progress.values(),
+        [pp for pp in project_progress.values() if pp['learning_progress_rate'] > 0],
         key=lambda x: x['completion_rate'],
         reverse=True
     )
