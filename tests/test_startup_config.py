@@ -60,5 +60,19 @@ class DatabaseSettingsTests(unittest.TestCase):
         self.assertEqual(config["PORT"], "3307")
 
 
+class DependencyFileTests(unittest.TestCase):
+    def test_default_requirements_cover_runtime_imports(self):
+        requirements = (PROJECT_ROOT / "requirements.txt").read_text()
+        self.assertIn("Django>=5.1,<5.2", requirements)
+        self.assertIn("Pillow>=10,<13", requirements)
+        self.assertIn("requests>=2.31,<3", requirements)
+        self.assertNotIn("mysqlclient", requirements)
+
+    def test_mysql_requirements_extend_default_requirements(self):
+        requirements = (PROJECT_ROOT / "requirements-mysql.txt").read_text()
+        self.assertIn("-r requirements.txt", requirements)
+        self.assertIn("mysqlclient>=2.2,<3", requirements)
+
+
 if __name__ == "__main__":
     unittest.main()
