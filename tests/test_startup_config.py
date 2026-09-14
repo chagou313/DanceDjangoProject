@@ -74,5 +74,21 @@ class DependencyFileTests(unittest.TestCase):
         self.assertIn("mysqlclient>=2.2,<3", requirements)
 
 
+class StartScriptTests(unittest.TestCase):
+    def test_start_script_is_executable_and_has_valid_bash_syntax(self):
+        script = PROJECT_ROOT / "start.sh"
+        self.assertTrue(script.exists())
+        self.assertTrue(os.access(script, os.X_OK))
+        subprocess.run(["bash", "-n", script], check=True)
+
+    def test_start_script_prepares_and_runs_django(self):
+        script = (PROJECT_ROOT / "start.sh").read_text()
+        self.assertIn("-m venv", script)
+        self.assertIn("-m pip install -r requirements.txt", script)
+        self.assertIn("manage.py migrate --noinput", script)
+        self.assertIn("manage.py runserver", script)
+        self.assertIn('${HOST:-127.0.0.1}:${PORT:-8000}', script)
+
+
 if __name__ == "__main__":
     unittest.main()
