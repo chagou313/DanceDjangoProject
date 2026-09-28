@@ -16,6 +16,7 @@ fi
 
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python manage.py migrate --noinput
+.venv/bin/python manage.py seed_news --if-empty
 
 echo "项目已准备完成：http://${HOST:-127.0.0.1}:${PORT:-8000}"
 exec .venv/bin/python manage.py runserver "${HOST:-127.0.0.1}:${PORT:-8000}" --noreload
