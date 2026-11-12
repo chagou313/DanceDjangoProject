@@ -1078,8 +1078,13 @@ function renderKnowledgeGraph(data) {
                                     resource.type === 'demo' ? '传承人示范' : '图文教程';
                     const durationText = resource.duration ? ` | ${Math.round(resource.duration / 60)}分钟` : '';
                     
+                    // 如果有视频文件，跳转到视频播放页面；否则打开外部链接
+                    const linkUrl = resource.has_video_file ? `/knowledge/video/${resource.id}/` : resource.url;
+                    const targetAttr = resource.has_video_file ? '' : 'target="_blank"';
+                    const externalIcon = resource.has_video_file ? '' : '<i class="fas fa-external-link-alt" style="color: rgba(232, 213, 155, 0.4);"></i>';
+                    
                     html += `
-                        <a href="${resource.url}" target="_blank" class="resource-item">
+                        <a href="${linkUrl}" ${targetAttr} class="resource-item">
                             <div class="resource-icon">
                                 <i class="fas ${iconClass}"></i>
                             </div>
@@ -1087,7 +1092,7 @@ function renderKnowledgeGraph(data) {
                                 <div class="resource-title">${resource.title}</div>
                                 <div class="resource-meta">${typeText}${durationText}</div>
                             </div>
-                            <i class="fas fa-external-link-alt" style="color: rgba(232, 213, 155, 0.4);"></i>
+                            ${externalIcon}
                         </a>
                     `;
                 });

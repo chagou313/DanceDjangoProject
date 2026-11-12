@@ -114,13 +114,19 @@ def get_project_knowledge_graph(request, project_id):
                 # 获取学习资源
                 resources = LearningResource.objects.filter(specific_move=move).order_by('order_index')
                 for resource in resources:
+                    resource_url = resource.url
+                    # 如果有上传的视频文件，优先使用视频文件
+                    if resource.video_file:
+                        resource_url = resource.video_file.url
+                    
                     move_data['resources'].append({
                         'id': resource.id,
                         'type': resource.resource_type,
                         'title': resource.title,
-                        'url': resource.url,
+                        'url': resource_url,
                         'thumbnail': resource.thumbnail.url if resource.thumbnail else None,
                         'duration': resource.duration,
+                        'has_video_file': bool(resource.video_file),
                     })
                 
                 # 获取知识点标签
@@ -560,3 +566,41 @@ def update_learning_progress(request, move_id):
         return JsonResponse({'success': False, 'error': '招式不存在'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def play_video(request, resource_id):
+    """视频播放页面"""
+    from origin.models import DanceProject as OriginDanceProject
+    
+    resource = get_object_or_404(LearningResource, id=resource_id)
+    specific_move = resource.specific_move
+    action_module = specific_move.action_module
+    dance_project = action_module.dance_project
+    
+    # 获取 origin 项目用于展示
+    try:
+        origin_project = OriginDanceProject.objects.get(name=dance_project.name)
+    except OriginDanceProject.DoesNotExist:
+        origin_project = None
+    
+    # 获取同招式的所有学习资源
+    related_resources = LearningResource.objects.filter(
+        specific_move=specific_move
+    ).order_by('order_index')
+    
+    # 获取同模块的其他招式
+    other_moves = SpecificMove.objects.filter(
+        action_module=action_module
+    ).order_by('order_index')
+    
+    context = {
+        'resource': resource,
+        'specific_move': specific_move,
+        'action_module': action_module,
+        'dance_project': dance_project,
+        'origin_project': origin_project,
+        'related_resources': related_resources,
+        'other_moves': other_moves,
+    }
+    return render(request, 'knowledge/video_player.html', context)

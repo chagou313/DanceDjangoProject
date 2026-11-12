@@ -1,0 +1,342 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}{{ resource.title }} - 视频学习{% endblock %}
+
+{% block content %}
+<style>
+    .video-player-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* 页面头部 */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.6);
+        text-decoration: none;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+    }
+
+    .back-button:hover {
+        color: #F5EDC8;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+        color: rgba(232, 213, 155, 0.6);
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .breadcrumb a:hover {
+        color: #F5EDC8;
+    }
+
+    /* 主内容区 */
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+    }
+
+    /* 视频播放器 */
+    .video-section {
+        background: rgba(216, 191, 100, 0.03);
+        border: 1px solid rgba(216, 191, 100, 0.15);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        background: #000;
+    }
+
+    .video-wrapper video {
+        width: 100%;
+        display: block;
+    }
+
+    .video-info {
+        padding: 1.5rem;
+    }
+
+    .video-title {
+        font-size: 1.3rem;
+        color: #F5EDC8;
+        margin-bottom: 0.8rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .video-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .video-description {
+        color: rgba(232, 213, 155, 0.7);
+        line-height: 1.8;
+        font-size: 0.95rem;
+    }
+
+    /* 侧边栏 */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sidebar-section {
+        background: rgba(216, 191, 100, 0.03);
+        border: 1px solid rgba(216, 191, 100, 0.15);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        color: #F5EDC8;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    /* 相关资源列表 */
+    .resource-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .resource-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem;
+        background: rgba(216, 191, 100, 0.05);
+        border: 1px solid rgba(216, 191, 100, 0.1);
+        border-radius: 0.4rem;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .resource-item:hover {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.3);
+    }
+
+    .resource-item.active {
+        background: rgba(216, 191, 100, 0.15);
+        border-color: rgba(216, 191, 100, 0.4);
+    }
+
+    .resource-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: rgba(216, 191, 100, 0.1);
+        border-radius: 0.4rem;
+        color: #D8BF64;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .resource-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .resource-title {
+        color: #E8D59B;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .resource-meta {
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.8rem;
+    }
+
+    /* 招式列表 */
+    .move-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .move-item {
+        padding: 0.6rem 0.8rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 0.3rem;
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .move-item:hover {
+        background: rgba(216, 191, 100, 0.1);
+    }
+
+    .move-item.current {
+        background: rgba(216, 191, 100, 0.15);
+        color: #F5EDC8;
+        font-weight: 500;
+    }
+
+    .move-number {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        background: rgba(216, 191, 100, 0.2);
+        border-radius: 50%;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+    }
+
+    /* 响应式 */
+    @media (max-width: 1024px) {
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="video-player-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <a href="javascript:history.back()" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            <span>返回知识图谱</span>
+        </a>
+        <h1 class="page-title">{{ resource.title }}</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'knowledge:knowledge_map' %}">知识图谱</a>
+            <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            {% if origin_project %}
+            <a href="{% url 'project_detail' origin_project.id %}">{{ dance_project.name }}</a>
+            {% else %}
+            <span>{{ dance_project.name }}</span>
+            {% endif %}
+            <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            <span>{{ action_module.name }}</span>
+            <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            <span>{{ specific_move.name }}</span>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 视频播放器 -->
+        <div class="video-section">
+            <div class="video-wrapper">
+                <video controls autoplay>
+                    <source src="{{ resource.video_file.url }}" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-info">
+                <h2 class="video-title">{{ resource.title }}</h2>
+                <div class="video-meta">
+                    {% if resource.duration %}
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ resource.duration }}秒</span>
+                    </div>
+                    {% endif %}
+                    <div class="meta-item">
+                        <i class="fas fa-video"></i>
+                        <span>教学视频</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>{{ dance_project.name }}</span>
+                    </div>
+                </div>
+                {% if resource.description %}
+                <p class="video-description">{{ resource.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <!-- 相关资源 -->
+            <div class="sidebar-section">
+                <h3 class="section-title"><i class="fas fa-book-open"></i> 相关学习资源</h3>
+                <div class="resource-list">
+                    {% for res in related_resources %}
+                    <a href="{% url 'knowledge:play_video' res.id %}" class="resource-item {% if res.id == resource.id %}active{% endif %}">
+                        <div class="resource-icon">
+                            <i class="fas {% if res.resource_type == 'video' %}fa-video{% elif res.resource_type == 'demo' %}fa-user-tie{% elif res.resource_type == 'article' %}fa-file-alt{% else %}fa-music{% endif %}"></i>
+                        </div>
+                        <div class="resource-info">
+                            <div class="resource-title">{{ res.title }}</div>
+                            <div class="resource-meta">
+                                {% if res.resource_type == 'video' %}教学视频{% elif res.resource_type == 'demo' %}传承人示范{% elif res.resource_type == 'article' %}图文教程{% else %}音频讲解{% endif %}
+                                {% if res.duration %} | {{ res.duration }}秒{% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 同模块招式 -->
+            <div class="sidebar-section">
+                <h3 class="section-title"><i class="fas fa-list-ol"></i> 同模块招式</h3>
+                <div class="move-list">
+                    {% for move in other_moves %}
+                    <div class="move-item {% if move.id == specific_move.id %}current{% endif %}">
+                        <span class="move-number">{{ forloop.counter }}</span>
+                        {{ move.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

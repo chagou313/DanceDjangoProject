@@ -18,4 +18,7 @@ urlpatterns = [
     
     # 学习进度
     path('my-progress/', views.my_progress, name='my_progress'),
+    
+    # 视频播放
+    path('video/<int:resource_id>/', views.play_video, name='play_video'),
 ]

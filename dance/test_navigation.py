@@ -24,6 +24,12 @@ class ResponsiveNavigationTests(SimpleTestCase):
         self.assertIn('--navbar-height:', content)
         self.assertIn('@media (max-width: 1200px)', content)
 
+    def test_home_mobile_layout_prevents_narrow_grid_overflow(self):
+        content = self.render_home()
+
+        self.assertIn('grid-template-columns: minmax(0, 1fr);', content)
+        self.assertIn('overflow-x: hidden;', content)
+
     def test_authenticated_mobile_menu_contains_session_actions(self):
         user = User(username="layout-user")
 

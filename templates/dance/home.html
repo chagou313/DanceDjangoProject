@@ -1192,6 +1192,20 @@
         color: rgba(232, 213, 155, 0.5);
         margin-bottom: 0.5rem;
     }
+
+    @media (max-width: 550px) {
+        .news-grid,
+        .popular-grid,
+        .features-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .news-card,
+        .feature-card,
+        .about-intro {
+            min-width: 0;
+        }
+    }
 </style>
 
 <div class="page-container">
