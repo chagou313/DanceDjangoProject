@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.db.models import Q, Max
+from django.db.models import Count, Max, Q
 from .models import Level, Question, LevelQuestion, UserQuizRecord, UserAnswerDetail
 from knowledge.models import KnowledgePoint
 from origin.models import DanceProject
@@ -26,12 +26,12 @@ def quiz_list(request):
         user=request.user
     ).values('level_id').annotate(
         best_score=Max('score'),
-        is_passed=Max('is_passed')
+        passed_count=Count('id', filter=Q(is_passed=True))
     )
     for record in best_records:
         user_progress[record['level_id']] = {
             'best_score': record['best_score'],
-            'is_passed': record['is_passed'],
+            'is_passed': record['passed_count'] > 0,
         }
     
     # 统计已完成和进行中的关卡数

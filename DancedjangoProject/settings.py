@@ -35,13 +35,31 @@ _load_local_env(BASE_DIR / ".env")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-_(6t=q0ty8%%=0-+bg2vh^*dlds%bg#g(08z^n6lx4+7t3@mm("
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+def env_list(name, default=""):
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+# 线上（Render）通过环境变量配置；本地不设置时沿用开发默认值
+SECRET_KEY = os.getenv(
+    "DANCE_SECRET_KEY",
+    "django-insecure-_(6t=q0ty8%%=0-+bg2vh^*dlds%bg#g(08z^n6lx4+7t3@mm(",
+)
+DEBUG = env_bool("DANCE_DEBUG", True)
+ALLOWED_HOSTS = env_list("DANCE_ALLOWED_HOSTS", "127.0.0.1,localhost")
+CSRF_TRUSTED_ORIGINS = env_list("DANCE_CSRF_TRUSTED_ORIGINS")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# 设置了 CLOUDINARY_URL 时，上传的图片和视频保存到 Cloudinary
+USE_CLOUDINARY = bool(os.getenv("CLOUDINARY_URL"))
 
 
 # Application definition
@@ -60,9 +78,12 @@ INSTALLED_APPS = [
     "quiz",      # 答题闯关模块
     "community", # 交流社区模块
 ]
+if USE_CLOUDINARY:
+    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,8 +118,20 @@ WSGI_APPLICATION = "DancedjangoProject.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DB_ENGINE == "mysql":
+if DATABASE_URL:
+    # 线上：Neon PostgreSQL 连接字符串
+    import dj_database_url
+
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
+    }
+elif DB_ENGINE == "mysql":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -155,7 +188,8 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -164,6 +198,26 @@ STATICFILES_DIRS = [
 # Media files (用户上传的文件)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# 与 mangowit 共用一个 Cloudinary 账号时，用独立前缀区分两个网站的文件
+CLOUDINARY_STORAGE = {"PREFIX": "dance/media/"}
+
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if USE_CLOUDINARY
+            else "django.core.files.storage.FileSystemStorage"
+        )
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        )
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
