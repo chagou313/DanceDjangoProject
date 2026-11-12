@@ -38,6 +38,13 @@ if [[ -z "${DATABASE_URL:-}" || -z "${CLOUDINARY_URL:-}" ]]; then
     echo ".env.deploy 里需要同时有 DATABASE_URL 和 CLOUDINARY_URL。"
     exit 1
 fi
+if [[ "$CLOUDINARY_URL" == *"<"* || "$DATABASE_URL" == *"<"* ]]; then
+    echo ".env.deploy 里还有 <...> 占位文字，请换成 Neon / Cloudinary 控制台里真实的连接字符串。"
+    exit 1
+fi
+
+echo "检查目标数据库……"
+"$PY" manage.py check_target_database
 
 echo "2/4 在线上数据库创建数据表……"
 "$PY" manage.py migrate --noinput
