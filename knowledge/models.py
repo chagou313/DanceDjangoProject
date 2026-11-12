@@ -78,6 +78,7 @@ class LearningResource(models.Model):
     title = models.CharField(max_length=200, verbose_name="资源标题")
     url = models.URLField(verbose_name="资源链接")
     thumbnail = models.ImageField(upload_to='resources/%Y%m%d/', blank=True, null=True, verbose_name="缩略图")
+    video_file = models.FileField(upload_to='resource/', blank=True, null=True, verbose_name="视频文件")
     duration = models.IntegerField(blank=True, null=True, verbose_name="时长（秒）")
     description = models.TextField(blank=True, verbose_name="资源描述")
     order_index = models.IntegerField(default=0, verbose_name="排序索引")
@@ -121,3 +122,96 @@ class AIQuestion(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.question[:50]}"
+
+
+class UserLearningProgress(models.Model):
+    """用户学习进度追踪表"""
+    STATUS_CHOICES = [
+        ('not_started', '未开始'),
+        ('learning', '学习中'),
+        ('completed', '已完成'),
+        ('mastered', '已掌握'),
+    ]
+    
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='learning_progress', verbose_name="用户")
+    dance_project = models.ForeignKey(DanceProject, on_delete=models.CASCADE, related_name='user_progress', verbose_name="舞蹈项目")
+    specific_move = models.ForeignKey('SpecificMove', on_delete=models.CASCADE, related_name='user_progress', verbose_name="具体招式")
+    
+    # 学习状态
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started', verbose_name="学习状态")
+    
+    # 学习数据
+    practice_count = models.IntegerField(default=0, verbose_name="练习次数")
+    total_practice_time = models.IntegerField(default=0, verbose_name="总练习时长(秒)")
+    last_practice_time = models.DateTimeField(null=True, blank=True, verbose_name="最后练习时间")
+    
+    # 能力评估
+    proficiency_score = models.FloatField(default=0.0, verbose_name="熟练度(0-100)")
+    difficulty_rating = models.FloatField(default=0.0, verbose_name="用户感知难度(1-10)")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    
+    class Meta:
+        verbose_name = "用户学习进度"
+        verbose_name_plural = "用户学习进度"
+        unique_together = ['user', 'specific_move']
+        ordering = ['-updated_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.specific_move.name} ({self.get_status_display()})"
+
+
+class UserKnowledgeMastery(models.Model):
+    """用户知识点掌握度表"""
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='knowledge_mastery', verbose_name="用户")
+    knowledge_point = models.ForeignKey(KnowledgePoint, on_delete=models.CASCADE, related_name='user_mastery', verbose_name="知识点")
+    
+    mastery_level = models.FloatField(default=0.0, verbose_name="掌握程度(0-1)")
+    quiz_correct_rate = models.FloatField(default=0.0, verbose_name="答题正确率")
+    quiz_attempts = models.IntegerField(default=0, verbose_name="答题次数")
+    last_assessment_time = models.DateTimeField(null=True, blank=True, verbose_name="最后评估时间")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    
+    class Meta:
+        verbose_name = "用户知识点掌握度"
+        verbose_name_plural = "用户知识点掌握度"
+        unique_together = ['user', 'knowledge_point']
+        ordering = ['-mastery_level']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.knowledge_point.name} ({self.mastery_level:.2f})"
+
+
+class RecommendationLog(models.Model):
+    """推荐记录日志表"""
+    ALGORITHM_CHOICES = [
+        ('content_based', '基于内容'),
+        ('collaborative', '协同过滤'),
+        ('knowledge_graph', '知识图谱'),
+        ('hybrid', '混合推荐'),
+        ('popular', '热门推荐'),
+    ]
+    
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='recommendation_logs', verbose_name="用户")
+    recommended_project = models.ForeignKey(DanceProject, on_delete=models.CASCADE, related_name='recommendation_logs', verbose_name="推荐项目")
+    recommendation_algorithm = models.CharField(max_length=50, choices=ALGORITHM_CHOICES, verbose_name="推荐算法")
+    recommendation_score = models.FloatField(verbose_name="推荐得分")
+    recommendation_reason = models.TextField(blank=True, verbose_name="推荐理由")
+    
+    # 用户反馈
+    is_clicked = models.BooleanField(default=False, verbose_name="是否点击")
+    is_completed = models.BooleanField(default=False, verbose_name="是否完成学习")
+    feedback_rating = models.IntegerField(null=True, blank=True, choices=[(i, f'{i}星') for i in range(1, 6)], verbose_name="用户评分(1-5)")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="推荐时间")
+    
+    class Meta:
+        verbose_name = "推荐记录"
+        verbose_name_plural = "推荐记录"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.recommended_project.name} ({self.recommendation_algorithm})"

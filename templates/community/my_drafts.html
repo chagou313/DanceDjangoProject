@@ -1,0 +1,214 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}我的草稿 - 交流社区{% endblock %}
+
+{% block content %}
+<style>
+    .drafts-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .drafts-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .drafts-title {
+        font-size: 1.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .drafts-count {
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.9rem;
+    }
+    
+    .draft-item {
+        background: rgba(20, 22, 30, 0.6);
+        border-radius: 0.8rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .draft-item:hover {
+        background: rgba(20, 22, 30, 0.8);
+    }
+    
+    .draft-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.8rem;
+    }
+    
+    .draft-item-title {
+        color: #F5EDC8;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .draft-item-time {
+        color: rgba(232, 213, 155, 0.4);
+        font-size: 0.8rem;
+    }
+    
+    .draft-item-content {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .draft-item-actions {
+        display: flex;
+        gap: 0.8rem;
+    }
+    
+    .draft-action-btn {
+        padding: 0.5rem 1.2rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+        border: none;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .btn-edit {
+        background: rgba(216, 191, 100, 0.15);
+        color: #D8BF64;
+    }
+    
+    .btn-edit:hover {
+        background: rgba(216, 191, 100, 0.25);
+    }
+    
+    .btn-publish {
+        background: linear-gradient(135deg, #D8BF64, #E8D59B);
+        color: #0F0F1A;
+    }
+    
+    .btn-publish:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(216, 191, 100, 0.3);
+    }
+    
+    .btn-delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: #E74C3C;
+    }
+    
+    .btn-delete:hover {
+        background: rgba(231, 76, 60, 0.2);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(20, 22, 30, 0.5);
+        border-radius: 1rem;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state h3 {
+        color: #F5EDC8;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: rgba(232, 213, 155, 0.5);
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.6);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+        color: #E8D59B;
+    }
+</style>
+
+<div class="drafts-container">
+    <a href="{% url 'community_posts' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回社区
+    </a>
+    
+    <div class="drafts-header">
+        <div>
+            <h1 class="drafts-title"><i class="fas fa-file-alt"></i> 我的草稿</h1>
+            <span class="drafts-count">{{ drafts.count }} 篇草稿</span>
+        </div>
+    </div>
+    
+    {% if drafts %}
+        {% for draft in drafts %}
+        <div class="draft-item">
+            <div class="draft-item-header">
+                <div>
+                    <div class="draft-item-title">{{ draft.title }}</div>
+                    <div class="draft-item-time">
+                        <i class="far fa-clock"></i> 最后编辑：{{ draft.updated_at|date:"Y-m-d H:i" }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="draft-item-content">{{ draft.content|truncatewords:40 }}</div>
+            
+            <div class="draft-item-actions">
+                <a href="{% url 'edit_post' draft.id %}" class="draft-action-btn btn-edit">
+                    <i class="fas fa-edit"></i> 编辑
+                </a>
+                <form method="post" action="{% url 'edit_post' draft.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="title" value="{{ draft.title }}">
+                    <input type="hidden" name="content" value="{{ draft.content }}">
+                    {% if draft.topic %}
+                    <input type="hidden" name="topic" value="{{ draft.topic.id }}">
+                    {% endif %}
+                    <input type="hidden" name="tags" value="{{ draft.tags }}">
+                    <input type="hidden" name="action" value="publish">
+                    <button type="submit" class="draft-action-btn btn-publish">
+                        <i class="fas fa-paper-plane"></i> 发布
+                    </button>
+                </form>
+                <a href="{% url 'delete_draft' draft.id %}" class="draft-action-btn btn-delete" 
+                   onclick="return confirm('确定要删除这个草稿吗？')">
+                    <i class="fas fa-trash"></i> 删除
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>暂无草稿</h3>
+            <p>你可以在发帖时保存草稿，稍后继续编辑</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

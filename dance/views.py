@@ -409,7 +409,7 @@ def profile(request):
     """个人主页 - 显示用户的统计数据概览"""
     from dance.models import UserProfile
     from community.models import Post, PostLike, PostCollection, Comment
-    from news.models import UserInteraction
+    from news.models import UserInteraction, News
     
     if not request.user.is_authenticated:
         return redirect('login')
@@ -423,14 +423,26 @@ def profile(request):
     total_likes = PostLike.objects.filter(user=request.user).count()
     total_collections = PostCollection.objects.filter(user=request.user).count()
     total_comments = Comment.objects.filter(user=request.user, is_deleted=False).count()
-    total_posts = Post.objects.filter(author=request.user).count()
+    total_posts = Post.objects.filter(author=request.user, status='published').count()
     
     # 资讯互动统计
     news_liked_count = UserInteraction.objects.filter(user=request.user, interaction_type='like').count()
     news_collected_count = UserInteraction.objects.filter(user=request.user, interaction_type='collect').count()
     
-    # 获取最近的动态（各取 5 条用于展示）
-    recent_posts = Post.objects.filter(author=request.user).select_related('topic').order_by('-created_at')[:5]
+    # 获取最近浏览的资讯（从 session 中获取 ID）
+    visited_news_ids = request.session.get('visited_news', [])[:3]
+    recent_news = News.objects.filter(id__in=visited_news_ids).select_related('author', 'dance_project').order_by('-created_at')[:3]
+    # 按浏览顺序排序
+    recent_news = sorted(recent_news, key=lambda x: visited_news_ids.index(x.id) if x.id in visited_news_ids else 999)
+    
+    # 获取最近浏览的帖子（从 session 中获取 ID）
+    visited_posts_ids = request.session.get('visited_posts_home', [])[:3]
+    recent_posts_browsed = Post.objects.filter(id__in=visited_posts_ids).select_related('author', 'topic').order_by('-created_at')[:3]
+    # 按浏览顺序排序
+    recent_posts_browsed = sorted(recent_posts_browsed, key=lambda x: visited_posts_ids.index(x.id) if x.id in visited_posts_ids else 999)
+    
+    # 保留原有的最近发帖和评论（用于备用）
+    recent_posts_created = Post.objects.filter(author=request.user, status='published').select_related('topic').order_by('-created_at')[:5]
     recent_comments = Comment.objects.filter(user=request.user, is_deleted=False).select_related('post').order_by('-created_at')[:3]
     
     context = {
@@ -441,7 +453,9 @@ def profile(request):
         'total_posts': total_posts,
         'news_liked_count': news_liked_count,
         'news_collected_count': news_collected_count,
-        'recent_posts': recent_posts,
+        'recent_news': recent_news,
+        'recent_posts_browsed': recent_posts_browsed,
+        'recent_posts_created': recent_posts_created,
         'recent_comments': recent_comments,
     }
     return render(request, 'community/profile.html', context)
@@ -511,11 +525,12 @@ def user_comments(request):
 
 @login_required
 def user_posts(request):
-    """用户发布的帖子列表"""
+    """用户发布的帖子列表（排除草稿箱）"""
     from community.models import Post
     
     posts = Post.objects.filter(
-        author=request.user
+        author=request.user,
+        status='published'
     ).select_related('topic').order_by('-created_at')
     
     total_count = posts.count()
@@ -597,3 +612,57 @@ def edit_avatar(request):
             messages.error(request, '请选择要上传的图片')
     
     return render(request, 'community/edit_avatar.html', {'user_profile': user_profile})
+
+
+@login_required
+def edit_profile(request):
+    """编辑个人资料（技能等级、偏好舞种等）"""
+    from .models import UserProfile
+    
+    user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
+    
+    # 可选的舞种列表
+    dance_type_choices = [
+        '古典舞蹈', '民间舞蹈', '民族舞蹈', '传统舞蹈',
+        '现代舞', '芭蕾舞', '街舞', '国标舞'
+    ]
+    
+    if request.method == 'POST':
+        # 获取表单数据
+        skill_level = request.POST.get('skill_level', 1)
+        learning_goal = request.POST.get('learning_goal', '')
+        available_time = request.POST.get('available_time_per_week', 5)
+        
+        # 获取偏好舞种（复选框）
+        preferred_types = request.POST.getlist('preferred_dance_types')
+        
+        # 验证数据
+        try:
+            skill_level = int(skill_level)
+            if skill_level < 1 or skill_level > 5:
+                skill_level = 1
+        except (ValueError, TypeError):
+            skill_level = 1
+        
+        try:
+            available_time = int(available_time)
+            if available_time < 1 or available_time > 50:
+                available_time = 5
+        except (ValueError, TypeError):
+            available_time = 5
+        
+        # 更新用户资料
+        user_profile.skill_level = skill_level
+        user_profile.learning_goal = learning_goal[:200]  # 限制长度
+        user_profile.available_time_per_week = available_time
+        user_profile.preferred_dance_types = preferred_types
+        user_profile.save()
+        
+        messages.success(request, '个人资料更新成功！推荐结果已刷新')
+        return redirect('knowledge:recommendations')
+    
+    context = {
+        'user_profile': user_profile,
+        'dance_type_choices': dance_type_choices,
+    }
+    return render(request, 'community/edit_profile.html', context)

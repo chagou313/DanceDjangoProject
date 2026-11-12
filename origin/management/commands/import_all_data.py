@@ -23,6 +23,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DancedjangoProject.settings')
 django.setup()
 
 from origin.models import Region, DanceProject, Inheritor, RelatedProject, AcademicResearch
+from news.services import import_news_dataframe
 
 
 # ========== 配置区域 ==========
@@ -313,10 +314,15 @@ def import_all_from_excel(excel_path):
             # 可以根据需要指定主项目编号
             import_related_projects(df_related)
         
-        # 导入相关资讯
-        if '相关资讯' in sheet_names:
-            df_news = pd.read_excel(excel_path, sheet_name='相关资讯')
-            # 类似的方法实现...
+        # 导入新闻资讯（兼容新旧工作表名称）
+        news_sheet = next(
+            (name for name in ('新闻资讯', '相关资讯') if name in sheet_names),
+            None,
+        )
+        if news_sheet:
+            df_news = pd.read_excel(excel_path, sheet_name=news_sheet)
+            success_count, error_count = import_news_dataframe(df_news)
+            print(f"\n【新闻资讯】导入完成：成功{success_count}条，失败{error_count}条")
         
         # 导入学术研究
         if '学术研究' in sheet_names:

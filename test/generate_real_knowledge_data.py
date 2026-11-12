@@ -1,17 +1,14 @@
-"""
-为3个典型舞蹈项目生成真实的知识图谱数据
-使用方法: python manage.py generate_real_data
-"""
+
 from django.core.management.base import BaseCommand
 from knowledge.models import DanceProject, ActionModule, SpecificMove, MoveAttribute, LearningResource, KnowledgePoint
 
 
 class Command(BaseCommand):
-    help = '生成真实的知识图谱数据示例'
+    help = '真实的知识图谱数据示例'
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('=' * 60))
-        self.stdout.write(self.style.SUCCESS('开始生成真实知识图谱数据'))
+        self.stdout.write(self.style.SUCCESS('真实知识图谱数据'))
         self.stdout.write(self.style.SUCCESS('=' * 60))
         
         generate_taipinggu_data(self)

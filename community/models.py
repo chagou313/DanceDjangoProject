@@ -32,6 +32,7 @@ class Post(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts', verbose_name="话题")
     tags = models.CharField(max_length=500, blank=True, verbose_name="标签（逗号分隔）")
     cover_image = models.ImageField(upload_to='community/%Y%m%d/', blank=True, null=True, verbose_name="封面图")
+    location = models.CharField(max_length=200, blank=True, verbose_name="地点")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='published', verbose_name="状态")
     views = models.IntegerField(default=0, verbose_name="浏览量")
     likes = models.IntegerField(default=0, verbose_name="点赞数")

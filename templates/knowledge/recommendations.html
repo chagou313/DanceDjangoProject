@@ -1,0 +1,378 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}个性化推荐 - 舞蹈知识图谱{% endblock %}
+
+{% block content %}
+<style>
+    .recommendations-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .page-title i {
+        color: #DAA520;
+    }
+
+    .user-preferences {
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0.5rem;
+        padding: 1.2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(216, 191, 100, 0.15);
+    }
+
+    .preferences-title {
+        color: #DAA520;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preferences-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .preference-item {
+        background: rgba(216, 191, 100, 0.05);
+        padding: 0.8rem;
+        border-radius: 0.4rem;
+        border: 1px solid rgba(216, 191, 100, 0.1);
+    }
+
+    .preference-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .preference-value {
+        color: #F5EDC8;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+    }
+
+    .recommendation-card {
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0.4rem;
+        overflow: hidden;
+        border-left: 3px solid rgba(216, 191, 100, 0.4);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        padding: 1rem;
+    }
+
+    .recommendation-card:hover {
+        background: rgba(216, 191, 100, 0.06);
+        transform: translateX(3px);
+    }
+
+    .project-thumbnail {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.3rem;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-right: 0.8rem;
+    }
+
+    .project-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.6rem;
+    }
+
+    .card-header-left {
+        display: flex;
+        align-items: flex-start;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .card-title {
+        color: #F5EDC8;
+        font-size: 1.05rem;
+        font-weight: bold;
+        flex: 1;
+    }
+
+    .score-badge {
+        background: rgba(218, 165, 32, 0.15);
+        color: #DAA520;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.3rem;
+        font-weight: bold;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        margin-left: 0.6rem;
+        border: 1px solid rgba(218, 165, 32, 0.3);
+    }
+
+    .card-category {
+        display: inline-block;
+        background: rgba(216, 191, 100, 0.1);
+        color: #DAA520;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.3rem;
+        font-size: 0.8rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .recommendation-reasons {
+        margin-top: 0.6rem;
+    }
+
+    .reasons-title {
+        color: #DAA520;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reason-item {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.6rem;
+        border-radius: 0.4rem;
+        text-align: center;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(218, 165, 32, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(216, 191, 100, 0.08);
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        color: #E8D59B;
+    }
+
+    .btn-secondary:hover {
+        border-color: rgba(216, 191, 100, 0.4);
+        background: rgba(216, 191, 100, 0.15);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: rgba(216, 191, 100, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: rgba(216, 191, 100, 0.08);
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        border-radius: 0.4rem;
+        color: #E8D59B;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+        border-color: rgba(216, 191, 100, 0.4);
+        background: rgba(216, 191, 100, 0.15);
+    }
+</style>
+
+<div class="recommendations-container">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-magic"></i> 个性化推荐</h1>
+        <p style="color: rgba(232, 213, 155, 0.6); font-size: 0.9rem;">基于您的学习偏好智能推荐</p>
+    </div>
+
+    <!-- 用户偏好信息 -->
+    <div class="user-preferences">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div style="color: #DAA520; font-size: 0.95rem; font-weight: bold;">
+                <i class="fas fa-sliders-h"></i> 您的学习偏好
+            </div>
+            <a href="/profile/edit/" class="back-link" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                <i class="fas fa-edit"></i> 修改偏好
+            </a>
+        </div>
+        <div class="preferences-grid">
+            <div class="preference-item">
+                <div class="preference-label">技能等级</div>
+                <div class="preference-value">
+                    {% if user.userprofile.skill_level %}
+                        {{ user.userprofile.skill_level }}级
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">每周学习时间</div>
+                <div class="preference-value">
+                    {% if user.userprofile.available_time_per_week %}
+                        {{ user.userprofile.available_time_per_week }}小时
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">学习目标</div>
+                <div class="preference-value" style="font-size: 0.95rem;">
+                    {% if user.userprofile.learning_goal %}
+                        {{ user.userprofile.learning_goal }}
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+            <div class="preference-item">
+                <div class="preference-label">偏好舞种</div>
+                <div class="preference-value" style="font-size: 0.95rem;">
+                    {% if user.userprofile.preferred_dance_types %}
+                        {{ user.userprofile.preferred_dance_types|join:"、" }}
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推荐列表 -->
+    {% if recommendations %}
+    <div class="recommendations-grid">
+        {% for rec in recommendations %}
+        <div class="recommendation-card" onclick="window.location.href='/knowledge/learning-path/{{ rec.origin_project_id }}/'">
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        {% if rec.project_image %}
+                        <div class="project-thumbnail">
+                            <img src="{{ rec.project_image }}" alt="{{ rec.project.name }}">
+                        </div>
+                        {% endif %}
+                        <div class="card-title">{{ rec.project.name }}</div>
+                    </div>
+                    <div class="score-badge">
+                        <i class="fas fa-star"></i> {{ rec.score|floatformat:1 }}
+                    </div>
+                </div>
+                
+                <span class="card-category">{{ rec.project.category }}</span>
+                
+                {% if rec.reasons %}
+                <div class="recommendation-reasons">
+                    <div class="reasons-title">
+                        <i class="fas fa-lightbulb"></i> 推荐理由
+                    </div>
+                    {% for reason in rec.reasons|slice:":3" %}
+                    <div class="reason-item">{{ reason }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="card-actions" onclick="event.stopPropagation();">
+                    <a href="/knowledge/learning-path/{{ rec.origin_project_id }}/" class="action-btn btn-primary">
+                        <i class="fas fa-route"></i> 学习路径
+                    </a>
+                    <a href="/dance/origin/{{ rec.origin_project_id }}/" class="action-btn btn-secondary">
+                        <i class="fas fa-info-circle"></i> 详情
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-compass"></i>
+        <h3 style="color: #F5EDC8; margin-bottom: 1rem;">暂无推荐</h3>
+        <p>完善您的个人资料，即可获得个性化推荐</p>
+        <a href="/profile/edit/" class="back-link" style="margin-top: 1.5rem;">
+            <i class="fas fa-edit"></i> 编辑个人资料
+        </a>
+    </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(216, 191, 100, 0.15);">
+        <a href="/profile/edit/" class="back-link">
+            <i class="fas fa-edit"></i> 编辑学习偏好
+        </a>
+        <a href="{% url 'knowledge:knowledge_map' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> 返回知识图谱
+        </a>
+    </div>
+</div>
+{% endblock %}

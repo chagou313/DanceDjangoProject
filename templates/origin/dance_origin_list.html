@@ -19,11 +19,11 @@ window._AMapSecurityConfig = {
     .map-container {
         max-width: 1400px;
         margin: 0 auto;
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
     }
 
     .map-header {
@@ -32,7 +32,7 @@ window._AMapSecurityConfig = {
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid rgba(216, 191, 100, 0.2);
+        border-bottom: 1px solid rgba(216, 191, 100, 0.15);
     }
 
     .map-title {
@@ -65,16 +65,16 @@ window._AMapSecurityConfig = {
     #dance-map {
         width: 100%;
         height: 700px;
-        border-radius: 1rem;
-        border: 2px solid rgba(216, 191, 100, 0.3);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(216, 191, 100, 0.15);
     }
 
     .map-legend {
         margin-top: 1.5rem;
         padding: 1rem;
-        background: rgba(216, 191, 100, 0.05);
-        border-radius: 1rem;
-        border: 1px solid rgba(216, 191, 100, 0.2);
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0.4rem;
+        border: 1px solid rgba(216, 191, 100, 0.1);
     }
 
     .legend-title {
@@ -99,19 +99,19 @@ window._AMapSecurityConfig = {
     }
 
     .legend-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        border-radius: 0.2rem;
         background: #D8BF64;
-        box-shadow: 0 0 10px rgba(216, 191, 100, 0.6);
+        box-shadow: 0 0 6px rgba(216, 191, 100, 0.4);
     }
 
-    /* 自定义弹出框样式 */
+    /* 自定义弹出框样式 - 现代化 */
     .leaflet-popup-content-wrapper {
         background: linear-gradient(135deg, rgba(20, 22, 30, 0.98) 0%, rgba(28, 30, 38, 0.98) 100%);
-        border: 2px solid rgba(216, 191, 100, 0.6);
-        border-radius: 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(216, 191, 100, 0.4);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
     .leaflet-popup-content {
@@ -135,11 +135,11 @@ window._AMapSecurityConfig = {
     .popup-count {
         display: inline-block;
         margin-top: 0.5rem;
-        padding: 0.3rem 0.8rem;
-        background: rgba(216, 191, 100, 0.2);
-        border-radius: 1rem;
+        padding: 0.25rem 0.6rem;
+        background: rgba(216, 191, 100, 0.1);
+        border-radius: 0.3rem;
         color: #D8BF64;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 600;
     }
 
@@ -170,11 +170,12 @@ window._AMapSecurityConfig = {
     .search-container {
         max-width: 1400px;
         margin: 0 auto;
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0;
+        padding: 1.5rem 2rem;
+        border: none;
+        border-top: 1px solid rgba(216, 191, 100, 0.1);
+        border-bottom: 1px solid rgba(216, 191, 100, 0.1);
     }
 
     .search-filters {
@@ -199,13 +200,13 @@ window._AMapSecurityConfig = {
 
     .filter-select {
         width: 100%;
-        padding: 0.9rem 1.2rem;
+        padding: 0.7rem 1rem;
         background: rgba(10, 10, 15, 0.6);
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        border-radius: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        border-radius: 0.4rem;
         color: #F5EDC8;
         font-family: 'Noto Serif SC', serif;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s;
         outline: none;
@@ -229,13 +230,13 @@ window._AMapSecurityConfig = {
 
     .search-keyword {
         flex: 1;
-        padding: 0.9rem 1.5rem;
+        padding: 0.7rem 1.2rem;
         background: rgba(10, 10, 15, 0.6);
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        border-radius: 1rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        border-radius: 0.4rem;
         color: #F5EDC8;
         font-family: 'Noto Serif SC', serif;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: all 0.3s;
         outline: none;
     }
@@ -250,17 +251,17 @@ window._AMapSecurityConfig = {
     }
 
     .search-btn {
-        padding: 0.9rem 2.5rem;
+        padding: 0.7rem 2rem;
         background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
         border: none;
-        border-radius: 1rem;
+        border-radius: 0.4rem;
         color: #fff;
         font-family: 'Noto Serif SC', serif;
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+        box-shadow: 0 2px 8px rgba(184, 134, 11, 0.3);
         letter-spacing: 1px;
     }
 
@@ -272,10 +273,10 @@ window._AMapSecurityConfig = {
 
     .search-results-info {
         margin-top: 1.5rem;
-        padding: 1rem;
-        background: rgba(216, 191, 100, 0.1);
-        border-left: 4px solid rgba(216, 191, 100, 0.6);
-        border-radius: 0 1rem 1rem 0;
+        padding: 0.8rem 1rem;
+        background: rgba(216, 191, 100, 0.05);
+        border-left: 3px solid rgba(216, 191, 100, 0.4);
+        border-radius: 0 0.4rem 0.4rem 0;
     }
 
     .results-title {
@@ -326,20 +327,20 @@ window._AMapSecurityConfig = {
     }
 
     .dance-card {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0.4rem;
         overflow: hidden;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(216, 191, 100, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
         display: block;
     }
 
     .dance-card:hover {
-        transform: translateY(-8px);
-        border-color: rgba(216, 191, 100, 0.7);
-        box-shadow: 0 20px 50px rgba(216, 191, 100, 0.2);
+        transform: translateY(-3px);
+        border-color: rgba(216, 191, 100, 0.4);
+        box-shadow: 0 4px 15px rgba(216, 191, 100, 0.1);
     }
 
     .dance-image {
@@ -587,12 +588,12 @@ function showIndicatorCard(name, count, maxCount, position) {
     
     const content = `
         <div style="
-            padding: 15px 20px;
+            padding: 12px 16px;
             background: linear-gradient(135deg, rgba(20, 22, 30, 0.98), rgba(28, 30, 38, 0.98));
-            border: 2px solid rgba(216, 191, 100, 0.8);
-            border-radius: 12px;
-            min-width: 220px;
-            box-shadow: 0 8px 30px rgba(218, 165, 32, 0.3);
+            border: 1px solid rgba(216, 191, 100, 0.6);
+            border-radius: 0.5rem;
+            min-width: 200px;
+            box-shadow: 0 4px 20px rgba(218, 165, 32, 0.2);
             position: relative;
         ">
             <button onclick="closeIndicatorCard()" style="
@@ -699,12 +700,12 @@ function showProjectsBelowMap(regionName) {
         container = document.createElement('div');
         container.id = 'region-projects-container';
         container.style.cssText = `
-            margin-top: 2rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, rgba(20, 22, 30, 0.95) 0%, rgba(28, 30, 38, 0.98) 100%);
-            border-radius: 2rem;
-            border: 2px solid rgba(216, 191, 100, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(216, 191, 100, 0.03);
+            border-radius: 0.4rem;
+            border: 1px solid rgba(216, 191, 100, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         `;
         
         // 插入到地图容器后面
@@ -729,23 +730,23 @@ function showProjectsBelowMap(regionName) {
     console.log('项目数量:', count, '项目列表:', dances.length);
     
     let content = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(216, 191, 100, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(216, 191, 100, 0.1);">
             <h3 style="color: #F5EDC8; font-size: 1.5rem; font-family: 'Noto Serif SC', serif; margin: 0;">
                 <i class="fas fa-map-marker-alt"></i> ${regionName}
             </h3>
-            <button onclick="closeRegionProjects()" style="
-                background: transparent;
-                border: 2px solid rgba(216, 191, 100, 0.4);
-                border-radius: 1rem;
-                color: rgba(232, 213, 155, 0.6);
-                padding: 0.5rem 1.5rem;
-                cursor: pointer;
-                font-family: 'Noto Serif SC', serif;
-                transition: all 0.3s;
-            " onmouseover="this.style.borderColor='#D8BF64'; this.style.color='#F5EDC8'" 
-               onmouseout="this.style.borderColor='rgba(216, 191, 100, 0.4)'; this.style.color='rgba(232, 213, 155, 0.6)'">
-                <i class="fas fa-times"></i> 关闭
-            </button>
+                <button onclick="closeRegionProjects()" style="
+                    background: transparent;
+                    border: 1px solid rgba(216, 191, 100, 0.2);
+                    border-radius: 0.4rem;
+                    color: rgba(232, 213, 155, 0.6);
+                    padding: 0.4rem 1.2rem;
+                    cursor: pointer;
+                    font-family: 'Noto Serif SC', serif;
+                    transition: all 0.3s;
+                " onmouseover="this.style.borderColor='rgba(216, 191, 100, 0.5)'; this.style.color='#F5EDC8'" 
+                onmouseout="this.style.borderColor='rgba(216, 191, 100, 0.2)'; this.style.color='rgba(232, 213, 155, 0.6)'">
+                    <i class="fas fa-times"></i> 关闭
+                </button>
         </div>
         <div style="color: #D8BF64; font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: bold;">
             共 ${count} 个项目
@@ -767,34 +768,30 @@ function showProjectsBelowMap(regionName) {
             content += `
                 <a href="/origin/${project.id}/" style="
                     display: flex;
-                    padding: 1.5rem;
-                    background: rgba(10, 10, 15, 0.6);
-                    border: 2px solid rgba(216, 191, 100, 0.3);
-                    border-radius: 1.5rem;
+                    padding: 1.2rem;
+                    background: rgba(10, 10, 15, 0.4);
+                    border: 1px solid rgba(216, 191, 100, 0.15);
+                    border-radius: 0.4rem;
                     color: #F5EDC8;
                     text-decoration: none;
                     transition: all 0.3s;
-                    gap: 1.5rem;
+                    gap: 1.2rem;
                     align-items: center;
-                " onmouseover="this.style.background='rgba(184, 134, 11, 0.2)'; this.style.borderColor='rgba(216, 191, 100, 0.6)'; this.style.transform='translateY(-5px)'" 
-                   onmouseout="this.style.background='rgba(10, 10, 15, 0.6)'; this.style.borderColor='rgba(216, 191, 100, 0.3)'; this.style.transform='translateY(0)'">
+                " onmouseover="this.style.background='rgba(216, 191, 100, 0.08)'; this.style.borderColor='rgba(216, 191, 100, 0.3)'; this.style.transform='translateY(-2px)'" 
+                   onmouseout="this.style.background='rgba(10, 10, 15, 0.4)'; this.style.borderColor='rgba(216, 191, 100, 0.15)'; this.style.transform='translateY(0)'">
                     <div style="flex: 1;">
                         <div style="font-size: 1.2rem; font-weight: bold; color: #FFD700; margin-bottom: 0.8rem;">${project.name}</div>
-                        <div style="font-size: 0.9rem; color: rgba(232, 213, 155, 0.7); margin-bottom: 0.5rem;">
-                            <span style="color: #D8BF64;">${project.dance_type || ''}</span>
-                            ${project.category ? `<span style="margin-left: 0.5rem; color: rgba(232, 213, 155, 0.6);">· ${project.category}</span>` : ''}
-                        </div>
-                        ${project.level ? `<div style="font-size: 0.8rem; color: rgba(232, 213, 155, 0.5);">${project.level}</div>` : ''}
+                        ${project.announce_batch ? `<div style="font-size: 0.9rem; color: rgba(232, 213, 155, 0.7); margin-bottom: 0.5rem;"><i class="fas fa-list-ol"></i> ${project.announce_batch}</div>` : ''}
+                        ${project.announce_time ? `<div style="font-size: 0.8rem; color: rgba(232, 213, 155, 0.5);"><i class="fas fa-calendar-alt"></i> ${project.announce_time}</div>` : ''}
                     </div>
                     ${imageUrl ? `
                     <div style="
                         flex-shrink: 0;
-                        width: 100px;
-                        height: 100px;
-                        border-radius: 1rem;
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 0.4rem;
                         overflow: hidden;
-                        border: 2px solid rgba(216, 191, 100, 0.4);
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                        border: 1px solid rgba(216, 191, 100, 0.2);
                     ">
                         <img src="${imageUrl}" 
                              style="

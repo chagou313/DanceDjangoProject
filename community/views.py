@@ -15,9 +15,17 @@ def community_posts(request):
     # 获取筛选参数
     topic_id = request.GET.get('topic')
     order_by = request.GET.get('order', 'latest')  # latest, hot, featured
+    search_query = request.GET.get('q', '').strip()  # 关键词搜索
     
     # 基础查询集：已发布的帖子
     posts = Post.objects.filter(status='published').select_related('author', 'topic')
+    
+    # 关键词搜索（标题和内容）
+    if search_query:
+        posts = posts.filter(
+            Q(title__icontains=search_query) | Q(content__icontains=search_query)
+        )
+        print(f"Searched with query: {search_query}")
     
     # 话题筛选
     if topic_id:
@@ -57,6 +65,7 @@ def community_posts(request):
         'topics': topics,
         'current_topic': int(topic_id) if topic_id else None,
         'order_by': order_by,
+        'search_query': search_query,
     }
     
     print("==========================\n")
@@ -71,17 +80,31 @@ def post_detail(request, post_id):
     post.views += 1
     post.save(update_fields=['views'])
     
-    # 记录用户访问过的帖子 ID 到 session，用于返回列表页时更新显示
+    # 记录用户访问过的帖子 ID 到 session（用于个人主页浏览记录）
+    if 'visited_posts_home' not in request.session:
+        request.session['visited_posts_home'] = []
+    
+    visited_posts = request.session['visited_posts_home']
+    # 移除已存在的（避免重复）
+    if post_id in visited_posts:
+        visited_posts.remove(post_id)
+    # 添加到开头
+    visited_posts.insert(0, post_id)
+    # 只保留最近 20 个
+    request.session['visited_posts_home'] = visited_posts[:20]
+    request.session.modified = True
+    
+    # 记录用户访问过的帖子 ID 到 session（旧版，用于其他用途）
     if 'visited_posts' not in request.session:
         request.session['visited_posts'] = {}
-    
-    # 存储帖子 ID 和新的浏览量
     request.session['visited_posts'][str(post_id)] = post.views
-    # 标记为已修改，确保保存 session
     request.session.modified = True
     
     # 获取评论
     comments = post.comments.filter(parent=None, is_deleted=False)
+    
+    # 计算实际评论数（包括子评论）
+    actual_comments_count = comments.count() + Comment.objects.filter(post=post, parent__isnull=False, is_deleted=False).count()
     
     # 检查用户是否已点赞
     user_liked = False
@@ -98,6 +121,7 @@ def post_detail(request, post_id):
     context = {
         'post': post,
         'comments': comments,
+        'actual_comments_count': actual_comments_count,
         'user_liked': user_liked,
         'user_collected': user_collected,
         'tags_list': tags_list,
@@ -114,6 +138,7 @@ def create_post(request):
         topic_id = request.POST.get('topic')
         tags = request.POST.get('tags')
         cover_image = request.FILES.get('cover_image')
+        action = request.POST.get('action')  # 'publish' 或 'draft'
         
         if not title or not content:
             messages.error(request, '标题和内容不能为空')
@@ -124,6 +149,9 @@ def create_post(request):
         if topic_id:
             topic = get_object_or_404(Topic, id=topic_id)
         
+        # 确定状态
+        status = 'draft' if action == 'draft' else 'published'
+        
         post = Post.objects.create(
             title=title,
             content=content,
@@ -131,15 +159,80 @@ def create_post(request):
             topic=topic,
             tags=tags,
             cover_image=cover_image,
-            status='published'
+            status=status
         )
         
-        messages.success(request, '帖子发布成功！')
-        return redirect('community_posts')  # 跳转到社区主页（帖子列表）
+        if status == 'draft':
+            messages.success(request, '草稿已保存！')
+            return redirect('my_drafts')
+        else:
+            messages.success(request, '帖子发布成功！')
+            return redirect('community_posts')
     
     # GET 请求，显示发帖表单
     topics = Topic.objects.all()
     return render(request, 'community/create_post.html', {'topics': topics})
+
+@login_required
+def edit_post(request, post_id):
+    """编辑帖子/草稿"""
+    post = get_object_or_404(Post, id=post_id, author=request.user)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')  # 'publish' 或 'draft'
+        
+        post.title = request.POST.get('title')
+        post.content = request.POST.get('content')
+        post.tags = request.POST.get('tags', '')
+        
+        topic_id = request.POST.get('topic')
+        if topic_id:
+            post.topic = get_object_or_404(Topic, id=topic_id)
+        else:
+            post.topic = None
+        
+        if 'cover_image' in request.FILES:
+            post.cover_image = request.FILES['cover_image']
+        
+        # 确定状态
+        if action == 'publish':
+            post.status = 'published'
+        # 如果原来是草稿，且点击保存草稿，则保持草稿状态
+        
+        post.save()
+        
+        if post.status == 'draft':
+            messages.success(request, '草稿已更新！')
+            return redirect('my_drafts')
+        else:
+            messages.success(request, '帖子更新成功！')
+            return redirect('post_detail', post_id=post.id)
+    
+    # GET 请求，显示编辑表单
+    topics = Topic.objects.all()
+    return render(request, 'community/create_post.html', {
+        'topics': topics,
+        'editing_post': post,
+        'is_draft': post.status == 'draft'
+    })
+
+@login_required
+def my_drafts(request):
+    """我的草稿箱"""
+    drafts = Post.objects.filter(
+        author=request.user,
+        status='draft'
+    ).order_by('-updated_at')
+    
+    return render(request, 'community/my_drafts.html', {'drafts': drafts})
+
+@login_required
+def delete_draft(request, post_id):
+    """删除草稿"""
+    post = get_object_or_404(Post, id=post_id, author=request.user, status='draft')
+    post.delete()
+    messages.success(request, '草稿已删除')
+    return redirect('my_drafts')
 
 @login_required
 def toggle_like(request, post_id):
@@ -227,7 +320,7 @@ def create_comment(request, post_id):
             content=content
         )
         
-        # 更新帖子的评论数
+        # 更新帖子的评论数（包括子评论）
         post.comments_count = post.comments.filter(is_deleted=False).count()
         post.save(update_fields=['comments_count'])
         
@@ -245,7 +338,7 @@ def delete_comment(request, comment_id):
         comment.is_deleted = True
         comment.save(update_fields=['is_deleted'])
         
-        # 更新帖子的评论数
+        # 更新帖子的评论数（包括子评论）
         post = comment.post
         post.comments_count = post.comments.filter(is_deleted=False).count()
         post.save(update_fields=['comments_count'])
@@ -292,5 +385,7 @@ def report_content(request):
 
 def topics_list(request):
     """话题列表页"""
-    topics = Topic.objects.annotate(post_count=Count('posts')).order_by('-sort_order', '-post_count')
+    topics = Topic.objects.annotate(
+        post_count=Count('posts', filter=Q(posts__status='published'))
+    ).order_by('-sort_order', '-post_count')
     return render(request, 'community/topics.html', {'topics': topics})

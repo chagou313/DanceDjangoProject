@@ -21,4 +21,5 @@ urlpatterns = [
     path('profile/liked-news/', views.user_liked_news, name='user_liked_news'),
     path('profile/collected-news/', views.user_collected_news, name='user_collected_news'),
     path('profile/edit-avatar/', views.edit_avatar, name='edit_avatar'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 ]

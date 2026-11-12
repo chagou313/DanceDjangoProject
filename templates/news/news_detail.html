@@ -4,334 +4,442 @@
 
 {% block content %}
 <style>
-    .news-detail-container {
-        max-width: 1000px;
+    .news-detail-page {
+        max-width: 800px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 1rem 2rem 100px;
     }
 
-    .news-header {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .news-category-badge {
-        display: inline-block;
-        color: #D8BF64;
-        background: rgba(216, 191, 100, 0.15);
-        padding: 0.5rem 1.2rem;
-        border-radius: 2rem;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(216, 191, 100, 0.3);
-    }
-
-    .news-title {
-        font-size: 1.8rem;
-        color: #F5EDC8;
-        font-family: 'Noto Serif SC', serif;
-        line-height: 1.5;
-        margin-bottom: 1.5rem;
-        letter-spacing: 0.5px;
-    }
-
-    .news-meta-info {
-        display: flex;
-        gap: 2rem;
-        flex-wrap: wrap;
-        color: rgba(232, 213, 155, 0.7);
-        font-size: 0.95rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(216, 191, 100, 0.2);
-    }
-
-    .meta-item {
+    /* 作者信息区 */
+    .news-author-section {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-top: 1rem;
     }
 
-    .meta-item i {
+    .author-left {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(216, 191, 100, 0.3), rgba(232, 213, 155, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #D8BF64;
+        font-weight: 600;
+        overflow: hidden;
+    }
+
+    .author-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .author-name {
+        color: #F5EDC8;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .news-time {
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.8rem;
+    }
+
+    .author-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .follow-btn {
+        padding: 0.5rem 1.5rem;
+        background: transparent;
+        border: 1px solid rgba(216, 191, 100, 0.4);
+        border-radius: 2rem;
+        color: #D8BF64;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .follow-btn:hover {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.6);
+    }
+
+    .share-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .share-btn:hover {
+        background: rgba(216, 191, 100, 0.1);
         color: #D8BF64;
     }
 
-    .news-body {
-        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
-        border-radius: 2rem;
-        padding: 3rem;
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        margin-bottom: 2rem;
-    }
-    
-    /* 重置 news-body 内所有元素的默认样式 */
-    .news-body * {
-        text-indent: 0;
+    /* 资讯内容 */
+    .news-title {
+        font-size: 1.6rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+        line-height: 1.4;
     }
 
     .news-content-text {
-        font-size: 1.1rem;
-        line-height: 2;
-        color: rgba(232, 213, 155, 0.9);
-        font-family: 'Noto Serif SC', serif;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: rgba(232, 213, 155, 0.85);
+        margin-bottom: 1.5rem;
     }
 
-    /* 为所有段落添加强制缩进 */
     .news-content-text p {
-        text-indent: 2em !important;
-        margin-bottom: 1.5rem;
-        display: block;
-    }
-    
-    /* 处理 div 中的段落 */
-    .news-content-text div p {
-        text-indent: 2em !important;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* 处理换行符 */
-    .news-content-text br {
-        display: block;
-        content: "";
+        text-indent: 2em;
         margin-bottom: 1rem;
     }
-    
-    /* 处理图片及其说明 */
+
     .news-content-text img {
         max-width: 100%;
         height: auto;
-        border-radius: 1rem;
-        margin: 2rem auto;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        border-radius: 0.8rem;
+        margin: 1.5rem 0;
         display: block;
     }
-    
-    /* 图片后的第一个段落需要额外间距 */
-    .news-content-text img + p,
-    .news-content-text img + div + p,
-    .news-content-text div img + p {
-        margin-top: 2rem !important;
-        text-indent: 2em !important;
-    }
-    
-    /* 确保所有直接子元素都有正确的间距 */
-    .news-content-text > * {
+
+    /* 话题标签 */
+    .news-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
         margin-bottom: 1.5rem;
     }
 
-    .news-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(216, 191, 100, 0.2);
-    }
-
-    .action-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.8rem 1.5rem;
-        background: rgba(216, 191, 100, 0.1);
-        border: 2px solid rgba(216, 191, 100, 0.3);
-        border-radius: 1rem;
-        color: #E8D59B;
+    .tag {
+        color: #64B5F6;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s;
-        font-size: 1rem;
-        text-decoration: none;
     }
 
-    .action-btn:hover {
-        background: rgba(216, 191, 100, 0.2);
-        border-color: rgba(216, 191, 100, 0.5);
-        transform: translateY(-2px);
+    .tag:hover {
+        color: #90CAF9;
     }
 
-    .action-btn.active {
-        background: rgba(216, 191, 100, 0.3);
-        border-color: #D8BF64;
-        color: #F5EDC8;
-    }
-
-    .action-btn i {
-        font-size: 1.2rem;
-    }
-
-    .news-tags {
+    /* 底部信息 */
+    .news-footer {
         display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(216, 191, 100, 0.2);
-    }
-
-    .tag {
-        color: #E8D59B;
-        background: rgba(216, 191, 100, 0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 1.5rem;
-        font-size: 0.9rem;
-        border: 1px solid rgba(216, 191, 100, 0.3);
-    }
-
-    .back-btn {
-        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.8rem 1.5rem;
-        background: linear-gradient(135deg, rgba(216, 191, 100, 0.2) 0%, rgba(232, 213, 155, 0.1) 100%);
-        border: 2px solid rgba(216, 191, 100, 0.4);
-        border-radius: 1rem;
-        color: #E8D59B;
-        text-decoration: none;
-        transition: all 0.3s;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-top: 1px solid rgba(216, 191, 100, 0.1);
         margin-bottom: 2rem;
     }
 
+    .news-footer-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: rgba(232, 213, 155, 0.5);
+        font-size: 0.85rem;
+    }
+
+    .dislike-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: rgba(232, 213, 155, 0.4);
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .dislike-btn:hover {
+        color: rgba(232, 213, 155, 0.6);
+    }
+
+    /* 相关图片 */
+    .related-images {
+        margin-bottom: 2rem;
+    }
+
+    .related-images-title {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .image-item {
+        position: relative;
+        border-radius: 0.6rem;
+        overflow: hidden;
+        aspect-ratio: 16/10;
+    }
+
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .image-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 0.5rem 0.8rem;
+        color: #E8D59B;
+        font-size: 0.8rem;
+    }
+
+    /* 底部操作栏 */
+    .bottom-action-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        padding: 1.2rem 2rem;
+        margin-top: 2rem;
+        background: rgba(20, 22, 30, 0.4);
+        border-radius: 0.8rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .bottom-stats {
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .bottom-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: none;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+
+    .bottom-stat i {
+        font-size: 1.3rem;
+        transition: all 0.3s;
+        color: rgba(216, 191, 100, 0.5);
+    }
+
+    .bottom-stat:hover {
+        color: #D8BF64;
+        background: rgba(216, 191, 100, 0.08);
+    }
+
+    .bottom-stat:hover i {
+        transform: scale(1.1);
+        color: #D8BF64;
+    }
+
+    /* 返回按钮 */
+    .back-btn {
+        position: fixed;
+        top: 100px;
+        left: 2rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(20, 22, 30, 0.8);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #D8BF64;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 1001;
+        text-decoration: none;
+    }
+
     .back-btn:hover {
-        background: linear-gradient(135deg, rgba(216, 191, 100, 0.3) 0%, rgba(232, 213, 155, 0.2) 100%);
-        border-color: rgba(216, 191, 100, 0.6);
-        transform: translateX(-5px);
+        background: rgba(20, 22, 30, 0.95);
+        transform: scale(1.1);
     }
 
     @media (max-width: 768px) {
-        .news-detail-container {
+        .news-detail-page {
             padding: 1rem;
         }
 
-        .news-header,
-        .news-body {
-            padding: 2rem;
+        .bottom-action-bar {
+            gap: 1.5rem;
+            padding: 1rem 1.5rem;
         }
 
-        .news-title {
-            font-size: 1.6rem;
+        .bottom-stats {
+            gap: 1.5rem;
         }
 
-        .news-meta-info {
-            gap: 1rem;
+        .bottom-stat {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .bottom-stat i {
+            font-size: 1.2rem;
         }
     }
 </style>
 
-<div class="page-container">
-    <div class="news-detail-container">
-        <!-- 顶部返回按钮 -->
-        <a href="{% url 'news_list' %}" class="back-btn" style="margin-bottom: 2rem;">
-            <i class="fas fa-arrow-left"></i> 返回资讯列表
-        </a>
+<div class="news-detail-page">
+    <a href="{% url 'news_list' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+    </a>
 
-        <div class="news-header">
-            <span class="news-category-badge">
-                <i class="fas fa-folder"></i> {{ news.get_category_display }}
-            </span>
-            <h1 class="news-title">{{ news.title }}</h1>
-            
-            <div class="news-meta-info">
-                <div class="meta-item">
-                    <i class="fas fa-user"></i>
-                    <span>{{ news.author.username }}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-calendar"></i>
-                    <span>{{ news.created_at|date:"Y年m月d日" }}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-eye"></i>
-                    <span>{{ news.views }} 浏览</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-heart"></i>
-                    <span>{{ news.likes }} 点赞</span>
-                </div>
-                {% if news.dance_project %}
-                <div class="meta-item">
-                    <i class="fas fa-tag"></i>
-                    <span>{{ news.dance_project.name }}</span>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="news-body">
-            <div class="news-content-text">
-                {{ news.content|safe }}
-            </div>
-
-            {% if news.images.exists %}
-            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(216, 191, 100, 0.2);">
-                <h3 style="color: #F5EDC8; font-family: 'Noto Serif SC', serif; margin-bottom: 1rem;">
-                    <i class="fas fa-images"></i> 相关图片
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
-                    {% for image in news.images.all %}
-                    <div style="position: relative; border-radius: 1rem; overflow: hidden; border: 2px solid rgba(216, 191, 100, 0.3);">
-                        <img src="{{ image.image.url }}" alt="{{ image.caption }}" 
-                             style="width: 100%; height: 200px; object-fit: cover; display: block;">
-                        {% if image.caption %}
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.7); 
-                                    padding: 0.8rem; color: #E8D59B; font-size: 0.9rem;">
-                            {{ image.caption }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="news-tags">
-                <span class="tag"><i class="fas fa-folder"></i> {{ news.get_category_display }}</span>
-                {% if news.dance_project %}
-                <span class="tag"><i class="fas fa-tag"></i> {{ news.dance_project.name }}</span>
-                {% endif %}
-            </div>
-
-            <!-- 点赞和收藏按钮 -->
-            <div class="news-actions">
-                {% if user.is_authenticated %}
-                <button class="action-btn {% if user_liked %}active{% endif %}" 
-                        onclick="toggleLike({{ news.id }})" id="like-btn">
-                    <i class="fas fa-heart"></i>
-                    <span id="like-text">{% if user_liked %}已点赞{% else %}点赞{% endif %}</span>
-                    <span id="like-count">({{ news.likes }})</span>
-                </button>
-                <button class="action-btn {% if user_collected %}active{% endif %}" 
-                        onclick="toggleCollect({{ news.id }})" id="collect-btn">
-                    <i class="fas fa-star"></i>
-                    <span id="collect-text">{% if user_collected %}已收藏{% else %}收藏{% endif %}</span>
-                    <span id="collect-count">({{ news.collections }})</span>
-                </button>
+    <!-- 作者信息 -->
+    <div class="news-author-section">
+        <div class="author-left">
+            <div class="author-avatar">
+                {% if news.author.userprofile.avatar %}
+                    <img src="{{ news.author.userprofile.avatar.url }}" alt="{{ news.author.username }}">
                 {% else %}
-                <a href="{% url 'login' %}" class="action-btn">
-                    <i class="fas fa-heart"></i> 点赞 ({{ news.likes }})
-                </a>
-                <a href="{% url 'login' %}" class="action-btn">
-                    <i class="fas fa-star"></i> 收藏 ({{ news.collections }})
-                </a>
+                    {{ news.author.username|first|upper }}
                 {% endif %}
             </div>
+            <div class="author-info">
+                <span class="author-name">{{ news.author.username }}</span>
+                <span class="news-time">{{ news.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
         </div>
+        <div class="author-right">
+            <button class="follow-btn">关注</button>
+            <button class="share-btn">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
+    </div>
 
-        <!-- 底部返回按钮 -->
-        <a href="{% url 'news_list' %}" class="back-btn" style="margin-top: 2rem; display: block; text-align: center;">
-            <i class="fas fa-arrow-left"></i> 返回资讯列表
-        </a>
+    <!-- 资讯内容 -->
+    <h1 class="news-title">{{ news.title }}</h1>
+
+    <div class="news-content-text">
+        {{ news.content|safe }}
+    </div>
+
+    <!-- 相关图片 -->
+    {% if news.images.exists %}
+    <div class="related-images">
+        <div class="related-images-title">
+            <i class="fas fa-images"></i> 相关图片
+        </div>
+        <div class="images-grid">
+            {% for image in news.images.all %}
+            <div class="image-item">
+                <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                {% if image.caption %}
+                <div class="image-caption">{{ image.caption }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 标签 -->
+    <div class="news-tags">
+        <span class="tag">#{{ news.get_category_display }}</span>
+        {% if news.dance_project %}
+        <span class="tag">#{{ news.dance_project.name }}</span>
+        {% endif %}
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="news-footer">
+        <div class="news-footer-left">
+            <span>{{ news.created_at|date:"Y-m-d" }}</span>
+            {% if news.dance_project %}
+            <span>{{ news.dance_project.name }}</span>
+            {% endif %}
+        </div>
+        <button class="dislike-btn">
+            <i class="far fa-frown"></i> 不喜欢
+        </button>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-action-bar">
+        <div class="bottom-stats">
+            {% if user.is_authenticated %}
+            <button class="bottom-stat" onclick="toggleLike({{ news.id }}, this)">
+                <i class="{% if user_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                <span id="like-count">{{ news.likes }}</span>
+            </button>
+            <button class="bottom-stat" onclick="toggleCollect({{ news.id }}, this)">
+                <i class="{% if user_collected %}fas{% else %}far{% endif %} fa-star"></i>
+                <span id="collect-count">{{ news.collections }}</span>
+            </button>
+            {% else %}
+            <span class="bottom-stat">
+                <i class="far fa-heart"></i>
+                <span id="like-count">{{ news.likes }}</span>
+            </span>
+            <span class="bottom-stat">
+                <i class="far fa-star"></i>
+                <span id="collect-count">{{ news.collections }}</span>
+            </span>
+            {% endif %}
+            <span class="bottom-stat">
+                <i class="far fa-eye"></i>
+                <span>{{ news.views }}</span>
+            </span>
+        </div>
     </div>
 </div>
 
 <script>
-function toggleLike(newsId) {
-    const btn = document.getElementById('like-btn');
-    const textEl = document.getElementById('like-text');
-    const countEl = document.getElementById('like-count');
-    
+function toggleLike(newsId, btnElement) {
     fetch(`/news/${newsId}/like/`, {
         method: 'POST',
         headers: {
@@ -342,24 +450,30 @@ function toggleLike(newsId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            const icon = btnElement.querySelector('i');
+            const countEl = document.getElementById('like-count');
+            
             if (data.liked) {
-                textEl.textContent = '已点赞';
-                btn.classList.add('active');
+                icon.className = 'fas fa-heart';
+                icon.style.color = '#E74C3C';
             } else {
-                textEl.textContent = '点赞';
-                btn.classList.remove('active');
+                icon.className = 'far fa-heart';
+                icon.style.color = '';
             }
-            countEl.textContent = `(${data.likes_count})`;
+            
+            countEl.textContent = data.likes_count;
+            
+            // 添加弹跳动画
+            btnElement.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                btnElement.style.transform = 'scale(1)';
+            }, 200);
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
-function toggleCollect(newsId) {
-    const btn = document.getElementById('collect-btn');
-    const textEl = document.getElementById('collect-text');
-    const countEl = document.getElementById('collect-count');
-    
+function toggleCollect(newsId, btnElement) {
     fetch(`/news/${newsId}/collect/`, {
         method: 'POST',
         headers: {
@@ -370,14 +484,24 @@ function toggleCollect(newsId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            const icon = btnElement.querySelector('i');
+            const countEl = document.getElementById('collect-count');
+            
             if (data.collected) {
-                textEl.textContent = '已收藏';
-                btn.classList.add('active');
+                icon.className = 'fas fa-star';
+                icon.style.color = '#F39C12';
             } else {
-                textEl.textContent = '收藏';
-                btn.classList.remove('active');
+                icon.className = 'far fa-star';
+                icon.style.color = '';
             }
-            countEl.textContent = `(${data.collections_count})`;
+            
+            countEl.textContent = data.collections_count;
+            
+            // 添加弹跳动画
+            btnElement.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                btnElement.style.transform = 'scale(1)';
+            }, 200);
         }
     })
     .catch(error => console.error('Error:', error));

@@ -1,0 +1,228 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}话题广场 - 交流社区{% endblock %}
+
+{% block content %}
+<style>
+    .topics-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .topics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        background: rgba(20, 22, 30, 0.6);
+        border-radius: 1rem;
+        padding: 1.5rem 2rem;
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+    }
+
+    .topics-header h1 {
+        margin: 0 0 0.4rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 1.6rem;
+        font-weight: 600;
+    }
+
+    .topics-header p {
+        margin: 0;
+        color: rgba(232, 213, 155, 0.65);
+        font-size: 0.95rem;
+    }
+
+    .topics-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .topics-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.6rem;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .topics-btn.secondary {
+        background: rgba(216, 191, 100, 0.08);
+        color: #E8D59B;
+    }
+
+    .topics-btn.primary {
+        background: linear-gradient(135deg, #D8BF64, #E8D59B);
+        color: #0F0F1A;
+        font-weight: 600;
+    }
+
+    .topics-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(216, 191, 100, 0.3);
+    }
+
+    .topics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .topic-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1.5rem;
+        background: rgba(20, 22, 30, 0.6);
+        border-radius: 1rem;
+        backdrop-filter: blur(10px);
+        text-decoration: none;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .topic-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--topic-color, #D8BF64);
+    }
+
+    .topic-card:hover {
+        transform: translateY(-4px);
+        background: rgba(20, 22, 30, 0.85);
+        box-shadow: 0 8px 25px rgba(216, 191, 100, 0.15);
+    }
+
+    .topic-card-head {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .topic-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.8rem;
+        background: rgba(216, 191, 100, 0.1);
+        color: var(--topic-color, #D8BF64);
+        font-size: 1.2rem;
+    }
+
+    .topic-name {
+        margin: 0;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .topic-count {
+        margin-top: 0.2rem;
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.85rem;
+    }
+
+    .topic-desc {
+        margin: 0;
+        color: rgba(232, 213, 155, 0.75);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .topic-link {
+        color: var(--topic-color, #D8BF64);
+        font-size: 0.85rem;
+    }
+
+    .topics-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(20, 22, 30, 0.6);
+        border-radius: 1rem;
+        color: rgba(232, 213, 155, 0.7);
+    }
+
+    .topics-empty i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: rgba(216, 191, 100, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .topics-container {
+            padding: 1rem;
+        }
+
+        .topics-header {
+            padding: 1.25rem;
+        }
+
+        .topics-header h1 {
+            font-size: 1.35rem;
+        }
+    }
+</style>
+
+<div class="topics-container">
+    <div class="topics-header">
+        <div>
+            <h1><i class="fas fa-hashtag"></i> 话题广场</h1>
+            <p>共 {{ topics|length }} 个话题，选择感兴趣的话题浏览相关帖子</p>
+        </div>
+        <div class="topics-actions">
+            <a href="{% url 'community_posts' %}" class="topics-btn secondary"><i class="fas fa-stream"></i> 全部帖子</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_post' %}" class="topics-btn primary"><i class="fas fa-plus-circle"></i> 发布帖子</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if topics %}
+    <div class="topics-grid">
+        {% for topic in topics %}
+        <a href="{% url 'community_posts' %}?topic={{ topic.id }}" class="topic-card" style="--topic-color: {{ topic.color|default:'#D8BF64' }};">
+            <div class="topic-card-head">
+                <div class="topic-icon">
+                    {% if topic.icon %}
+                        <i class="{% if 'fa-' in topic.icon and ' ' not in topic.icon %}fas {% endif %}{{ topic.icon }}"></i>
+                    {% else %}
+                        <i class="fas fa-tag"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h2 class="topic-name">{{ topic.name }}</h2>
+                    <div class="topic-count"><i class="far fa-file-alt"></i> {{ topic.post_count }} 篇帖子</div>
+                </div>
+            </div>
+            <p class="topic-desc">{{ topic.description|default:"暂无话题描述" }}</p>
+            <span class="topic-link">浏览话题 <i class="fas fa-arrow-right"></i></span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="topics-empty">
+        <i class="fas fa-comments"></i>
+        <p>还没有任何话题</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,868 @@
+{% extends 'dance/base.html' %}
+
+{% block title %}{{ origin_project.name }} - 学习路径{% endblock %}
+
+{% block content %}
+<style>
+    .learning-path-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* 页面头部 - 现代化设计 */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 4rem 2rem 3rem;
+        background: transparent;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: {% if origin_project.images %}url('{{ origin_project.images.url }}') center/cover{% else %}linear-gradient(135deg, rgba(216, 191, 100, 0.1) 0%, rgba(216, 191, 100, 0.05) 100%){% endif %};
+        opacity: 0.2;
+        z-index: 0;
+    }
+
+    /* 底部渐变遮罩 */
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to top, rgba(20, 22, 30, 1) 0%, transparent 100%);
+        z-index: 1;
+    }
+
+    .page-header > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 返回按钮 */
+    .back-button {
+        position: absolute;
+        top: 1.5rem;
+        left: 1.5rem;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: rgba(20, 22, 30, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(216, 191, 100, 0.3);
+        border-radius: 0.5rem;
+        color: #E8D59B;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .back-button:hover {
+        background: rgba(218, 165, 32, 0.2);
+        border-color: rgba(216, 191, 100, 0.6);
+        color: #F5EDC8;
+        transform: translateX(-3px);
+    }
+
+    .back-button i {
+        font-size: 0.85rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        letter-spacing: 3px;
+        margin-bottom: 1rem;
+    }
+
+    .page-header .subtitle {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .project-meta {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(232, 213, 155, 0.8);
+        font-size: 0.95rem;
+    }
+
+    .meta-item i {
+        color: #DAA520;
+    }
+
+    /* 路径概览卡片 - 现代化设计 */
+    .path-overview {
+        background: rgba(216, 191, 100, 0.03);
+        border-radius: 0;
+        padding: 1.2rem 2rem;
+        margin-bottom: 2rem;
+        border: none;
+        border-top: 1px solid rgba(216, 191, 100, 0.1);
+        border-bottom: 1px solid rgba(216, 191, 100, 0.1);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .overview-stat {
+        text-align: center;
+        padding: 0.8rem 0.5rem;
+        background: transparent;
+        border-radius: 0;
+        border: none;
+    }
+
+    .stat-icon {
+        font-size: 1.8rem;
+        color: #DAA520;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #F5EDC8;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+        color: rgba(232, 213, 155, 0.6);
+        font-size: 0.8rem;
+    }
+
+    /* 学习阶段时间线 */
+    .stages-timeline {
+        position: relative;
+        padding-left: 3rem;
+    }
+
+    .stages-timeline::before {
+        content: '';
+        position: absolute;
+        left: 1.5rem;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(to bottom, #DAA520, rgba(218, 165, 32, 0.2));
+        border-radius: 2px;
+    }
+
+    .stage-card {
+        position: relative;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, rgba(20, 22, 30, 0.9) 0%, rgba(28, 30, 38, 0.95) 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 2px solid rgba(216, 191, 100, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .stage-card:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        box-shadow: 0 10px 30px rgba(216, 191, 100, 0.2);
+        transform: translateX(5px);
+    }
+
+    .stage-card::before {
+        content: '';
+        position: absolute;
+        left: -3.35rem;
+        top: 2rem;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        border-radius: 50%;
+        border: 4px solid #14161e;
+        box-shadow: 0 0 20px rgba(218, 165, 32, 0.5);
+    }
+
+    .stage-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .stage-title-section {
+        flex: 1;
+    }
+
+    .stage-number {
+        display: inline-block;
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+        padding: 0.3rem 1rem;
+        border-radius: 2rem;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .stage-name {
+        font-size: 1.8rem;
+        color: #F5EDC8;
+        font-family: 'Noto Serif SC', serif;
+        margin-bottom: 0.5rem;
+    }
+
+    .stage-description {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .stage-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .stage-stat {
+        text-align: center;
+        padding: 0.8rem 1.2rem;
+        background: rgba(216, 191, 100, 0.08);
+        border-radius: 0.8rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+    }
+
+    .stage-stat-value {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #DAA520;
+    }
+
+    .stage-stat-label {
+        font-size: 0.8rem;
+        color: rgba(232, 213, 155, 0.6);
+        margin-top: 0.3rem;
+    }
+
+    /* 招式列表 */
+    .moves-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .move-card {
+        background: rgba(216, 191, 100, 0.05);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(216, 191, 100, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .move-card:hover {
+        border-color: rgba(216, 191, 100, 0.5);
+        background: rgba(216, 191, 100, 0.08);
+        transform: translateY(-3px);
+    }
+
+    .move-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .move-name {
+        font-size: 1.2rem;
+        color: #F5EDC8;
+        font-weight: bold;
+        flex: 1;
+    }
+
+    .move-difficulty {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-left: 1rem;
+    }
+
+    .difficulty-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(218, 165, 32, 0.3);
+    }
+
+    .difficulty-dot.active {
+        background: #DAA520;
+        box-shadow: 0 0 8px rgba(218, 165, 32, 0.6);
+    }
+
+    .move-module {
+        display: inline-block;
+        background: rgba(216, 191, 100, 0.15);
+        color: #DAA520;
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .move-description {
+        color: rgba(232, 213, 155, 0.7);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .move-details {
+        background: rgba(20, 22, 30, 0.5);
+        padding: 1rem;
+        border-radius: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: start;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-item i {
+        color: #DAA520;
+        margin-top: 0.2rem;
+        font-size: 0.8rem;
+    }
+
+    .detail-label {
+        color: rgba(232, 213, 155, 0.6);
+        min-width: 80px;
+    }
+
+    .detail-value {
+        color: rgba(232, 213, 155, 0.9);
+        flex: 1;
+    }
+
+    .move-resources {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .resource-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        background: rgba(216, 191, 100, 0.1);
+        border: 1px solid rgba(216, 191, 100, 0.3);
+        border-radius: 1rem;
+        color: rgba(232, 213, 155, 0.8);
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .resource-tag:hover {
+        background: rgba(216, 191, 100, 0.2);
+        border-color: rgba(216, 191, 100, 0.5);
+    }
+
+    .resource-tag i {
+        color: #DAA520;
+    }
+
+    /* 操作按钮 */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1rem;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+        color: #1a1c24;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(218, 165, 32, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(216, 191, 100, 0.1);
+        border-color: rgba(216, 191, 100, 0.3);
+        color: #E8D59B;
+    }
+
+    .btn-secondary:hover {
+        border-color: rgba(216, 191, 100, 0.6);
+        background: rgba(216, 191, 100, 0.2);
+        transform: translateY(-3px);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .learning-path-container {
+            padding: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .stages-timeline {
+            padding-left: 2rem;
+        }
+
+        .stages-timeline::before {
+            left: 1rem;
+        }
+
+        .stage-card::before {
+            left: -2.35rem;
+            width: 16px;
+            height: 16px;
+        }
+
+        .moves-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stage-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stage-stats {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+
+<div class="learning-path-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <!-- 返回按钮 -->
+        <a href="javascript:history.back()" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            <span>返回</span>
+        </a>
+
+        <h1><i class="fas fa-route"></i> {{ learning_path.project.name }}</h1>
+        <p class="subtitle">{{ learning_path.project.description|truncatewords:30 }}</p>
+        
+        <div class="project-meta">
+            <div class="meta-item">
+                <i class="fas fa-layer-group"></i>
+                <span>{{ learning_path.project.category }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-signal"></i>
+                <span>难度等级: {{ learning_path.project.difficulty }}/5</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>预计学习: {{ learning_path.total_estimated_days }}天</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 路径概览 -->
+    <div class="path-overview">
+        <div class="overview-stat">
+            <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-value">{{ learning_path.total_stages }}</div>
+            <div class="stat-label">学习阶段</div>
+        </div>
+        <div class="overview-stat">
+            <div class="stat-icon"><i class="fas fa-drum"></i></div>
+            <div class="stat-value">
+                {% with total_moves=0 %}
+                    {% for stage in learning_path.stages %}
+                        {% with total_moves=total_moves|add:stage.moves|length %}{% endwith %}
+                    {% endfor %}
+                    {{ total_moves }}
+                {% endwith %}
+            </div>
+            <div class="stat-label">核心招式</div>
+        </div>
+        <div class="overview-stat">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">{{ learning_path.total_estimated_days }}</div>
+            <div class="stat-label">预计天数</div>
+        </div>
+        <div class="overview-stat">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-value">{{ learning_path.project.difficulty }}/5</div>
+            <div class="stat-label">综合难度</div>
+        </div>
+    </div>
+
+    <!-- 学习阶段时间线 -->
+    <div class="stages-timeline">
+        {% for stage in learning_path.stages %}
+        <div class="stage-card">
+            <div class="stage-header">
+                <div class="stage-title-section">
+                    <span class="stage-number">阶段 {{ forloop.counter }}</span>
+                    <h2 class="stage-name">{{ stage.stage_name }}</h2>
+                    <p class="stage-description">{{ stage.description }}</p>
+                </div>
+                
+                <div class="stage-stats">
+                    <div class="stage-stat">
+                        <div class="stage-stat-value">{{ stage.moves|length }}</div>
+                        <div class="stage-stat-label">招式数量</div>
+                    </div>
+                    <div class="stage-stat">
+                        <div class="stage-stat-value">{{ stage.estimated_days }}</div>
+                        <div class="stage-stat-label">预计天数</div>
+                    </div>
+                    <div class="stage-stat">
+                        <div class="stage-stat-value">{{ stage.difficulty }}</div>
+                        <div class="stage-stat-label">难度级别</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 招式列表 -->
+            <div class="moves-grid">
+                {% for move in stage.moves %}
+                <div class="move-card">
+                    <div class="move-header">
+                        <div class="move-name">{{ move.name }}</div>
+                        <div class="move-difficulty" title="难度系数: {{ move.difficulty }}">
+                            {% for i in "1234567890" %}
+                                {% if forloop.counter <= move.difficulty %}
+                                    <div class="difficulty-dot active"></div>
+                                {% elif forloop.counter <= 10 %}
+                                    <div class="difficulty-dot"></div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <span class="move-module">
+                        <i class="fas fa-cube"></i> {{ move.module }}
+                    </span>
+
+                    <p class="move-description">{{ move.description|truncatewords:20 }}</p>
+
+                    {% if move.key_points or move.common_mistakes %}
+                    <div class="move-details">
+                        {% if move.key_points %}
+                        <div class="detail-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="detail-label">要领:</span>
+                            <span class="detail-value">{{ move.key_points|truncatewords:15 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if move.common_mistakes %}
+                        <div class="detail-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span class="detail-label">易错点:</span>
+                            <span class="detail-value">{{ move.common_mistakes|truncatewords:15 }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if move.resources %}
+                    <div class="move-resources">
+                        {% for resource in move.resources %}
+                        <span class="resource-tag">
+                            {% if resource.type == 'video' %}
+                                <i class="fas fa-video"></i>
+                            {% elif resource.type == 'demo' %}
+                                <i class="fas fa-user-tie"></i>
+                            {% elif resource.type == 'article' %}
+                                <i class="fas fa-file-alt"></i>
+                            {% else %}
+                                <i class="fas fa-headphones"></i>
+                            {% endif %}
+                            {{ resource.title|truncatechars:15 }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- 学习操作按钮 -->
+                    <div class="move-actions" style="margin-top: 1rem; display: flex; gap: 0.8rem; align-items: center;">
+                        <button class="action-btn btn-primary" onclick="startMoveLearning({{ move.id }}, this)" style="flex: 1; padding: 0.6rem; font-size: 0.9rem;">
+                            <i class="fas fa-play"></i> 开始练习
+                        </button>
+                        <div class="move-progress" style="display: none; flex: 1; text-align: center; color: #DAA520; font-size: 0.9rem;">
+                            <i class="fas fa-clock"></i> <span class="timer">00:00</span>
+                        </div>
+                        <button class="action-btn btn-secondary" onclick="completeMoveLearning({{ move.id }}, this)" style="flex: 1; padding: 0.6rem; font-size: 0.9rem; display: none;">
+                            <i class="fas fa-check"></i> 完成
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+        <a href="{% url 'knowledge:knowledge_map' %}" class="action-btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> 返回知识图谱
+        </a>
+        <a href="{% url 'knowledge:recommendations' %}" class="action-btn btn-secondary">
+            <i class="fas fa-magic"></i> 查看更多推荐
+        </a>
+        <button class="action-btn btn-primary" onclick="startLearning()">
+            <i class="fas fa-play"></i> 开始学习
+        </button>
+    </div>
+</div>
+
+<script>
+    // 学习计时器管理
+    const timers = {};
+
+    // 开始学习招式
+    function startMoveLearning(moveId, btn) {
+        const container = btn.parentElement;
+        const timerDisplay = container.querySelector('.move-progress');
+        const completeBtn = container.querySelector('.action-btn:last-child');
+        const timerSpan = timerDisplay.querySelector('.timer');
+        
+        // 隐藏开始按钮，显示计时器和完成按钮
+        btn.style.display = 'none';
+        timerDisplay.style.display = 'block';
+        completeBtn.style.display = 'block';
+        
+        // 初始化计时器
+        let seconds = 0;
+        timers[moveId] = setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerSpan.textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }, 1000);
+        
+        showNotification('开始练习！完成后记得点击“完成”按钮', 'info');
+    }
+
+    // 完成招式学习
+    function completeMoveLearning(moveId, btn) {
+        const container = btn.parentElement;
+        const timerDisplay = container.querySelector('.move-progress');
+        const startBtn = container.querySelector('.action-btn:first-child');
+        const timerSpan = timerDisplay.querySelector('.timer');
+        
+        // 停止计时器
+        if (timers[moveId]) {
+            clearInterval(timers[moveId]);
+            delete timers[moveId];
+        }
+        
+        // 获取学习时间（秒）
+        const timeParts = timerSpan.textContent.split(':');
+        const practiceTime = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+        
+        // 计算熟练度（根据练习时间和招式时长）
+        // 假设标准练习时长是招式duration秒，超过则熟练度高
+        const moveCard = btn.closest('.move-card');
+        const estimatedDuration = parseInt(moveCard.dataset.duration) || 300; // 默认5分钟
+        
+        // 熟练度计算：练习时间 / 标准时长，最高100
+        let proficiency = Math.min((practiceTime / estimatedDuration) * 100, 100);
+        
+        // 状态判断
+        let status;
+        if (proficiency >= 85) {
+            status = 'mastered';
+        } else if (proficiency >= 70) {
+            status = 'completed';
+        } else {
+            status = 'learning';
+        }
+        
+        // 发送数据到后端
+        const csrftoken = getCookie('csrftoken');
+        fetch(`/knowledge/api/update-progress/${moveId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({
+                status: status,
+                proficiency_score: Math.round(proficiency),
+                practice_time: practiceTime,
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 更新UI显示完成状态
+                timerDisplay.innerHTML = `<i class="fas fa-check-circle" style="color: #81C784;"></i> 已完成 ${timerSpan.textContent}`;
+                timerDisplay.style.borderColor = '#81C784';
+                btn.innerHTML = '<i class="fas fa-redo"></i> 再次练习';
+                btn.onclick = function() { resetMoveLearning(moveId, btn, container); };
+                
+                const statusText = status === 'mastered' ? '已掌握' : 
+                                  status === 'completed' ? '已完成' : '学习中';
+                showNotification(`练习完成！熟练度: ${Math.round(proficiency)}% - ${statusText}`, 'success');
+            } else {
+                showNotification('保存失败：' + data.error, 'error');
+                resetMoveLearning(moveId, btn, container);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('网络错误，请重试', 'error');
+            resetMoveLearning(moveId, btn, container);
+        });
+    }
+
+    // 重置招式学习（再次练习）
+    function resetMoveLearning(moveId, btn, container) {
+        const timerDisplay = container.querySelector('.move-progress');
+        const startBtn = container.querySelector('.action-btn:first-child');
+        
+        // 重置UI
+        btn.style.display = 'none';
+        startBtn.style.display = 'block';
+        timerDisplay.style.display = 'none';
+        timerDisplay.innerHTML = '<i class="fas fa-clock"></i> <span class="timer">00:00</span>';
+        timerDisplay.style.borderColor = '';
+        
+        btn.innerHTML = '<i class="fas fa-check"></i> 完成';
+        btn.onclick = function() { completeMoveLearning(moveId, btn); };
+    }
+
+    // 获取 CSRF Token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 通知功能
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        const colors = {
+            'success': '#81C784',
+            'error': '#E57373',
+            'info': '#DAA520'
+        };
+        const icons = {
+            'success': 'check-circle',
+            'error': 'exclamation-circle',
+            'info': 'info-circle'
+        };
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, rgba(20, 22, 30, 0.95) 0%, rgba(28, 30, 38, 0.98) 100%);
+            border: 2px solid ${colors[type]};
+            border-radius: 1rem;
+            color: #F5EDC8;
+            font-size: 1rem;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        `;
+        notification.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${message}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}
