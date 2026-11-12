@@ -17,6 +17,21 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _load_local_env(env_file):
+    """读取项目根目录下的 .env（KEY=VALUE 每行一个），已存在的环境变量优先。"""
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_local_env(BASE_DIR / ".env")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -162,5 +177,6 @@ LOGOUT_REDIRECT_URL = '/'  # 登出后重定向到首页
 
 # ==================== 通义千问 API 配置 ====================
 # 在阿里云百炼平台申请：https://bailian.console.aliyun.com/
-# 创建应用 -> 获取 API Key
-QWEN_API_KEY = 'sk-4bfe9c5f1a7944ada8a85e5d9d886e1a'  # 已配置
+# 创建应用 -> 获取 API Key，写进项目根目录的 .env：QWEN_API_KEY=sk-xxxx
+# （.env 已被 .gitignore 忽略，不会上传到 GitHub）
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "")
