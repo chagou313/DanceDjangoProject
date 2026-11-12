@@ -26,7 +26,6 @@ echo "准备运行环境……"
 DUMP="${TMPDIR:-/tmp}/dance_data_$$.json"
 echo "1/4 从本地数据库导出数据……"
 env -u DATABASE_URL -u CLOUDINARY_URL "$PY" manage.py dumpdata \
-    --natural-foreign --natural-primary \
     -e contenttypes -e auth.permission -e sessions -e admin.logentry \
     -o "$DUMP"
 
@@ -64,7 +63,7 @@ fi
 "$PY" manage.py flush --noinput
 
 echo "3/4 导入数据……"
-"$PY" manage.py loaddata "$DUMP"
+"$PY" manage.py fast_loaddata "$DUMP"
 rm -f "$DUMP"
 
 echo "4/4 上传图片和视频到 Cloudinary（约 400 个文件，需要几分钟）……"
