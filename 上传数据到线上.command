@@ -30,10 +30,16 @@ env -u DATABASE_URL -u CLOUDINARY_URL "$PY" manage.py dumpdata \
     -e contenttypes -e auth.permission -e sessions -e admin.logentry \
     -o "$DUMP"
 
-set -a
-# shellcheck disable=SC1091
-source .env.deploy
-set +a
+# 逐行读取 KEY=VALUE（不用 source：连接字符串里的 & 会被 shell 当成命令分隔符）
+while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    value="${value%\"}"; value="${value#\"}"
+    value="${value%\'}"; value="${value#\'}"
+    export "$key=$value"
+done < .env.deploy
 if [[ -z "${DATABASE_URL:-}" || -z "${CLOUDINARY_URL:-}" ]]; then
     echo ".env.deploy 里需要同时有 DATABASE_URL 和 CLOUDINARY_URL。"
     exit 1
