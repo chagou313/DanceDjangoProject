@@ -60,6 +60,46 @@ python manage.py init_topics
 - `QWEN_API_KEY`：通义千问 API Key（[阿里云百炼](https://bailian.console.aliyun.com/)）。未配置时 AI 问答返回内置回复。
 - 默认使用 SQLite。改用 MySQL：设置 `DB_ENGINE=mysql` 及 `DB_*` 各项，并执行 `pip install -r requirements-mysql.txt`。
 
+## 线上部署
+
+网站部署在 Render 免费套餐上，配置写在 `render.yaml`：
+
+| 服务 | 用途 |
+| --- | --- |
+| Render | 运行 Django 与 Gunicorn，WhiteNoise 提供静态资源 |
+| Neon PostgreSQL | 保存账号、知识图谱、题库、社区等全部数据 |
+| Cloudinary | 保存项目图片、新闻封面、头像和视频（文件放在 `dance/media/` 目录下） |
+
+**第一次上线：**
+
+1. 在 Neon 新建一个数据库，复制连接字符串（`postgresql://` 开头）；在 Cloudinary 控制台复制 `CLOUDINARY_URL`（`cloudinary://` 开头）。
+2. 在项目根目录新建 `.env.deploy`，写入这两行（文件已被忽略，不会上传）：
+   ```
+   DATABASE_URL=postgresql://...
+   CLOUDINARY_URL=cloudinary://...
+   ```
+3. 双击 `上传数据到线上.command`：把本机 `db.sqlite3` 的数据导入 Neon，并把 `media/` 里的图片上传到 Cloudinary。
+4. 在 Render 选择 **New → Blueprint**，连接本仓库，填入 `DATABASE_URL`、`CLOUDINARY_URL`、`QWEN_API_KEY`，然后部署。
+
+**更新网站**：把代码合并到 `main` 分支即可。Render 会自动重新构建，启动时自动执行数据库迁移。
+
+**环境变量**（在 Render 服务的 Environment 页面管理）：
+
+| 变量 | 说明 |
+| --- | --- |
+| `DATABASE_URL` | Neon 提供的连接字符串 |
+| `CLOUDINARY_URL` | Cloudinary 提供的连接字符串 |
+| `QWEN_API_KEY` | 通义千问 API Key（可选） |
+| `DANCE_SECRET_KEY` | 由 Blueprint 自动生成 |
+
+连接字符串和密钥只填在 Render 和本机的 `.env.deploy` 里，不要提交到 GitHub。
+
+**注意事项：**
+
+- 免费服务 15 分钟无人访问会休眠，下次打开需要等约一分钟；数据在 Neon 和 Cloudinary，不会因休眠丢失。
+- 线上数据以 Neon 为准。重新运行 `上传数据到线上.command` 会用本机数据覆盖线上数据，脚本会先让你确认。
+- 部署失败时，在 Render 的 Deploys 页面打开对应部署查看日志。
+
 ## 常用管理命令
 
 | 命令 | 作用 |
@@ -71,6 +111,7 @@ python manage.py init_topics
 | `check_duplicate_interactions` | 检查并清理重复的点赞、收藏记录 |
 | `generate_all_real_knowledge_data` | 为舞蹈项目生成知识图谱示例数据 |
 | `generate_quiz_questions` | 根据知识图谱生成答题题目 |
+| `upload_media_to_cloudinary` | 把本地图片上传到 Cloudinary（由 `上传数据到线上.command` 调用） |
 
 ## 项目结构
 

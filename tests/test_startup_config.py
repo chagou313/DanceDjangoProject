@@ -18,6 +18,7 @@ def load_database_config(**overrides):
         "DB_PASSWORD",
         "DB_HOST",
         "DB_PORT",
+        "DATABASE_URL",
     ):
         env.pop(name, None)
     env.update(overrides)

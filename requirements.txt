@@ -4,3 +4,10 @@ requests>=2.31,<3
 pandas>=2.2,<4
 openpyxl>=3.1,<4
 dashscope>=1.20,<2
+# 线上部署（Render + Neon + Cloudinary）
+gunicorn>=23.0,<24
+whitenoise>=6.8,<7
+dj-database-url>=2.3,<3
+psycopg[binary]>=3.2,<4
+cloudinary>=1.41,<2
+django-cloudinary-storage>=0.3,<0.4

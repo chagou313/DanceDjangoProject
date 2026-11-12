@@ -1,5 +1,7 @@
 from django.db import models
 
+from .storage import video_storage
+
 class DanceProject(models.Model):
     """舞蹈项目表（知识图谱核心）"""
     name = models.CharField(max_length=200, verbose_name="舞蹈项目名称")
@@ -78,7 +80,7 @@ class LearningResource(models.Model):
     title = models.CharField(max_length=200, verbose_name="资源标题")
     url = models.URLField(verbose_name="资源链接")
     thumbnail = models.ImageField(upload_to='resources/%Y%m%d/', blank=True, null=True, verbose_name="缩略图")
-    video_file = models.FileField(upload_to='resource/', blank=True, null=True, verbose_name="视频文件")
+    video_file = models.FileField(upload_to='resource/', storage=video_storage, blank=True, null=True, verbose_name="视频文件")
     duration = models.IntegerField(blank=True, null=True, verbose_name="时长（秒）")
     description = models.TextField(blank=True, verbose_name="资源描述")
     order_index = models.IntegerField(default=0, verbose_name="排序索引")

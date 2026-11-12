@@ -92,3 +92,6 @@ yarn-error.log
 
 # Local database backups (contain user data)
 db.sqlite3.*
+
+# 部署用的数据库与 Cloudinary 连接串（只在本机使用）
+.env.deploy

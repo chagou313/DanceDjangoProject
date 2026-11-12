@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: dance-heritage
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && gunicorn DancedjangoProject.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: DANCE_DEBUG
+        value: "false"
+      - key: DANCE_SECRET_KEY
+        generateValue: true
+      - key: DANCE_ALLOWED_HOSTS
+        value: .onrender.com
+      - key: DANCE_CSRF_TRUSTED_ORIGINS
+        value: https://*.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: QWEN_API_KEY
+        sync: false
