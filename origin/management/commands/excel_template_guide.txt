@@ -83,9 +83,8 @@
 ----------------------------------------
 1. 将您的 Excel 数据按照上述格式整理
 2. 保存为 .xlsx 格式
-3. 修改 import_all_data.py 中的 EXCEL_FILE_PATH 为您的文件路径
-4. 运行命令：python import_all_data.py
-5. 或者在命令行直接指定文件：python import_all_data.py 文件路径.xlsx
+3. 放到 data/traditional_dance_data.xlsx，运行：python manage.py import_excel_data
+4. 或者直接指定文件：python manage.py import_excel_data 文件路径.xlsx
 
 ----------------------------------------
 快速开始：
