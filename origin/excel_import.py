@@ -1,39 +1,15 @@
+"""从 Excel 导入非遗舞蹈数据：舞蹈项目、传承人、相关项目、新闻资讯。
+
+Excel 工作表：项目情况概要（必需）、传承人、相关项目、新闻资讯 / 相关资讯。
+由 `python manage.py import_excel_data [文件路径]` 调用。
 """
-完整的非遗舞蹈数据导入脚本（支持 Excel）
-包含：舞蹈项目、传承人、相关项目、相关资讯、学术研究
-
-使用方法：
-1. 准备 Excel 文件，包含以下 Sheet：
-   - 舞蹈项目
-   - 传承人
-   - 相关项目
-   - 相关资讯
-   - 学术研究
-
-2. 运行命令：python import_all_data.py
-"""
-
 import os
-import sys
-import django
-
-# 设置 Django 环境
-sys.path.append('D:\\Python_study\\DancedjangoProject')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DancedjangoProject.settings')
-django.setup()
 
 from origin.models import Region, DanceProject, Inheritor, RelatedProject, AcademicResearch
 from news.services import import_news_dataframe
 
 
-# ========== 配置区域 ==========
-# Excel 文件路径（支持三种方式）
-# 1. 绝对路径：r'C:\Users\YourName\Desktop\traditional_dance_data.xlsx'
-# 2. 相对路径：r'data\traditional_dance_data.xlsx' (相对于项目根目录)
-# 3. 命令行参数：python import_all_data.py 文件路径
 
-EXCEL_FILE_PATH = r'data\traditional_dance_data.xlsx'  # 默认使用 data 文件夹
-# ===============================
 
 
 def get_or_create_region(region_name):
@@ -347,13 +323,3 @@ def import_all_from_excel(excel_path):
         print(f"\n✗ 错误：{str(e)}")
         import traceback
         traceback.print_exc()
-
-
-if __name__ == '__main__':
-    # 检查命令行参数
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-    else:
-        file_path = EXCEL_FILE_PATH
-    
-    import_all_from_excel(file_path)

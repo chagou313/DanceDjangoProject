@@ -8,7 +8,7 @@
 请将您的 Excel 文件放在以下任一位置：
 
 【推荐】项目根目录的 data 文件夹：
-D:\Python_study\DancedjangoProject\data\traditional_dance_data.xlsx
+data/traditional_dance_data.xlsx（项目根目录下）
 
 或者使用绝对路径（任意位置）：
 C:\Users\YourName\Desktop\traditional_dance_data.xlsx
@@ -43,24 +43,17 @@ Excel 文件应包含以下工作表（Sheet）：
 ----------------------------------------
 1. 将 Excel 文件放到 data 文件夹
 2. 命名为：traditional_dance_data.xlsx
-3. 运行命令：
-   python origin/management/commands/import_all_data.py
+3. 在项目根目录运行：
+   python manage.py import_excel_data
 
 
-方法二：命令行指定路径
+方法二：指定文件路径
 ----------------------------------------
-python origin/management/commands/import_all_data.py 文件路径.xlsx
+python manage.py import_excel_data 文件路径.xlsx
 
 示例：
-python origin/management/commands/import_all_data.py data\my_dance_data.xlsx
-python origin/management/commands/import_all_data.py C:\Users\Admin\Desktop\data.xlsx
-
-
-方法三：修改脚本配置
-----------------------------------------
-编辑 import_all_data.py 文件，修改 EXCEL_FILE_PATH 变量：
-
-EXCEL_FILE_PATH = r'您的文件路径.xlsx'
+python manage.py import_excel_data data/my_dance_data.xlsx
+python manage.py import_excel_data ~/Desktop/data.xlsx
 
 
 ========================================
@@ -115,4 +108,4 @@ pip install pandas openpyxl
 ========================================
 
 查看详细模板说明：excel_template_guide.txt
-查看导入脚本源码：import_all_data.py
+查看导入代码：origin/excel_import.py
