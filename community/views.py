@@ -385,5 +385,7 @@ def report_content(request):
 
 def topics_list(request):
     """话题列表页"""
-    topics = Topic.objects.annotate(post_count=Count('posts')).order_by('-sort_order', '-post_count')
+    topics = Topic.objects.annotate(
+        post_count=Count('posts', filter=Q(posts__status='published'))
+    ).order_by('-sort_order', '-post_count')
     return render(request, 'community/topics.html', {'topics': topics})

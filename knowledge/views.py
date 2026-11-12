@@ -38,6 +38,8 @@ def get_project_knowledge_graph(request, project_id):
             try:
                 project = DanceProject.objects.get(id=project_id)
                 project_name = project.name
+                # 按名称找回对应的 origin 项目（用于图片、批次等展示）
+                origin_project = OriginDanceProject.objects.filter(name=project_name).first()
             except DanceProject.DoesNotExist:
                 return JsonResponse({
                     'success': False,

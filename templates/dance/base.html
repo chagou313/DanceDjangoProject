@@ -658,6 +658,7 @@
                     <a href="{% url 'community_posts' %}" class="{% if request.resolver_match.url_name == 'community_posts' or request.resolver_match.url_name == 'post_detail' or request.resolver_match.url_name == 'create_post' or request.resolver_match.url_name == 'topics_list' %}active{% endif %}"><i class="fas fa-comments"></i> 交流社区</a>
                     <div class="dropdown-menu">
                         <a href="{% url 'community_posts' %}" class="dropdown-item"><i class="fas fa-stream"></i> 帖子列表</a>
+                        <a href="{% url 'topics_list' %}" class="dropdown-item"><i class="fas fa-hashtag"></i> 话题广场</a>
                         {% if user.is_authenticated %}
                         <div class="dropdown-divider"></div>
                         <a href="{% url 'create_post' %}" class="dropdown-item"><i class="fas fa-plus-circle"></i> 发布帖子</a>

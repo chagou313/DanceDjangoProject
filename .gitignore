@@ -90,3 +90,6 @@ celerybeat.pid
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Local database backups (contain user data)
+db.sqlite3.*

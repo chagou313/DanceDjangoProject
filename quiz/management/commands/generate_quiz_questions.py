@@ -142,41 +142,90 @@ class Command(BaseCommand):
     def generate_choice_question(self, kp, move, kp_project, origin_project):
         """生成选择题"""
         try:
+            # 干扰项候选：从数据库里的其他真实模块/知识点中抽取，保证与正确答案不同
+            if not hasattr(self, '_module_names'):
+                self._module_names = sorted(set(ActionModule.objects.values_list('name', flat=True)))
+                self._kp_descriptions = sorted(set(KnowledgePoint.objects.values_list('description', flat=True)))
+
+            def pick_wrong(pool, correct, fallback):
+                # 去重，并排除与正确答案开头相同的近似项
+                candidates = list(dict.fromkeys(
+                    x for x in pool if x and x != correct and x[:12] != correct[:12]
+                ))
+                random.shuffle(candidates)
+                picked = []
+                for x in candidates:
+                    if len(picked) >= 3:
+                        break
+                    if all(x[:12] != y[:12] for y in picked):
+                        picked.append(x)
+                for extra in fallback:
+                    if len(picked) >= 3:
+                        break
+                    if extra != correct and extra not in picked:
+                        picked.append(extra)
+                return picked
+
+            def short(text, n=50):
+                text = (text or '').strip().split('\n')[0].strip()
+                return text[:n] + '……' if len(text) > n else text
+
+            def masked_short(name, desc):
+                # 把介绍里的项目名替换成"该舞蹈"，避免名字直接暴露答案
+                text = (desc or '').strip().split('\n')[0].strip()
+                parts = [name] + [p.strip('）) ') for p in name.replace('(', '（').split('（')]
+                for p in sorted({p for p in parts if len(p) >= 2}, key=len, reverse=True):
+                    text = text.replace(p, '该舞蹈')
+                return short(text)
+
+            project_desc = masked_short(kp_project.name, kp_project.description)
+            if not hasattr(self, '_other_project_descs'):
+                self._other_project_descs = {}
+                for name, desc in KPDanceProject.objects.values_list('name', 'description'):
+                    self._other_project_descs[name] = masked_short(name, desc)
+            other_descs = [
+                d for n, d in self._other_project_descs.items()
+                if n != kp_project.name and d
+                and n.split('（')[0] not in kp_project.name and kp_project.name.split('（')[0] not in n
+            ]
+
             # 构建问题和选项
             templates = [
                 {
-                    'content': f'{kp.name}在{kp_project.name}中的作用是什么？',
-                    'correct': kp.description[:50],
-                    'wrong_options': [
-                        f'主要用于增强表演的视觉效果',
-                        f'是{kp_project.name}的基本功训练内容',
-                        f'体现了传统文化的艺术特色',
-                    ]
+                    'content': f'在{kp_project.name}的「{move.name}」中，知识点「{kp.name}」指的是什么？',
+                    'correct': kp.description,
+                    'wrong_options': pick_wrong(self._kp_descriptions, kp.description, [
+                        '主要用于增强表演的视觉效果',
+                        '只在舞台演出中使用，日常练习不涉及',
+                        '属于现代舞的训练方法',
+                    ]),
+                    'explanation': f'「{kp.name}」是「{move.name}」的关键知识点：{kp.description}。',
                 },
                 {
-                    'content': f'{move.name}属于哪个动作模块？',
+                    'content': f'在{kp_project.name}中，招式「{move.name}」属于哪个动作模块？',
                     'correct': move.action_module.name,
-                    'wrong_options': [
-                        '基本手姿模块',
-                        '身段韵律模块',
-                        '跳跃动作模块',
-                    ]
+                    'wrong_options': pick_wrong(self._module_names, move.action_module.name, [
+                        '基本手姿模块', '身段韵律模块', '跳跃动作模块', '基本步法模块',
+                    ]),
+                    'explanation': f'「{move.name}」属于{kp_project.name}的「{move.action_module.name}」。{move.action_module.description}',
                 },
                 {
-                    'content': f'{kp_project.name}的主要特点是什么？',
-                    'correct': kp_project.description[:50] if kp_project.description else '具有深厚的文化底蕴',
-                    'wrong_options': [
-                        '动作简单，易于学习',
-                        '节奏明快，适合现代表演',
-                        '融合了多种舞蹈元素',
-                    ]
+                    'content': f'以下哪一项是对{kp_project.name}的正确描述？',
+                    'correct': project_desc or '具有深厚的文化底蕴',
+                    'wrong_options': pick_wrong(other_descs, project_desc or '具有深厚的文化底蕴', [
+                        '起源于二十世纪的现代舞蹈形式',
+                        '由西方芭蕾舞演变而来',
+                        '一种没有固定动作、完全即兴的舞蹈',
+                    ]),
+                    'explanation': f'这段介绍出自{kp_project.name}：{short(kp_project.description, 150)}',
                 },
             ]
-            
+
             template = random.choice(templates)
-            
+
             # 组合选项
             options = [template['correct']] + template['wrong_options']
+            assert len(set(options)) == 4, f'选项重复: {options}'
             random.shuffle(options)
             
             # 正确答案的字母
@@ -194,7 +243,7 @@ class Command(BaseCommand):
                 content=template['content'],
                 options=options,
                 correct_answer=correct_answer,
-                explanation=f'正确答案是{correct_answer}。{kp.description}',
+                explanation=f'正确答案是{correct_answer}。{template["explanation"]}',
             )
             
             return question
